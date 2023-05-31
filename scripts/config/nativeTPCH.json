@@ -1,0 +1,10 @@
+{
+    "home_path" :"/home/gz/hedb",
+    "experiment_name": "unencrypted-tpch",
+    "pg_ip": "127.0.0.1",
+    "pg_port": "15432",
+    "data_size": "1",
+    "schema_name" : "tpch-schema.sql",
+    "index_name" : "tpch-index.sql",
+    "sqls_path": "scripts/sqls/insecure-sqls"
+}

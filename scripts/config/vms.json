@@ -1,0 +1,8 @@
+{
+    "home_path" :"/home/gz/hedb",
+    "vm_scripts_path": "/home/gz/qemu-hedb/disk",
+    "pg_ip": "127.0.0.1",
+    "pg_port": "15432",
+    "dbms_script": "qemu-dbms.sh",
+    "ops_script": "qemu-ops.sh"
+}

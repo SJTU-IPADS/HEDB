@@ -1,0 +1,18 @@
+/* enclave.edl - Top EDL file. */
+
+enclave {
+    /*
+     * ocall_enclave_sample - invokes OCALL to display string buffer inside the enclave.
+     *  [in]: copy the string buffer to App outside.
+     *  [string]: specifies 'str' is a NULL terminated buffer.
+     */
+    untrusted {
+        void ocall_print_string([in, string] const char *str);
+    };
+
+    trusted {
+        public int generateKeyEnclave([out, size = sealedkey_len] uint8_t *sealed_key, size_t sealedkey_len);
+        public int loadKeyEnclave ([in, size = len]  uint8_t *key, size_t len);
+        public int enclaveProcess ([user_check]void* buffer);
+    };
+};

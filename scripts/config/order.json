@@ -1,0 +1,7 @@
+{
+    "home_path" :"/home/gz/hedb",
+    "order_script_path": "scripts/sqls/util_sqls",
+    "sql_name": "formOrder.sql",
+    "pg_ip": "127.0.0.1",
+    "pg_port": "15432"
+}

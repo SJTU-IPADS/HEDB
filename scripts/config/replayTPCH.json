@@ -1,0 +1,12 @@
+{
+    "home_path" :"/home/gz/hedb",
+    "experiment_name": "replay_tpch_run",
+    "pg_ip": "127.0.0.1",
+    "pg_port": "15432",
+    "data_size": "1",
+    "schema_name" : "tpch-schema-encrypted.sql",
+    "index_name" : "tpch-index.sql",
+    "sqls_path": "scripts/sqls/replay-sqls",
+    "figure" : "replay",
+    "experiment_dir" : "tmp"
+}
