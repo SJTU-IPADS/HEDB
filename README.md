@@ -3,6 +3,8 @@
 ![Status](https://img.shields.io/badge/Version-Experimental-green.svg)
 [![License: MIT](https://img.shields.io/badge/License-Mulan-brightgreenn.svg)](http://license.coscl.org.cn/MulanPubL-2.0)
 
+**Note: The repo is now under refactoring. It will be ready before the conference (10th July, 2023).**
+
 HEDB is a dual-mode encrypted database that removes the tension between security and maintenance. Its dual-mode design accomplishes two goals: 1) achieving interface security by preventig illegal invocations to operators in the execution mode, and 2) allowing DBA common maintenance tasks by replaying legal invocations in the maintenance mode.
 
 Currently, HEDB is based on PostgreSQL and supports TPC-H workloads.
@@ -28,7 +30,7 @@ Currently, HEDB is based on PostgreSQL and supports TPC-H workloads.
 
 ## Paper
 
-* [Encrypted Databases Made Secure Yet Maintainable](https://www.usenix.org/conference/osdi23/presentation/li)<br>
+* [Encrypted Databases Made Secure Yet Maintainable](https://www.usenix.org/conference/osdi23/presentation/li-mingyu)<br>
 Mingyu Li, Xuyang Zhao, Le Chen, Cheng Tan, Huorong Li, Sheng Wang, Zeyu Mi, Yubin Xia, Feifei Li, Haibo Chen<br>
 The 17th USENIX Symposium on Operating Systems Design and Implementation (OSDI ‘23)
 
