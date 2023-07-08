@@ -9,15 +9,10 @@ typedef enum ShmReqStatus {
     SHM_EXIT
 } ShmReqStat;
 
-#define SET(a, n)      \
-    {                  \
-        a |= 1UL << n; \
-    }
-#define CLEAR(a, n)       \
-    {                     \
-        a &= ~(1UL << n); \
-    }
 #define GET(a, n) ((a >> n) & 1U)
+#define SET(a, n) { a |= 1UL << n; }
+#define CLEAR(a, n) { a &= ~(1UL << n); }
+
 typedef struct ops_server {
     int volatile lock;
     int __res; // reserved filed, avoid cache false sharing.

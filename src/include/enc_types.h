@@ -1,8 +1,10 @@
 #pragma once
+
 #include <defs.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+
 // #define DECLARE_PG_FUNC(func) extern "C" { PG_FUNCTION_INFO_V1(func); }
 
 #define DEFINE_ENCTYPE(type_name, data_size) \
@@ -31,6 +33,7 @@ typedef struct
     uint32_t len;
     uint8_t data[STRING_LENGTH];
 } Str;
+
 //                      uint32_t len       int32_t order     enc_cstr
 #define ENCSTRLEN(len) (sizeof(uint32_t) + sizeof(int32_t) + IV_SIZE + TAG_SIZE + len)
 static int inline encstr_size(EncStr estr)

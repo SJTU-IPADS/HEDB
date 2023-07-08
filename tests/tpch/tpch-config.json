@@ -1,0 +1,13 @@
+{
+    "test_name": "tpch",
+    "pg_ip": "127.0.0.1",
+    "pg_port": "5432",
+    "pg_user": "ubuntu",
+    "pg_password": "ubuntu",
+    "data_size": "0.01",
+    "secure": "y",
+    "record_replay": "none",
+    "secure_query_dir": "secure-query",
+    "insecure_query_dir": "insecure-query",
+    "output_dir": "output"
+}

@@ -11,6 +11,7 @@ typedef enum ReqStatus {
     DONE,
     EXIT
 } ReqStat;
+
 typedef struct
 {
     volatile ReqStat status;
@@ -112,7 +113,7 @@ DEFINE_ENCTYPE_1ARG_ReqData(EncTimestamp, EncInt, EncTimestampExtractYearRequest
         res_type res;                                                                                                     \
     } typename;
 
-DEFINE_ENCTYPE_3ARG_ReqData(EncStr, str, EncInt, begin, EncInt, end, EncStr, SubstringRequestData);
+DEFINE_ENCTYPE_3ARG_ReqData(EncStr, str, EncInt, start, EncInt, length, EncStr, SubstringRequestData);
 
 #ifdef __cplusplus
 }
