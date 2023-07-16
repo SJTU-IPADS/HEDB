@@ -19,3 +19,11 @@ To avoid using sudo when executing DBA's fixes, we use the sticky bit, i.e., SUI
 To learn more about DBA skills, you can refer to `https://roadmap.sh/postgresql-dba`.
 
 For sure, you can add your own templates.
+
+### Other Resources
+
+- https://optimizdba.com/top-database-optimization-tips-from-an-expert-dba/
+- https://www.prisma.io/dataguide/managing-databases/database-troubleshooting
+- https://www.mssqltips.com/sql-server-tip-category/60/database-administration/
+- https://github.com/pgexperts/pgx_scripts/
+- https://github.com/oraclesean/oracle
