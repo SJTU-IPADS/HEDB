@@ -82,33 +82,35 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none'):
         queryRange = range(1, 23)
     
     for i in queryRange:
-        con = psycopg2.connect(database = pgDB, user = pgUser, password = pgPW, host = pgIp, port = pgPort)
-        try:
-            with con:
-                with con.cursor() as cur:
-                    if record or replay:
-                        cur.execute('set max_parallel_workers = 0;')
+        conn = psycopg2.connect(database = pgDB, user = pgUser, password = pgPW, host = pgIp, port = pgPort)
+        cur = conn.cursor()
+            
+        if record or replay:
+            cur.execute('set max_parallel_workers = 0;')
                         
-                    queryFile = queryDirectory + f"/Q{i}.sql" 
-                    outputFile = open(outputDir + f"/Q{i}.out", "w+");
+            queryFile = queryDirectory + f"/Q{i}.sql" 
+            outputFile = open(outputDir + f"/Q{i}.out", "w+");
 
-                    if record:
-                        cur.execute('SELECT enable_record_mode(\'Q%s\');' % i)
+        if record:
+            cur.execute('SELECT enable_record_mode(\'Q%s\');' % i)
                             
-                    if replay:
-                        cur.execute('SELECT enable_replay_mode(\'Q%s\', \'seq\');' % i)
+        if replay:
+            cur.execute('SELECT enable_replay_mode(\'Q%s\', \'seq\');' % i)
 
-                    print("query " + queryFile)
-                    cur.execute(open(queryFile, "r").read())
-                    result = cur.fetchall()
+        print("query " + queryFile)
+        cur.execute(open(queryFile, "r").read())
+        result = cur.fetchall()
 
-                    outputFile.write(str(cur.description) + '\n')
-                    for row in result:
-                        outputFile.write(str(row) + '\n')
+        outputFile.write(str(cur.description) + '\n')
+        for row in result:
+            outputFile.write(str(row) + '\n')
 
-                    outputFile.close()
-        finally:
-            con.close()
+        outputFile.close()
+        
+        conn.commit()
+
+        cur.close()
+        conn.close()
 
 def main():
     # parse arguments 
