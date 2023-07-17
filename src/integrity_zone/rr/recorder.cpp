@@ -3,6 +3,7 @@
 #include <request.hpp>
 #include <request_types.h>
 
+#include <rrprintf.hpp>
 #include <assert.h>
 
 static inline uint64_t get_timestamp(void)
@@ -65,32 +66,25 @@ void Recorder::record(void* req_buffer)
             EncFloatCmpRequestData* req = (EncFloatCmpRequestData*)req_buffer;
             size_t length = sizeof(int) * 3 + ENC_FLOAT4_LENGTH * 2 + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
-            memcpy(dst, &req_control->reqType, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req->left, ENC_FLOAT4_LENGTH);
-            dst += ENC_FLOAT4_LENGTH;
-            memcpy(dst, &req->right, ENC_FLOAT4_LENGTH);
-            dst += ENC_FLOAT4_LENGTH;
-            memcpy(dst, &req->cmp, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req_control->resp, sizeof(int));
-            dst += sizeof(int);
             uint64_t timestamp = get_timestamp();
-            memcpy(dst, &timestamp, sizeof(uint64_t));
+            rrprintf(1, dst, 6, 
+                sizeof(int), &req_control->reqType,
+                ENC_FLOAT4_LENGTH, &req->left,
+                ENC_FLOAT4_LENGTH, &req->right,
+                sizeof(int), &req->cmp,
+                sizeof(int), &req_control->resp,
+                sizeof(uint64_t), &timestamp);
         } else if (req_control->reqType == CMD_FLOAT_SUM_BULK) {
             EncFloatBulkRequestData* req = (EncFloatBulkRequestData*)req_buffer;
             size_t length = sizeof(int) * 3 + ENC_FLOAT4_LENGTH + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
-            memcpy(dst, &req_control->reqType, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req->bulk_size, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req->res, ENC_FLOAT4_LENGTH);
-            dst += ENC_FLOAT4_LENGTH;
-            memcpy(dst, &req_control->resp, sizeof(int));
-            dst += sizeof(int);
             uint64_t timestamp = get_timestamp();
-            memcpy(dst, &timestamp, sizeof(uint64_t));
+            rrprintf(1, dst, 5,
+                sizeof(int), &req_control->reqType,
+                sizeof(int), &req->bulk_size,
+                ENC_FLOAT4_LENGTH, &req->res,
+                sizeof(int), &req_control->resp,
+                sizeof(uint64_t), &timestamp);
 
             dst = get_write_buffer(req->bulk_size * ENC_FLOAT4_LENGTH);
             for (int i = 0; i < req->bulk_size; i++) {
@@ -101,18 +95,14 @@ void Recorder::record(void* req_buffer)
             EncFloatCalcRequestData* req = (EncFloatCalcRequestData*)req_buffer;
             size_t length = sizeof(int) * 2 + ENC_FLOAT4_LENGTH * 3 + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
-            memcpy(dst, &req->op, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req->left, ENC_FLOAT4_LENGTH);
-            dst += ENC_FLOAT4_LENGTH;
-            memcpy(dst, &req->right, ENC_FLOAT4_LENGTH);
-            dst += ENC_FLOAT4_LENGTH;
-            memcpy(dst, &req->res, ENC_FLOAT4_LENGTH);
-            dst += ENC_FLOAT4_LENGTH;
-            memcpy(dst, &req_control->resp, sizeof(int));
-            dst += sizeof(int);
             uint64_t timestamp = get_timestamp();
-            memcpy(dst, &timestamp, sizeof(uint64_t));
+            rrprintf(1, dst, 6, 
+                sizeof(int), &req->op,
+                ENC_FLOAT4_LENGTH, &req->left,
+                ENC_FLOAT4_LENGTH, &req->right,
+                ENC_FLOAT4_LENGTH, &req->res,
+                sizeof(int), &req_control->resp,
+                sizeof(uint64_t), &timestamp);
         }
 
     } // end of float
@@ -124,32 +114,25 @@ void Recorder::record(void* req_buffer)
             EncIntCmpRequestData* req = (EncIntCmpRequestData*)req_buffer;
             size_t length = sizeof(int) * 3 + ENC_INT32_LENGTH * 2 + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
-            memcpy(dst, &req_control->reqType, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req->left, ENC_INT32_LENGTH);
-            dst += ENC_INT32_LENGTH;
-            memcpy(dst, &req->right, ENC_INT32_LENGTH);
-            dst += ENC_INT32_LENGTH;
-            memcpy(dst, &req->cmp, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req_control->resp, sizeof(int));
-            dst += sizeof(int);
             uint64_t timestamp = get_timestamp();
-            memcpy(dst, &timestamp, sizeof(uint64_t));
+            rrprintf(1, dst, 6,
+                sizeof(int), &req_control->reqType,
+                ENC_INT32_LENGTH, &req->left,
+                ENC_INT32_LENGTH, &req->right,
+                sizeof(int), &req->cmp,
+                sizeof(int), &req_control->resp,
+                sizeof(uint64_t), &timestamp);
         } else if (req_control->reqType == CMD_INT_SUM_BULK) {
             EncIntBulkRequestData* req = (EncIntBulkRequestData*)req_buffer;
             size_t length = sizeof(int) * 3 + ENC_INT32_LENGTH + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
-            memcpy(dst, &req_control->reqType, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req->bulk_size, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req->res, ENC_INT32_LENGTH);
-            dst += ENC_INT32_LENGTH;
-            memcpy(dst, &req_control->resp, sizeof(int));
-            dst += sizeof(int);
             uint64_t timestamp = get_timestamp();
-            memcpy(dst, &timestamp, sizeof(uint64_t));
+            rrprintf(1, dst, 5,
+                sizeof(int), &req_control->reqType,
+                sizeof(int), &req->bulk_size,
+                ENC_INT32_LENGTH, &req->res,
+                sizeof(int), &req_control->resp,
+                sizeof(uint64_t), &timestamp);
 
             dst = get_write_buffer(req->bulk_size * ENC_INT32_LENGTH);
             for (int i = 0; i < req->bulk_size; i++) {
@@ -160,18 +143,14 @@ void Recorder::record(void* req_buffer)
             EncIntCalcRequestData* req = (EncIntCalcRequestData*)req_buffer;
             size_t length = sizeof(int) * 2 + ENC_INT32_LENGTH * 3 + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
-            memcpy(dst, &req->op, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req->left, ENC_INT32_LENGTH);
-            dst += ENC_INT32_LENGTH;
-            memcpy(dst, &req->right, ENC_INT32_LENGTH);
-            dst += ENC_INT32_LENGTH;
-            memcpy(dst, &req->res, ENC_INT32_LENGTH);
-            dst += ENC_INT32_LENGTH;
-            memcpy(dst, &req_control->resp, sizeof(int));
-            dst += sizeof(int);
             uint64_t timestamp = get_timestamp();
-            memcpy(dst, &timestamp, sizeof(uint64_t));
+            rrprintf(1, dst, 6, 
+                sizeof(int), &req->op,
+                ENC_INT32_LENGTH, &req->left,
+                ENC_INT32_LENGTH, &req->right,
+                ENC_INT32_LENGTH, &req->res,
+                sizeof(int), &req_control->resp,
+                sizeof(uint64_t), &timestamp);
         }
     } else if (req_control->reqType != CMD_STRING_ENC
         && req_control->reqType != CMD_STRING_DEC
@@ -179,71 +158,52 @@ void Recorder::record(void* req_buffer)
         && req_control->reqType <= 206) {
         if (req_control->reqType == CMD_STRING_CMP || req_control->reqType == CMD_STRING_LIKE) {
             EncStrCmpRequestData* req = (EncStrCmpRequestData*)req_buffer;
-            int left_length = encstr_size(req->left), right_length = encstr_size(req->right);
+            int left_length = encstr_size(req->left);
+            int right_length = encstr_size(req->right);
             int length = sizeof(int) * 5 + left_length + right_length + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
-            memcpy(dst, &req_control->reqType, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &left_length, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &right_length, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req->left, left_length);
-            dst += left_length;
-            memcpy(dst, &req->right, right_length);
-            dst += right_length;
-            memcpy(dst, &req->cmp, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req_control->resp, sizeof(int));
-            dst += sizeof(int);
             uint64_t timestamp = get_timestamp();
-            memcpy(dst, &timestamp, sizeof(uint64_t));
+            rrprintf(1, dst, 8,
+                sizeof(int), &req_control->reqType,
+                sizeof(int), &left_length,
+                sizeof(int), &right_length,
+                left_length, &req->left,
+                right_length, &req->right,
+                sizeof(int), &req->cmp,
+                sizeof(int), &req_control->resp,
+                sizeof(uint64_t), &timestamp);
         } else if (req_control->reqType == CMD_STRING_SUBSTRING) {
             SubstringRequestData* req = (SubstringRequestData*)req_buffer;
             int str_length = encstr_size(req->str), result_length = encstr_size(req->res);
             size_t length = sizeof(int) * 4 + str_length + result_length + 2 * ENC_INT32_LENGTH + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
-            memcpy(dst, &req_control->reqType, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &str_length, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &result_length, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req->str, str_length);
-            dst += str_length;
-            memcpy(dst, &req->start, ENC_INT32_LENGTH);
-            dst += ENC_INT32_LENGTH;
-            memcpy(dst, &req->length, ENC_INT32_LENGTH);
-            dst += ENC_INT32_LENGTH;
-            memcpy(dst, &req->res, result_length);
-            dst += result_length;
-            memcpy(dst, &req_control->resp, sizeof(int));
-            dst += sizeof(int);
             uint64_t timestamp = get_timestamp();
-            memcpy(dst, &timestamp, sizeof(uint64_t));
+            rrprintf(1, dst, 9,
+                sizeof(int), &req_control->reqType,
+                sizeof(int), &str_length,
+                sizeof(int), &result_length,
+                str_length, &req->str,
+                ENC_INT32_LENGTH, &req->start,
+                ENC_INT32_LENGTH, &req->length,
+                result_length, &req->res,
+                sizeof(int), &req_control->resp,
+                sizeof(uint64_t), &timestamp);
         } else {
             EncStrCalcRequestData* req = (EncStrCalcRequestData*)req_buffer;
             int left_length = encstr_size(req->left), right_length = encstr_size(req->right), res_length = encstr_size(req->res);
             int length = sizeof(int) * 5 + left_length + right_length + res_length + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
-            memcpy(dst, &req->op, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &left_length, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &right_length, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &res_length, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req->left, left_length);
-            dst += left_length;
-            memcpy(dst, &req->right, right_length);
-            dst += right_length;
-            memcpy(dst, &req->res, res_length);
-            dst += res_length;
-            memcpy(dst, &req_control->resp, sizeof(int));
-            dst += sizeof(int);
             uint64_t timestamp = get_timestamp();
-            memcpy(dst, &timestamp, sizeof(uint64_t));
+            rrprintf(1, dst, 9,
+                sizeof(int), &req->op,
+                sizeof(int), &left_length,
+                sizeof(int), &right_length,
+                sizeof(int), &res_length,
+                left_length, &req->left,
+                right_length, &req->right,
+                res_length, &req->res,
+                sizeof(int), &req_control->resp,
+                sizeof(uint64_t), &timestamp);
         }
     } else if (req_control->reqType >= 150
         && req_control->reqType <= 153
@@ -253,32 +213,26 @@ void Recorder::record(void* req_buffer)
             EncTimestampCmpRequestData* req = (EncTimestampCmpRequestData*)req_buffer;
             int length = sizeof(int) * 3 + ENC_TIMESTAMP_LENGTH * 2 + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
-            memcpy(dst, &req_control->reqType, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req->left, ENC_TIMESTAMP_LENGTH);
-            dst += ENC_TIMESTAMP_LENGTH;
-            memcpy(dst, &req->right, ENC_TIMESTAMP_LENGTH);
-            dst += ENC_TIMESTAMP_LENGTH;
-            memcpy(dst, &req->cmp, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req_control->resp, sizeof(int));
-            dst += sizeof(int);
             uint64_t timestamp = get_timestamp();
-            memcpy(dst, &timestamp, sizeof(uint64_t));
+            rrprintf(1, dst, 6, 
+                sizeof(int), &req_control->reqType,
+                ENC_TIMESTAMP_LENGTH, &req->left,
+                ENC_TIMESTAMP_LENGTH, &req->right,
+                sizeof(int), &req->cmp,
+                sizeof(int), &req_control->resp,
+                sizeof(uint64_t), &timestamp);
         } else if (req_control->reqType == CMD_TIMESTAMP_EXTRACT_YEAR) {
             EncTimestampExtractYearRequestData* req = (EncTimestampExtractYearRequestData*)req_buffer;
             size_t length = sizeof(int) * 2 + ENC_TIMESTAMP_LENGTH + ENC_INT32_LENGTH + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
-            memcpy(dst, &req_control->reqType, sizeof(int));
-            dst += sizeof(int);
-            memcpy(dst, &req->in, ENC_TIMESTAMP_LENGTH);
-            dst += ENC_TIMESTAMP_LENGTH;
-            memcpy(dst, &req->res, ENC_INT32_LENGTH);
-            dst += ENC_INT32_LENGTH;
-            memcpy(dst, &req_control->resp, sizeof(int));
-            dst += sizeof(int);
             uint64_t timestamp = get_timestamp();
-            memcpy(dst, &timestamp, sizeof(uint64_t));
+            rrprintf(1, dst, 5,
+                sizeof(int), &req_control->reqType,
+                ENC_TIMESTAMP_LENGTH, &req->in,
+                ENC_INT32_LENGTH, &req->res,
+                sizeof(int), &req_control->resp,
+                sizeof(uint64_t), &timestamp);
         }
     }
 }
+

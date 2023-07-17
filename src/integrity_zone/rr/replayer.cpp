@@ -3,6 +3,8 @@
 #include <request.hpp>
 #include <request_types.h>
 
+#include <rrprintf.hpp>
+
 #include <stdafx.hpp>
 
 int Replayer::replay_request(void* req_buffer)
@@ -25,15 +27,12 @@ int Replayer::replay_request(void* req_buffer)
             char read_buffer[sizeof(int) * 2 + ENC_FLOAT4_LENGTH * 2 + sizeof(uint64_t)];
             char* src = read_buffer;
             fread(read_buffer, sizeof(char), sizeof(int) * 2 + ENC_FLOAT4_LENGTH * 2 + sizeof(uint64_t), file);
-            memcpy(&left, src, ENC_FLOAT4_LENGTH);
-            src += ENC_FLOAT4_LENGTH;
-            memcpy(&right, src, ENC_FLOAT4_LENGTH);
-            src += ENC_FLOAT4_LENGTH;
-            memcpy(&cmp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&resp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&timestamp, src, sizeof(uint64_t));
+            rrprintf(0, src, 5,
+                ENC_FLOAT4_LENGTH, &left,
+                ENC_FLOAT4_LENGTH, &right,
+                sizeof(int), &cmp,
+                sizeof(int), &resp,
+                sizeof(uint64_t), &timestamp);
 
             if (memcmp(&req->left, &left, ENC_FLOAT4_LENGTH) || memcmp(&req->right, &right, ENC_FLOAT4_LENGTH)) {
                 // print_error("float cmp fail at %ld", ftell(read_file_ptr));
@@ -46,13 +45,11 @@ int Replayer::replay_request(void* req_buffer)
             char read_buffer[sizeof(int) * 2 + ENC_FLOAT4_LENGTH + sizeof(uint64_t)];
             char* src = read_buffer;
             fread(read_buffer, sizeof(char), sizeof(int) * 2 + ENC_FLOAT4_LENGTH + sizeof(uint64_t), file);
-            memcpy(&bulk_size, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&res, src, ENC_FLOAT4_LENGTH);
-            src += ENC_FLOAT4_LENGTH;
-            memcpy(&resp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&timestamp, src, sizeof(uint64_t));
+            rrprintf(0, src, 4,
+                sizeof(int), &bulk_size,
+                ENC_FLOAT4_LENGTH, &res,
+                sizeof(int), &resp,
+                sizeof(uint64_t), &timestamp);
 
             if (bulk_size != req->bulk_size) {
                 // print_error("float sum fail at %ld, req->bulk_size: %d, bulk_size:%d", ftell(read_file_ptr), req->bulk_size, bulk_size);
@@ -78,15 +75,12 @@ int Replayer::replay_request(void* req_buffer)
             char read_buffer[sizeof(int) + ENC_FLOAT4_LENGTH * 3 + sizeof(uint64_t)];
             char* src = read_buffer;
             fread(read_buffer, sizeof(char), sizeof(int) + ENC_FLOAT4_LENGTH * 3 + sizeof(uint64_t), file);
-            memcpy(&left, src, ENC_FLOAT4_LENGTH);
-            src += ENC_FLOAT4_LENGTH;
-            memcpy(&right, src, ENC_FLOAT4_LENGTH);
-            src += ENC_FLOAT4_LENGTH;
-            memcpy(&res, src, ENC_FLOAT4_LENGTH);
-            src += ENC_FLOAT4_LENGTH;
-            memcpy(&resp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&timestamp, src, sizeof(uint64_t));
+            rrprintf(0, src, 5,
+                ENC_FLOAT4_LENGTH, &left,
+                ENC_FLOAT4_LENGTH, &right,
+                ENC_FLOAT4_LENGTH, &res,
+                sizeof(int), &resp,
+                sizeof(uint64_t), &timestamp);
 
             if (memcmp(&left, &req->left, ENC_FLOAT4_LENGTH) || memcmp(&right, &req->right, ENC_FLOAT4_LENGTH)) {
                 // print_error("float ops fail at %ld", ftell(read_file_ptr));
@@ -104,15 +98,12 @@ int Replayer::replay_request(void* req_buffer)
             char read_buffer[sizeof(int) * 2 + ENC_INT32_LENGTH * 2 + sizeof(uint64_t)];
             char* src = read_buffer;
             fread(read_buffer, sizeof(char), sizeof(int) * 2 + ENC_INT32_LENGTH * 2 + sizeof(uint64_t), file);
-            memcpy(&left, src, ENC_INT32_LENGTH);
-            src += ENC_INT32_LENGTH;
-            memcpy(&right, src, ENC_INT32_LENGTH);
-            src += ENC_INT32_LENGTH;
-            memcpy(&cmp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&resp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&timestamp, src, sizeof(uint64_t));
+            rrprintf(0, src, 5,
+                ENC_INT32_LENGTH, &left,
+                ENC_INT32_LENGTH, &right,
+                sizeof(int), &cmp,
+                sizeof(int), &resp,
+                sizeof(uint64_t), &timestamp);
 
             if (memcmp(&left, &req->left, ENC_INT32_LENGTH) || memcmp(&right, &req->right, ENC_INT32_OPE_LENGTH)) {
                 // print_error("int cmp fail at %ld", ftell(read_file_ptr));
@@ -126,13 +117,11 @@ int Replayer::replay_request(void* req_buffer)
             char read_buffer[sizeof(int) * 2 + ENC_INT32_LENGTH + sizeof(uint64_t)];
             char* src = read_buffer;
             fread(read_buffer, sizeof(char), sizeof(int) * 2 + ENC_INT32_LENGTH + sizeof(uint64_t), file);
-            memcpy(&bulk_size, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&res, src, ENC_INT32_LENGTH);
-            src += ENC_INT32_LENGTH;
-            memcpy(&resp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&timestamp, src, sizeof(uint64_t));
+            rrprintf(0, src, 4,
+                sizeof(int), &bulk_size,
+                ENC_INT32_LENGTH, &res,
+                sizeof(int), &resp,
+                sizeof(uint64_t), &timestamp);
 
             if (bulk_size != req->bulk_size) {
                 // print_error("int sum fail at %ld, req->bulk_size: %d, bulk_size:%d", ftell(read_file_ptr), req->bulk_size, bulk_size);
@@ -158,15 +147,12 @@ int Replayer::replay_request(void* req_buffer)
             char read_buffer[sizeof(int) + ENC_INT32_LENGTH * 3 + sizeof(uint64_t)];
             char* src = read_buffer;
             fread(read_buffer, sizeof(char), sizeof(int) + ENC_INT32_LENGTH * 3 + sizeof(uint64_t), file);
-            memcpy(&left, src, ENC_INT32_LENGTH);
-            src += ENC_INT32_LENGTH;
-            memcpy(&right, src, ENC_INT32_LENGTH);
-            src += ENC_INT32_LENGTH;
-            memcpy(&res, src, ENC_INT32_LENGTH);
-            src += ENC_INT32_LENGTH;
-            memcpy(&resp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&timestamp, src, sizeof(uint64_t));
+            rrprintf(0, src, 5,
+                ENC_INT32_LENGTH, &left,
+                ENC_INT32_LENGTH, &right,
+                ENC_INT32_LENGTH, &res,
+                sizeof(int), &resp,
+                sizeof(uint64_t), &timestamp);
 
             if (memcmp(&left, &req->left, ENC_INT32_LENGTH) || memcmp(&right, &req->right, ENC_INT32_LENGTH)) {
                 // print_error("int ops fail at %ld", ftell(read_file_ptr));
@@ -192,15 +178,12 @@ int Replayer::replay_request(void* req_buffer)
             char read_buffer[left_length + right_length + sizeof(int) * 2 + sizeof(uint64_t)];
             char* src = read_buffer;
             fread(read_buffer, sizeof(char), left_length + right_length + sizeof(int) * 2 + sizeof(uint64_t), file);
-            memcpy(&left, src, left_length);
-            src += left_length;
-            memcpy(&right, src, right_length);
-            src += right_length;
-            memcpy(&cmp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&resp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&timestamp, src, sizeof(uint64_t));
+            rrprintf(0, src, 5,
+                left_length, &left,
+                right_length, &right,
+                sizeof(int), &cmp,
+                sizeof(int), &resp,
+                sizeof(uint64_t), &timestamp);
 
             req->cmp = cmp;
         } else if (req_control->reqType == CMD_STRING_SUBSTRING) {
@@ -219,17 +202,13 @@ int Replayer::replay_request(void* req_buffer)
             char read_buffer[str_length + result_length + sizeof(int) + ENC_INT32_LENGTH * 2 + sizeof(uint64_t)];
             char* src = read_buffer;
             fread(read_buffer, sizeof(char), str_length + result_length + sizeof(int) + ENC_INT32_LENGTH * 2 + sizeof(uint64_t), file);
-            memcpy(&str, src, str_length);
-            src += str_length;
-            memcpy(&start, src, ENC_INT32_LENGTH);
-            src += ENC_INT32_LENGTH;
-            memcpy(&length, src, ENC_INT32_LENGTH);
-            src += ENC_INT32_LENGTH;
-            memcpy(&res, src, result_length);
-            src += result_length;
-            memcpy(&resp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&timestamp, src, sizeof(uint64_t));
+            rrprintf(0, src, 6,
+                str_length, &str,
+                ENC_INT32_LENGTH, &start,
+                ENC_INT32_LENGTH, &length,
+                result_length, &res,
+                sizeof(int), &resp, 
+                sizeof(uint64_t), &timestamp);
 
             if (memcmp(&str, &req->str, str_length) || memcmp(&start, &req->start, ENC_INT32_LENGTH) || memcmp(&length, &req->length, ENC_INT32_LENGTH)) {
                 // print_error("string substring fail at %ld, contents mismatch", ftell(read_file_ptr));
@@ -251,15 +230,12 @@ int Replayer::replay_request(void* req_buffer)
             char read_buffer[sizeof(int) + left_length + right_length + res_length + sizeof(uint64_t)];
             fread(read_buffer, sizeof(char), sizeof(int) + left_length + right_length + res_length + sizeof(uint64_t), file);
             char* src = read_buffer;
-            memcpy(&left, src, left_length);
-            src += left_length;
-            memcpy(&right, src, right_length);
-            src += right_length;
-            memcpy(&res, src, res_length);
-            src += res_length;
-            memcpy(&resp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&timestamp, src, sizeof(uint64_t));
+            rrprintf(0, src, 5,
+                left_length, &left,
+                right_length, &right,
+                res_length, &res,
+                sizeof(int), &resp,
+                sizeof(uint64_t), &timestamp);
 
             if (memcmp(&left, &req->left, left_length) || memcmp(&right, &req->right, right_length)) {
                 // print_error("string ops fail at %ld, contents mismatch", ftell(read_file_ptr));
@@ -275,15 +251,12 @@ int Replayer::replay_request(void* req_buffer)
             char read_buffer[sizeof(int) * 2 + ENC_TIMESTAMP_LENGTH * 2 + sizeof(uint64_t)];
             fread(read_buffer, sizeof(char), sizeof(int) * 2 + ENC_TIMESTAMP_LENGTH * 2 + sizeof(uint64_t), file);
             char* src = read_buffer;
-            memcpy(&left, src, ENC_TIMESTAMP_LENGTH);
-            src += ENC_TIMESTAMP_LENGTH;
-            memcpy(&right, src, ENC_TIMESTAMP_LENGTH);
-            src += ENC_TIMESTAMP_LENGTH;
-            memcpy(&cmp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&resp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&timestamp, src, sizeof(uint64_t));
+            rrprintf(0, src, 5,
+                ENC_TIMESTAMP_LENGTH, &left,
+                ENC_TIMESTAMP_LENGTH, &right,
+                sizeof(int), &cmp,
+                sizeof(int), &resp,
+                sizeof(uint64_t), &timestamp);
 
             if (memcmp(&left, &req->left, ENC_TIMESTAMP_LENGTH) || memcmp(&right, &req->right, ENC_TIMESTAMP_LENGTH)) {
                 // print_info("timestamp cmp fail at %ld", ftell(read_file_ptr));
@@ -297,13 +270,11 @@ int Replayer::replay_request(void* req_buffer)
             char read_buffer[sizeof(int) + ENC_TIMESTAMP_LENGTH + ENC_INT32_LENGTH + sizeof(uint64_t)];
             fread(read_buffer, sizeof(char), sizeof(int) + ENC_TIMESTAMP_LENGTH + ENC_INT32_LENGTH + sizeof(uint64_t), file);
             char* src = read_buffer;
-            memcpy(&in, src, ENC_TIMESTAMP_LENGTH);
-            src += ENC_TIMESTAMP_LENGTH;
-            memcpy(&out, src, ENC_INT32_LENGTH);
-            src += ENC_INT32_LENGTH;
-            memcpy(&resp, src, sizeof(int));
-            src += sizeof(int);
-            memcpy(&timestamp, src, sizeof(uint64_t));
+            rrprintf(0, src, 4,
+                ENC_TIMESTAMP_LENGTH, &in,
+                ENC_INT32_LENGTH, &out,
+                sizeof(int), &resp,
+                sizeof(uint64_t), &timestamp);
 
             if (memcmp(&in, &req->in, ENC_TIMESTAMP_LENGTH)) {
                 // print_info("timestamp extract fail at %ld", ftell(read_file_ptr));
