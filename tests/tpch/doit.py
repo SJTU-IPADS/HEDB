@@ -45,7 +45,7 @@ def PrepBenchmark(propFile = DEFAULT_TPCH_CONFIG):
     executeCommand("find . -name \"*.tbl\" | xargs rm")
     
     
-def RunTest(propFile = DEFAULT_TPCH_CONFIG):
+def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none'):
     properties = loadPropertyFile(propFile)
     
     pgIp = properties['pg_ip']
@@ -53,7 +53,6 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG):
     pgUser = properties['pg_user']
     pgPW = properties['pg_password']
     secureQuery = properties['secure']
-    recordReplay = properties['record_replay']
     secureQueryDir = properties['secure_query_dir']
     insecureQueryDir = properties['insecure_query_dir']
     outputDir = properties['output_dir']
@@ -76,48 +75,57 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG):
     folder = os.path.exists(outputDir)
     if not folder:
         os.makedirs(outputDir)
-    
-    con = psycopg2.connect(database = pgDB, user = pgUser, password = pgPW, host = pgIp, port = pgPort)
-    with con:
-        cur = con.cursor()
-
-        if record or replay:
-            cur.execute('set max_parallel_workers = 0;')
         
-        for i in range(1, 23):
-            queryFile = queryDirectory + f"/Q{i}.sql" 
-            outputFile = open(outputDir + f"/Q{i}.out", "w+");
-             
-            if record:
-                cur.execute('SELECT enable_record_mode(\'Q%s\');' % i)
-            
-            if replay:
-                cur.execute('SELECT enable_replay_mode(\'Q%s\', \'seq\');' % i)
+    if query:
+        queryRange = range(query, query + 1)
+    else:
+        queryRange = range(1, 23)
+    
+    for i in queryRange:
+        con = psycopg2.connect(database = pgDB, user = pgUser, password = pgPW, host = pgIp, port = pgPort)
+        try:
+            with con:
+                with con.cursor() as cur:
+                    if record or replay:
+                        cur.execute('set max_parallel_workers = 0;')
+                        
+                    queryFile = queryDirectory + f"/Q{i}.sql" 
+                    outputFile = open(outputDir + f"/Q{i}.out", "w+");
 
-            print("query " + queryFile)
-            cur.execute(open(queryFile, "r").read())
-            result = cur.fetchall()
- 
-            outputFile.write(str(cur.description) + '\n')
-            for row in result:
-                outputFile.write(str(row) + '\n')
+                    if record:
+                        cur.execute('SELECT enable_record_mode(\'Q%s\');' % i)
+                            
+                    if replay:
+                        cur.execute('SELECT enable_replay_mode(\'Q%s\', \'seq\');' % i)
 
-            outputFile.close()
+                    print("query " + queryFile)
+                    cur.execute(open(queryFile, "r").read())
+                    result = cur.fetchall()
+
+                    outputFile.write(str(cur.description) + '\n')
+                    for row in result:
+                        outputFile.write(str(row) + '\n')
+
+                    outputFile.close()
+        finally:
+            con.close()
 
 def main():
     # parse arguments 
     parser = argparse.ArgumentParser(description='Run test.')
+    parser.add_argument('-rr', '--record-replay', type=str, default='none', help='enable \'record\' mode or \'replay\' mode')
     parser.add_argument('-sg', '--skip-generate', action='store_true',
                         help='skip data generation and table loading (default: false)')
     parser.add_argument('-l', '--load', action='store_true',
                         help='only generate data and load table(default: false)')
+    parser.add_argument('-Q', '--query', type=int, default=0, help='run the given query')
     args = parser.parse_args()
     
     if not args.skip_generate:
         PrepBenchmark()
     
     if not args.load:
-        RunTest()
+        RunTest(query=args.query, recordReplay=args.record_replay)
     
         
 if __name__ == '__main__':

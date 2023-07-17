@@ -6,7 +6,6 @@
     "pg_password": "ubuntu",
     "data_size": "0.01",
     "secure": "y",
-    "record_replay": "none",
     "secure_query_dir": "secure-query",
     "insecure_query_dir": "insecure-query",
     "output_dir": "output"

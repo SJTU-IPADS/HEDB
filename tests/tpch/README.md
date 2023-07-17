@@ -24,7 +24,6 @@ Config your environment in tpch-config.json.
     "pg_password": "ubuntu",
     "data_size": "0.01",
     "secure": "y",    // encryted or not, 'y' for yes
-    "record_replay": "replay",    // 'replay', 'record', 'none'
     "secure_query_dir": "secure-query",
     "insecure_query_dir": "insecure-query",
     "output_dir": "output"

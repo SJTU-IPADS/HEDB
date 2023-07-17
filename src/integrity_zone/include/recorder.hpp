@@ -7,7 +7,6 @@
 
 class Recorder{
     int write_fd;
-    std::string prefix;
     std::string filename;
     /* variables to operate write_fd */
     const int DATA_LENGTH = 16 * 1024 * 1024UL;
@@ -20,7 +19,9 @@ class Recorder{
 
     Recorder(std::string filename_prefix): 
      file_length(0), file_cursor(0), write_addr(nullptr), 
-     write_fd(0), prefix(filename_prefix) {}
+     write_fd(0) {
+        update_write_fd(filename_prefix);
+    }
     
     ~Recorder(){
         close(write_fd);   
@@ -35,6 +36,7 @@ public:
     Recorder & operator=(const Recorder& recorder) = delete;
 
     void record(void *request_buffer);
+    void update_write_fd(std::string prefix);
 };
 
 /* use different Recorder subclass to represent different rr strategy*/

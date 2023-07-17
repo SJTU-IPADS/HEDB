@@ -20,6 +20,8 @@ bool clientMode = true;
 
 extern bool recordMode;
 extern bool replayMode;
+extern bool updateRecordFile;
+extern bool updateReplayFile;
 extern bool sequence_replay;
 extern char record_name_prefix[MAX_NAME_LENGTH];
 extern char record_names[MAX_RECORDS_NUM][MAX_NAME_LENGTH];
@@ -40,6 +42,7 @@ Datum enable_client_mode(PG_FUNCTION_ARGS)
 Datum enable_record_mode(PG_FUNCTION_ARGS)
 {
     recordMode = true;
+    updateRecordFile = true;
     char* s = PG_GETARG_CSTRING(0);
     strncpy(record_name_prefix, s, strlen(s));
     // print_info("%s\n", s);
@@ -52,6 +55,8 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
         recordMode = false;
     }
     replayMode = true;
+    updateReplayFile = true;
+    records_cnt = 0;
     char* s = PG_GETARG_CSTRING(0);
     strncpy(record_name_prefix, s, strlen(s));
     strcat(record_name_prefix, "-");

@@ -24,6 +24,8 @@ TEEInvoker* TEEInvoker::invoker = nullptr;
 
 bool recordMode = false;
 bool replayMode = false;
+bool updateRecordFile = false;
+bool updateReplayFile = false;
 bool sequence_replay = true;
 int records_cnt = 0;
 char record_name_prefix[MAX_NAME_LENGTH];
@@ -63,6 +65,11 @@ int TEEInvoker::sendRequest(Request* req)
         for (int i = 0; i < records_cnt; i++)
             filenames.push_back(record_names[i]);
         static Replayer& replayer = Replayer::getInstance(filenames);
+        if (updateReplayFile) {
+            replayer.update_replay_files(filenames);
+            updateReplayFile = false;
+        }
+
         int resp = replayer.replay(req_buffer);
         if (resp != Replayer::NOT_REPLAY) {
             /* then copy result from req_buffer to destination buffer */
@@ -86,6 +93,10 @@ int TEEInvoker::sendRequest(Request* req)
     /* record */
     if (recordMode) {
         static Recorder& recorder = Recorder::getInstance(record_name_prefix);
+        if (updateRecordFile) {
+            recorder.update_write_fd(record_name_prefix);
+            updateRecordFile = false;
+        }
         recorder.record(req_buffer);
     }
 

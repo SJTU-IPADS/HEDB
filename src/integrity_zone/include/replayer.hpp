@@ -23,7 +23,9 @@ public:
     /* this request type is not for replay */
     static const int NOT_REPLAY = -10087;
 
-    /* process request on the request buffer, base on repay file 
+    /* process request on the request buffer, base on replay file 
     return value: status */
     int replay(void *request_buffer);
+
+    void update_replay_files(const std::vector<std::string> &fileList);
 };

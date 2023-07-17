@@ -3,6 +3,8 @@
 #include <request.hpp>
 #include <request_types.h>
 
+#include <stdafx.hpp>
+
 int Replayer::replay_request(void* req_buffer)
 {
     BaseRequest* req_control = static_cast<BaseRequest*>(req_buffer);
@@ -11,7 +13,7 @@ int Replayer::replay_request(void* req_buffer)
     uint64_t timestamp;
     fread(&op, sizeof(int), 1, file);
     if (op != reqType) {
-        // print_error("replay fail at %ld, op: %d, reqType: %d, previous_op: %d", ftell(file), op, reqType, previous_op);
+        print_error("replay fail at %ld, op: %d, reqType: %d, previous_op: %d", ftell(file), op, reqType, previous_op);
         return -RETRY_FAILED;
     }
     if (reqType >= 101
@@ -314,6 +316,12 @@ int Replayer::replay_request(void* req_buffer)
     return resp;
 }
 
+void Replayer::update_replay_files(const std::vector<std::string> &fileList)
+{
+    filenames = fileList;
+    file = nullptr;
+}
+
 int Replayer::replay(void* request_buffer)
 {
     int reqType = static_cast<BaseRequest*>(request_buffer)->reqType;
@@ -332,7 +340,7 @@ int Replayer::replay(void* request_buffer)
         for (auto filename : filenames) {
             file = fopen(filename.c_str(), "r+b");
             int ret = replay_request(request_buffer);
-            if (ret == RETRY_FAILED) {
+            if (ret == -RETRY_FAILED) {
                 fclose(file);
                 file = nullptr;
             } else

@@ -3,6 +3,8 @@
 #include <request.hpp>
 #include <request_types.h>
 
+#include <assert.h>
+
 static inline uint64_t get_timestamp(void)
 {
     uint64_t tsc;
@@ -18,17 +20,26 @@ static inline uint64_t get_timestamp(void)
     return tsc;
 }
 
+void Recorder::update_write_fd(std::string filename_prefix)
+{
+    if (write_fd) {
+        close(write_fd);
+    }
+    file_length = 0;
+    file_cursor = 0;
+    write_addr = nullptr;
+    pid_t pid = getpid();
+    if (filename_prefix == "") {
+        filename = "record-" + std::to_string(pid) + ".log";
+    } else {
+        filename = filename_prefix + "-" + std::to_string(pid) + ".log";
+    }
+    write_fd = open(filename.c_str(), O_RDWR | O_CREAT, 0666);
+}
+
 char* Recorder::get_write_buffer(unsigned long length)
 {
-    if (write_fd == 0) {
-        pid_t pid = getpid();
-        if (prefix == "") {
-            filename = "record-" + std::to_string(pid) + ".log";
-        } else {
-            filename = prefix + "-" + std::to_string(pid) + ".log";
-        }
-        write_fd = open(filename.c_str(), O_RDWR | O_CREAT, 0666);
-    }
+    assert(write_fd != 0);
     if (file_cursor + length > file_length) {
         // munmap(write_addr, file_length);
         file_length += DATA_LENGTH;

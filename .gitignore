@@ -3,6 +3,7 @@
 build/
 cmake-build-debug/
 *.cmd
+*.out
 *.o
 *.d
 benchmark
