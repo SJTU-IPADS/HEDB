@@ -52,6 +52,7 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none'):
     pgPort = properties['pg_port']
     pgUser = properties['pg_user']
     pgPW = properties['pg_password']
+    pgLogDir = properties['pg_log_dir']
     secureQuery = properties['secure']
     secureQueryDir = properties['secure_query_dir']
     insecureQueryDir = properties['insecure_query_dir']
@@ -86,16 +87,16 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none'):
         cur = conn.cursor()
             
         if record or replay:
-            cur.execute('set max_parallel_workers = 0;')
+            cur.execute('set max_parallel_workers_per_gather = 0;')
                         
-            queryFile = queryDirectory + f"/Q{i}.sql" 
-            outputFile = open(outputDir + f"/Q{i}.out", "w+");
+        queryFile = queryDirectory + f"/Q{i}.sql" 
+        outputFile = open(outputDir + f"/Q{i}.out", "w+");
 
         if record:
             cur.execute('SELECT enable_record_mode(\'Q%s\');' % i)
                             
         if replay:
-            cur.execute('SELECT enable_replay_mode(\'Q%s\', \'seq\');' % i)
+            cur.execute('SELECT enable_replay_mode(\'Q%s\', \'%s\', \'seq\');' % (i, pgLogDir))
 
         print("query " + queryFile)
         cur.execute(open(queryFile, "r").read())

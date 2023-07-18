@@ -58,13 +58,20 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
     updateReplayFile = true;
     records_cnt = 0;
     char* s = PG_GETARG_CSTRING(0);
+    memset(record_name_prefix, 0, MAX_NAME_LENGTH);
     strncpy(record_name_prefix, s, strlen(s));
     strcat(record_name_prefix, "-");
     // print_info("%s\n", s);
 
-    DIR* dir;
-    struct dirent* ent;
-    if ((dir = opendir("/usr/local/pgsql/data")) != NULL) {
+    char default_dir[22] = "/usr/local/pgsql/data";
+    char* dir_arg = PG_GETARG_CSTRING(1);
+    if (strlen(dir_arg) == 0) {
+        dir_arg = default_dir;
+    }
+
+    DIR* dir = NULL;
+    struct dirent* ent = NULL;
+    if ((dir = opendir(dir_arg)) != NULL) {
         // print_info("open directory success\n");
         /* print all the files and directories within directory */
         while ((ent = readdir(dir)) != NULL) {
@@ -78,15 +85,15 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
         for (int i = 0; i < records_cnt; i++) {
             sprintf(tmp + strlen(tmp), "%d: %s\n", i, record_names[i]);
         }
-        // print_info("%s\n",tmp);
+        print_info("%s\n",tmp);
         closedir(dir);
     } else {
         /* could not open directory */
-        // print_info("could not open directory\n");
+        print_error("could not open directory\n");
         return EXIT_FAILURE;
     }
 
-    char* mode = PG_GETARG_CSTRING(1);
+    char* mode = PG_GETARG_CSTRING(2);
     if (strcmp(mode, "random") == 0) {
         sequence_replay = false;
     }
