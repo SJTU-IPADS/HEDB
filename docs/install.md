@@ -1,4 +1,4 @@
-# Native Install
+# Non-VM Install
 
 This tutorial gives you a short guidance on how to run HEDB without VM support.
 
@@ -29,6 +29,13 @@ Run your 1st SQL:
 CREATE EXTENSION hedb;
 SELECT enc_int4_encrypt(1024) * enc_int4_encrypt(4096);
 ```
+
+# Tests
+
+TPC-H may not be a suitable benchmark for evaluating EDB's performance.
+
+Since we were not able to obtain the real-world traces, we resort to using TPC-H to simulate the realistic financial workloads.
+It's important to note that our tests involved encrypting all data types. However, in real-world scenarios, it is common practice for customers to selectively encrypt only the data that is crucial for security reasons, in order to maintain optimal performance. Considering these factors, it becomes evident that a more suitable benchmark is required to accurately evaluate EDB's capabilities.
 
 # Run TPC-H
 
@@ -69,14 +76,14 @@ cd tests/unit-test
 sudo -u postgres pg_prove unit-test.sql
 ```
 
-# Security
+# Security Concerns
 
 1. IV
 
-The IV should be a random number when inserting the data.
+The IV should be a random value when inserting the data.
 
-For anonymized replay, you can add the masking rule id as part of the IV.
+For anonymized replay, you can add the masking rule ID as part of the IV.
 
 2. Encryption Key
 
-Likewise, you should use the random number as the encryption key.
+Likewise, you should use the random value as the encryption key, not hard-coded one.
