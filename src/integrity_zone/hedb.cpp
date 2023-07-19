@@ -85,7 +85,7 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
         for (int i = 0; i < records_cnt; i++) {
             sprintf(tmp + strlen(tmp), "%d: %s\n", i, record_names[i]);
         }
-        print_info("%s\n",tmp);
+        // print_info("%s\n",tmp);
         closedir(dir);
     } else {
         /* could not open directory */

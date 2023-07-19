@@ -88,15 +88,17 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none'):
             
         if record or replay:
             cur.execute('set max_parallel_workers_per_gather = 0;')
-                        
+        
+        queryStr = f"Q{i}"
         queryFile = queryDirectory + f"/Q{i}.sql" 
         outputFile = open(outputDir + f"/Q{i}.out", "w+");
 
         if record:
-            cur.execute('SELECT enable_record_mode(\'Q%s\');' % i)
+            cur.execute('SELECT enable_record_mode(%s);', (queryStr, ))
                             
         if replay:
-            cur.execute('SELECT enable_replay_mode(\'Q%s\', \'%s\', \'seq\');' % (i, pgLogDir))
+            type = 'seq'
+            cur.execute('SELECT enable_replay_mode(%s, %s, %s);', (queryStr, pgLogDir, type))
 
         print("query " + queryFile)
         cur.execute(open(queryFile, "r").read())
