@@ -1,6 +1,6 @@
 # How to set up a 2-VM environment for HEDB
 
-We recommend using ubuntu cloud images, as they provide ready-to-use images.
+We recommend using Ubuntu cloud images, as they provide ready-to-use images.
 
 Download an amd64 image to use:
 ```sh
@@ -33,7 +33,7 @@ $ chmod a+rwx /dev/shm/ivshmem
 
 # Privacy Zone
 
-Set up the privacy zone for Operators:
+Set up the privacy-zone VM for Operators:
 ```sh
 $ cp ubuntu-23.04-server-cloudimg-amd64.img ops.img
 $ qemu-system-x86_64 \
@@ -46,7 +46,7 @@ $ qemu-system-x86_64 \
 ```
 We recommend you to wait a while till the message `ci-info: no authorized SSH keys fingerprints found for user ubuntu.` displays, or you may fail to login.
 
-After you log into the DBMS server, install the postgresql server:
+After you log into the privacy-zone VM, install the dependencies:
 ```sh
 sudo apt-get update
 sudo apt-get install -y build-essential cmake libmbedtls-dev
@@ -76,7 +76,7 @@ cd HEDB
 
 # Integrity Zone
 
-Make-up the integrity zone for DBMS:
+Make up the integrity-zone VM for DBMS:
 ```sh
 $ cp ubuntu-23.04-server-cloudimg-amd64.img dbms.img
 $ qemu-img resize dbms.img 10G
@@ -87,12 +87,12 @@ $ qemu-system-x86_64 \
     -drive if=virtio,format=raw,file=cloud2.img \
     -device ivshmem-plain,memdev=hostmem,master=on \
     -object memory-backend-file,size=16M,share=on,mem-path=/dev/shm/ivshmem,id=hostmem \
-    -device virtio-net-pci,netdev=net0 -netdev user,id=net0,hostfwd=tcp::8000-:8000
+    -device virtio-net-pci,netdev=net0 -netdev user,id=net0,hostfwd=tcp::8000-:8000 \
 ```
-(If you wish to experiment with local shmem, at 2 vcpu must be assigned, or otherwise the busy-polling shmem will be blocked.)
+(If you wish to experiment with local shmem, at least 2 vcpus must be assigned, or otherwise the busy-polling shmem will be blocked.)
 Note that the `hostfwd` is for HEDB's template-hotfix server, and `master=on` is for HEDB's CVM fork (via QEMU VM snapshot even with ivshmem).
 
-After you log into the DBMS server, install the postgresql server:
+After you log into the integrity-zone VM, install the postgresql server:
 ```sh
 sudo apt-get update
 sudo apt-get install -y build-essential cmake libmbedtls-dev \
@@ -139,33 +139,19 @@ One way to implement CVM fork is to leverage the mature QEMU feature: VM snapsho
 
 First, append this line to qemu command line of integrity zone:
 ```
-    -monitor unix:/tmp/qemu-mon-dbms.sock,server,nowait
+    -monitor stdio -serial telnet:localhost:4321,server,nowait
 ```
 
-Then, write a script:
-```
-#!/bin/sh
-#
-# connect to qemu monitor socket
-# disconnect from it with Ctrl-C
-
-MACHINE="${1}"
-SOCKET="/tmp/qemu-mon-${MACHINE}.sock"
-
-echo "CONNECTING TO ${MACHINE} ..."
-socat ${SOCKET} STDIN
+Second, log into the integrity zone VM via telnet:
+```sh
+telnet localhost 4321
 ```
 
-Third connect to the qemu monitor:
-```
-bash ./qemu-monitor.sh dbms
-```
-
-There you can issue `savevm <checkpoint name>` to create a snapshot.
-Acting as a DBA, you can try as many times as you wish.
+Third, you can issue commands to the qemu monitor.
+For example, `savevm <checkpoint name>` creates a VM snapshot. Acting as a DBA, you can try as many times as you wish.
 To re-execute SQLs, simply try HEDB replay mode.
-After whatever inspections and fixes, you can issue `loadvm <checkpoint name>` to unwind, hence discard the side effects.
-To navigate the snapshot list, use `info snapshots`.
+After whatever inspections and fixes, issue `loadvm <checkpoint name>` to unwind, which discards the side effects.
+To navigate the snapshot list, use `info snapshots`. `delvm <checkpoint name>` deletes unwanted ones.
 
 In brief, VM snapshots provides temporal fork, rather than spatial fork.
 
