@@ -3,10 +3,10 @@
 -- complain if script is sourced in psql, rather than via CREATE EXTENSION
 \echo Use "CREATE EXTENSION hedb" to load this file. \quit
 
-CREATE FUNCTION disable_client_mode(int)
+CREATE FUNCTION disable_client_mode()
 RETURNS int AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
-CREATE FUNCTION enable_client_mode(int)
+CREATE FUNCTION enable_client_mode()
 RETURNS int AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION enable_record_mode(cstring)

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# sudo apt-get install python3-pip
-# python3 -m pip install psycopg2
+# This is a demo Smuggle attacks that breach a particular TPC-H column
+# Run this with a DBA account
+# $ python3 -m pip install psycopg2
 
 import psycopg2
 
@@ -11,6 +12,8 @@ con = psycopg2.connect(database='secure_test', user='postgres', password='postgr
 
 with con:
     cur = con.cursor()
+    ### enable HEDB server mode
+    cur.execute('SELECT disable_client_mode();')
     ### count the number to be breached
     cur.execute('SELECT COUNT(p_size) FROM part;')
     num = cur.fetchone()[0]

@@ -102,7 +102,7 @@ The proof-of-concept of HEDB has some insecure implementations:
 
 1. The prototype uses a hard-coded key and iv for data en/decryption; see `src/privacy_zone/crypto.cpp`. A good practice would harness cliend-side encryption. See [Acra](https://github.com/cossacklabs/acra).
 2. The prototype contains encryption and decryption operators (e.g., `enc_int4_encrypt`) for the purpose of debugging. They should be all eliminated. A DBA should only see ciphertexts in the `base64` form, by turning on `SELECT disable_client_mode()`.
-3. The anonymized replay does not support troubleshooting cryptographic algorithms (e.g., mbedtls), because concolic executors such as KLEE cannot scale over them. You may be interested in this [research direction](https://ieeexplore.ieee.org/document/8023121).
+3. The anonymized replay does not support troubleshooting cryptographic algorithms (e.g., mbedtls), because concolic executors such as KLEE cannot scale over them. You may be interested in this research [direction](https://ieeexplore.ieee.org/document/8023121).
 4. The authenticated replay does not support query rewriting. Replay should use search instead of match. Improve them in `src/integrity_zone/rr`.
 
 #### Anecdotes
