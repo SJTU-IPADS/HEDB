@@ -121,8 +121,8 @@ Datum enc_timestamp_out(PG_FUNCTION_ARGS)
 #define ENC_TIMESTAMP_B64_LENGTH 49 // ((4 * n / 3) + 3) & ~3
         char base64_timestamp[ENC_TIMESTAMP_B64_LENGTH + 1] = { 0 };
 
-        ToBase64Fast((const unsigned char*)t, ENC_TIMESTAMP_LENGTH, base64_timestamp, ENC_TIMESTAMP_B64_LENGTH);
-        ereport(INFO, (errmsg("base64('%p') = %s", t, base64_timestamp)));
+        toBase64((const unsigned char*)t, ENC_TIMESTAMP_LENGTH, base64_timestamp);
+        // ereport(INFO, (errmsg("base64('%p') = %s", t, base64_timestamp)));
         PG_RETURN_CSTRING(base64_timestamp);
     }
 }

@@ -92,7 +92,7 @@ Datum enc_text_out(PG_FUNCTION_ARGS)
 #define ENC_STRING_B64_LENGTH 1405 // ((4 * n / 3) + 3) & ~3
         char base64_text[ENC_STRING_B64_LENGTH + 1] = { 0 };
 
-        ToBase64Fast((const unsigned char*)&estr->enc_cstr, estr->len, base64_text, ENC_STRING_B64_LENGTH);
+        toBase64((const unsigned char*)&estr->enc_cstr, estr->len, base64_text);
         // ereport(INFO, (errmsg("base64('%p') = %s", &estr->enc_cstr, base64_text)));
         PG_RETURN_CSTRING(base64_text);
     }
