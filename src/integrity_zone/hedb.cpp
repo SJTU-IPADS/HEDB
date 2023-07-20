@@ -75,6 +75,10 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
     strcat(record_name_prefix, "-");
     // print_info("%s\n", s);
 
+    for (int i = 0; i < MAX_RECORDS_NUM; ++i) {
+        memset(record_names[i], 0, MAX_NAME_LENGTH);
+    }
+
     const char *default_dir = "/tmp";
     const char* dir_arg = PG_GETARG_CSTRING(1);
     if (strlen(dir_arg) == 0) {
