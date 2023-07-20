@@ -1,4 +1,4 @@
-# Non-VM Install
+# Non-VM Install (Development Only)
 
 This tutorial gives you a short guidance on how to run HEDB without VM support.
 
@@ -35,7 +35,7 @@ SELECT enc_int4_encrypt(1024) * enc_int4_encrypt(4096);
 TPC-H may not be a suitable benchmark for evaluating EDB's performance.
 
 Since we were not able to obtain the real-world traces, we resort to using TPC-H to simulate the realistic financial workloads.
-It's important to note that our tests involved encrypting all data types. However, in real-world scenarios, it is common practice for customers to selectively encrypt only the data that is crucial for security reasons, in order to maintain optimal performance. Considering these factors, it becomes evident that a more suitable benchmark is required to accurately evaluate EDB's capabilities.
+Note that our tests involved encrypting all data types. However, in real-world scenarios, it is common practice for customers to selectively encrypt only the data that is crucial for security reasons, in order to maintain optimal performance.
 
 # Run TPC-H
 
@@ -87,3 +87,8 @@ For anonymized replay, you can add the masking rule ID as part of the IV.
 2. Encryption Key
 
 Likewise, you should use the random value as the encryption key, not hard-coded one.
+
+3. Prevent Admin login
+
+Replace admin's password with a random long key.
+
