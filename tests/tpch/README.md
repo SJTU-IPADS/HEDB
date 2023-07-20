@@ -3,11 +3,11 @@
 ## Directory Structure
 ```
 .
-├── dbgen     # data generation tool
-├── run.py   # python script to run TPCH
+├── dbgen      # data generation tool
+├── run.py     # python script to run TPCH
 ├── README.md
-├── tpch-config.json   # config file
-├── tpch-schema-enc.sql  # encrypted schema for TPCH
+├── tpch-config.json     # config file
+├── tpch-schema-enc.sql  # cipher schema for TPCH
 ├── tpch-schema.sql      # normal schema for TPCH
 └── util_py3
 ```
@@ -52,4 +52,13 @@ $ python3 run.py -sg -rr replay
 ```
 
 Use `-h` to see more options.
+
+## Caveats
+
+Why ops should still run during replay?
+
+Because the current implementation lacks client-side encryption.
+Constants in the SQLs will be automatically encrypted using ops.
+
+We're seeking a simple client-side encryption or proxy-side encryption.
 
