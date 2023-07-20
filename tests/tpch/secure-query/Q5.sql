@@ -1,5 +1,5 @@
 select
-    n_name,sum(l_extendedprice * ('1' - l_discount)) as revenue
+    n_name,sum(l_extendedprice * ('1'::enc_float4 - l_discount)) as revenue
 from
     customer,orders,lineitem,supplier,nation,region
 where
@@ -9,9 +9,9 @@ where
     and c_nationkey = s_nationkey
     and s_nationkey = n_nationkey
     and n_regionkey = r_regionkey
-    and r_name = 'AMERICA'
-    and o_orderdate >= enc_timestamp_encrypt('1994-01-01')
-    and o_orderdate < enc_timestamp_encrypt('1995-01-01') 
+    and r_name = 'AMERICA'::enc_text
+    and o_orderdate >= '1994-01-01'::enc_timestamp
+    and o_orderdate < '1995-01-01'::enc_timestamp
 group by
     n_name
 order by

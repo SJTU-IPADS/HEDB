@@ -3,8 +3,8 @@ select
     l_linestatus,
     sum(l_quantity) as sum_qty,
     sum(l_extendedprice) as sum_base_price,
-    sum(l_extendedprice * ('1' - l_discount)) as sum_disc_price,
-    sum(l_extendedprice * ('1' - l_discount) * ('1' + l_tax)) as sum_charge,
+    sum(l_extendedprice * ('1'::enc_float4 - l_discount)) as sum_disc_price,
+    sum(l_extendedprice * ('1'::enc_float4 - l_discount) * ('1'::enc_float4 + l_tax)) as sum_charge,
     avg(l_quantity) as avg_qty,
     avg(l_extendedprice) as avg_price,
     avg(l_discount) as avg_disc,
@@ -12,7 +12,7 @@ select
 from
     lineitem
 where
-    l_shipdate <= enc_timestamp_encrypt('1998-12-01')
+    l_shipdate <= '1998-12-01'::enc_timestamp
 
 group by
     l_returnflag,

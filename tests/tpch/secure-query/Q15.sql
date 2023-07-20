@@ -1,11 +1,11 @@
 WITH revenue (supplier_no, total_revenue) as (
     SELECT
-        l_suppkey,SUM(l_extendedprice * ('1'-l_discount))
+        l_suppkey, SUM(l_extendedprice * ('1'::enc_float4 - l_discount))
     FROM
         lineitem
     WHERE
-        l_shipdate >= enc_timestamp_encrypt('1995-05-01') 
-        AND l_shipdate < enc_timestamp_encrypt('1995-08-01')
+        l_shipdate >= '1995-05-01'::enc_timestamp
+        AND l_shipdate < '1995-08-01'::enc_timestamp
     GROUP BY l_suppkey
     )
 SELECT

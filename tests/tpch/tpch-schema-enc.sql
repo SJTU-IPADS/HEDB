@@ -10,8 +10,10 @@ DROP TABLE IF EXISTS partsupp CASCADE;
 DROP TABLE IF EXISTS orders CASCADE;
 DROP TABLE IF EXISTS customer CASCADE;
 DROP TABLE IF EXISTS lineitem CASCADE;
+
 DROP EXTENSION IF EXISTS hedb CASCADE;
 CREATE EXTENSION hedb;
+ALTER SYSTEM SET max_parallel_workers_per_gather = 0; -- FIXME: avoid replay bug
 
 CREATE TABLE nation  ( n_nationkey  INTEGER NOT NULL,
                        n_name       enc_text NOT NULL,
@@ -68,7 +70,7 @@ CREATE TABLE orders  ( o_orderkey       INTEGER NOT NULL,
 CREATE TABLE lineitem ( l_orderkey    INTEGER NOT NULL,
                         l_partkey     INTEGER NOT NULL,
                         l_suppkey     INTEGER NOT NULL,
-                        l_linenumber  INTEGER NOT NULL,
+                        l_linenumber  enc_int4 NOT NULL,
                         l_quantity    enc_float4 NOT NULL,
                         l_extendedprice  enc_float4 NOT NULL,
                         l_discount    enc_float4 NOT NULL,
