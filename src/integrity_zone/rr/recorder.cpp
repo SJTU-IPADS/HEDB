@@ -177,7 +177,7 @@ void Recorder::record(void* req_buffer)
         } else if (req_control->reqType == CMD_STRING_SUBSTRING) {
             SubstringRequestData* req = (SubstringRequestData*)req_buffer;
             int str_length = encstr_size(req->str), result_length = encstr_size(req->res);
-            size_t length = sizeof(int) * 4 + str_length + result_length + 2 * ENC_INT32_LENGTH + sizeof(uint64_t);
+            size_t length = sizeof(int) * 4 + str_length + result_length + 2 * sizeof(int32_t) + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
             uint64_t timestamp = get_timestamp();
             rrprintf(1, dst, 9,
@@ -185,8 +185,8 @@ void Recorder::record(void* req_buffer)
                 sizeof(int), &str_length,
                 sizeof(int), &result_length,
                 str_length, &req->str,
-                ENC_INT32_LENGTH, &req->start,
-                ENC_INT32_LENGTH, &req->length,
+                sizeof(int32_t), &req->start,
+                sizeof(int32_t), &req->length,
                 result_length, &req->res,
                 sizeof(int), &req_control->resp,
                 sizeof(uint64_t), &timestamp);

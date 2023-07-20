@@ -6,7 +6,7 @@ CREATE EXTENSION hedb;
 
 \unset ECHO
 
-select plan(45);
+select plan(46);
 
 DROP TABLE IF EXISTS test_table;
 CREATE TABLE test_table (id int, num_i enc_int4, num_f enc_float4, str enc_text, time enc_timestamp);
@@ -96,6 +96,7 @@ select ok('test1'::enc_text = 'test1'::enc_text, 'enc_text: inequality test, ope
 select ok('test1'::enc_text != 'test2'::enc_text, 'enc_text: inequality test, operator !=');
 select ok('test1'::enc_text <> 'test2'::enc_text, 'enc_text: inequality test, operator <>');
 select ok('hello'::enc_text || 'world'::enc_text = 'helloworld'::enc_text, 'enc_text: operator ||');
+select ok(substring('hedb'::enc_text, 2, 3) = 'edb'::enc_text, 'enc_text: operator substring');
 
 select * from finish();
 DROP TABLE IF EXISTS test_table;

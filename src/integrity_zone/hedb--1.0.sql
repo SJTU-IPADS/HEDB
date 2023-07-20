@@ -369,7 +369,7 @@ CREATE OPERATOR !~~ (
   PROCEDURE = enc_text_notlike
 );
 
-CREATE FUNCTION pg_catalog.substring(enc_text, enc_int4, enc_int4)
+CREATE FUNCTION pg_catalog.substring(enc_text, int4, int4)
 RETURNS enc_text AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE FUNCTION enc_text(varchar)

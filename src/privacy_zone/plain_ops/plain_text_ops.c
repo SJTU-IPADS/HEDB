@@ -30,7 +30,7 @@ static void SubText(char* dst, char* src, int start, int length)
     dst[length] = '\0';
 }
 
-int plain_text_substring(char* str, int start, int length, char* substr)
+int plain_text_substring(char* str, int32_t start, int32_t length, char* substr)
 {
     SubText(substr, str, start, length);
     return 0;

@@ -40,37 +40,6 @@ PG_FUNCTION_INFO_V1(int4_to_enc_float4);
 }
 #endif
 
-// #define ENABLE_COUNTER
-#ifdef ENABLE_COUNTER
-int counter = 0;
-static inline void before_invoke_function(const char* str)
-{
-    counter++;
-    if (counter % 10000 == 0) {
-        char ch[1000];
-        sprintf(ch, "#ope invocation: %d", counter);
-        print_info_str(ch);
-        // print_info("#ope invocation: %d",counter );
-    }
-    static int add_counter = 0, cmp_counter = 0;
-    if (!strcmp(str, "enc_float4_add")) {
-        add_counter++;
-        if (add_counter % 10000 == 0) {
-            char ch[1000];
-            sprintf(ch, "#ope invocation: %d", counter);
-            print_info_str(ch);
-        }
-    } else if (!strcmp(str, "enc_float4_cmp")) {
-        cmp_counter++;
-        if (cmp_counter % 10000 == 0) {
-            char ch[1000];
-            sprintf(ch, "#ope invocation: %d", counter);
-            print_info_str(ch);
-        }
-    }
-}
-#endif
-
 float4 pg_float4_in(char* num);
 
 #ifdef _MSC_VER
@@ -116,9 +85,6 @@ get_float4_nan(void)
  */
 Datum enc_float4_in(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     char* s = PG_GETARG_CSTRING(0);
     float val = pg_float4_in(s);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
@@ -134,9 +100,6 @@ Datum enc_float4_in(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_out(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* in = PG_GETARG_ENCFlOAT(0);
 
     if (clientMode == true) {
@@ -249,9 +212,6 @@ Datum int4_to_enc_float4(PG_FUNCTION_ARGS)
 //  WILL BE DELETED IN THE PRODUCT
 Datum enc_float4_encrypt(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     float src = PG_GETARG_FLOAT4(0);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
     enc_float_encrypt(src, f);
@@ -263,9 +223,6 @@ Datum enc_float4_encrypt(PG_FUNCTION_ARGS)
 //  WILL BE DELETED IN THE PRODUCT
 Datum enc_float4_decrypt(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* s = PG_GETARG_ENCFlOAT(0);
     float ans;
     enc_float_decrypt(s, &ans);
@@ -305,9 +262,6 @@ Datum enc_float4_sum_bulk(PG_FUNCTION_ARGS)
 
 Datum enc_float4_avg_bulk(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     // print_info("avg bulk");
     ArrayType* v = PG_GETARG_ARRAYTYPE_P(0);
     bool isnull;
@@ -456,9 +410,6 @@ void convert_expr(char* expr, char* out_expr)
 
 Datum enc_float4_eval_expr(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     // print_info("eval expr");
     Datum* args;
     bool* nulls;
@@ -496,9 +447,6 @@ Datum enc_float4_eval_expr(PG_FUNCTION_ARGS)
 
 Datum enc_float4_avg_simple(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     ArrayType* v = PG_GETARG_ARRAYTYPE_P(0);
     bool isnull;
     Datum value;
@@ -530,9 +478,6 @@ Datum enc_float4_avg_simple(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_max(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp;
@@ -548,9 +493,6 @@ Datum enc_float4_max(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_min(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp;
@@ -564,9 +506,6 @@ Datum enc_float4_min(PG_FUNCTION_ARGS)
 
 Datum enc_float4_add(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
@@ -583,9 +522,6 @@ Datum enc_float4_add(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_subs(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
@@ -602,9 +538,6 @@ Datum enc_float4_subs(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_mult(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
@@ -622,9 +555,6 @@ Datum enc_float4_mult(PG_FUNCTION_ARGS)
 
 Datum enc_float4_div(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
@@ -642,9 +572,6 @@ Datum enc_float4_div(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_exp(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
@@ -662,9 +589,6 @@ Datum enc_float4_exp(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_mod(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
@@ -682,9 +606,6 @@ Datum enc_float4_mod(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_eq(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp, ret;
@@ -705,9 +626,6 @@ Datum enc_float4_eq(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_ne(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp, ret;
@@ -728,9 +646,6 @@ Datum enc_float4_ne(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_lt(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp, ret;
@@ -751,9 +666,6 @@ Datum enc_float4_lt(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_le(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp, ret;
@@ -774,9 +686,6 @@ Datum enc_float4_le(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_gt(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp, ret;
@@ -797,9 +706,6 @@ Datum enc_float4_gt(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_ge(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp, ret;
@@ -818,9 +724,6 @@ Datum enc_float4_ge(PG_FUNCTION_ARGS)
  */
 Datum enc_float4_cmp(PG_FUNCTION_ARGS)
 {
-#ifdef ENABLE_COUNTER
-    before_invoke_function(__func__);
-#endif
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp;

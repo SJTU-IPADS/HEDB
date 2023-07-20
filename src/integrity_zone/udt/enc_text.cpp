@@ -359,17 +359,14 @@ Datum enc_text_notlike(PG_FUNCTION_ARGS)
 Datum substring(PG_FUNCTION_ARGS)
 {
     EncText* s = PG_GETARG_ENCTEXT_P(0);
-    EncInt* start = PG_GETARG_ENCINT(1);
-    EncInt* length = PG_GETARG_ENCINT(2);
+    int32_t start = PG_GETARG_INT32(1);
+    int32_t length = PG_GETARG_INT32(2);
 
-    int sta, len;
-    enc_int_decrypt(start, &sta);
-    enc_int_decrypt(length, &len);
     EncStr* str = (EncStr*)VARDATA(s);
 
-    EncText* res = (EncText*)palloc0(ENCSTRLEN(len) + VARHDRSZ);
+    EncText* res = (EncText*)palloc0(ENCSTRLEN(length) + VARHDRSZ);
     EncStr* estr = (EncStr*)VARDATA(res);
-    SET_VARSIZE(res, ENCSTRLEN(len) + VARHDRSZ);
+    SET_VARSIZE(res, ENCSTRLEN(length) + VARHDRSZ);
     enc_text_substring(str, start, length, estr);
 
     PG_RETURN_CSTRING(res);

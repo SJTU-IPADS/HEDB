@@ -4,16 +4,16 @@ select
     sum(c_acctbal) as totacctbal
 from (
     select
-        substring(c_phone from '1' for '2') as cntrycode,
+        substring(c_phone from 1 for 2) as cntrycode,
         c_acctbal
     from customer
     where
-        substring(c_phone from '1' for '2') in ('28','14','22','10','26','33','30')
+        substring(c_phone from 1 for 2) in ('28','14','22','10','26','33','30')
         and c_acctbal > (
             select avg(c_acctbal) from customer
             where
-                c_acctbal > '0.00'
-                and substring (c_phone from '1' for '2') 
+                c_acctbal > '0.00'::enc_float4
+                and substring (c_phone from 1 for 2)
                                 in ('28','14','22','10','26','33','30'))
         and not exists (
             select * from orders where  o_custkey = c_custkey)

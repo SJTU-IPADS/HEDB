@@ -261,7 +261,6 @@ int main(int argc, char* argv[])
     printf("HEDB ops_server running on shared memory addr: %p.\n", req);
     memset(req, 0, sizeof(OpsServer));
     while (1) {
-        //        usleep(3);
         if (req->status == SHM_GET) {
             for (int i = 0; i < MAX_REGION_NUM; i++) {
                 if (GET(req->bitmap, i) == 0) {

@@ -187,7 +187,7 @@ int Replayer::replay_request(void* req_buffer)
         } else if (req_control->reqType == CMD_STRING_SUBSTRING) {
             SubstringRequestData* req = (SubstringRequestData*)req_buffer;
             EncStr str;
-            EncInt start, length;
+            int32_t start, length;
             int str_length, result_length;
             fread(&str_length, sizeof(int), 1, replay_file);
             fread(&result_length, sizeof(int), 1, replay_file);
@@ -199,16 +199,16 @@ int Replayer::replay_request(void* req_buffer)
 
             char read_buffer[str_length + result_length + sizeof(int) + ENC_INT32_LENGTH * 2 + sizeof(uint64_t)];
             char* src = read_buffer;
-            fread(read_buffer, sizeof(char), str_length + result_length + sizeof(int) + ENC_INT32_LENGTH * 2 + sizeof(uint64_t), replay_file);
+            fread(read_buffer, sizeof(char), str_length + result_length + sizeof(int) + sizeof(int32_t) * 2 + sizeof(uint64_t), replay_file);
             rrprintf(0, src, 6,
                 str_length, &str,
-                ENC_INT32_LENGTH, &start,
-                ENC_INT32_LENGTH, &length,
+                sizeof(int32_t), &start,
+                sizeof(int32_t), &length,
                 result_length, &res,
                 sizeof(int), &resp, 
                 sizeof(uint64_t), &timestamp);
 
-            if (memcmp(&str, &req->str, str_length) || memcmp(&start, &req->start, ENC_INT32_LENGTH) || memcmp(&length, &req->length, ENC_INT32_LENGTH)) {
+            if (memcmp(&str, &req->str, str_length) || memcmp(&start, &req->start, sizeof(int32_t)) || memcmp(&length, &req->length, sizeof(int32_t))) {
                 // print_error("string substring fail at %ld, contents mismatch", ftell(read_file_ptr));
                 return -RETRY_FAILED;
             }

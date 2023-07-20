@@ -3,9 +3,10 @@
 
 int handle_ops(BaseRequest* base_req)
 {
-    // DMSG("\n -------------------\nops: %d", base_req->reqType);
-
+    // printf("\nops: %d", base_req->reqType);
     switch (base_req->reqType) {
+
+    /* int */
     case CMD_INT_PLUS:
     case CMD_INT_MINUS:
     case CMD_INT_MULT:
@@ -35,8 +36,7 @@ int handle_ops(BaseRequest* base_req)
         break;
     }
 
-        /* FLOATs */
-
+    /* float */
     case CMD_FLOAT_PLUS:
     case CMD_FLOAT_MINUS:
     case CMD_FLOAT_MULT:
@@ -77,6 +77,7 @@ int handle_ops(BaseRequest* base_req)
     case CMD_TIMESTAMP_CMP:
         base_req->resp = enc_timestamp_cmp((EncTimestampCmpRequestData*)base_req);
         break;
+
     case CMD_TIMESTAMP_ENC: {
         EncTimestampEncRequestData* req = (EncTimestampEncRequestData*)base_req;
         req->common.resp = encrypt_bytes((uint8_t*)&req->plaintext, sizeof(req->plaintext),
@@ -90,8 +91,7 @@ int handle_ops(BaseRequest* base_req)
         break;
     }
 
-        /* text */
-
+    /* text */
     case CMD_STRING_SUBSTRING:
         base_req->resp = enc_text_substring((SubstringRequestData*)base_req);
         break;
@@ -104,6 +104,7 @@ int handle_ops(BaseRequest* base_req)
     case CMD_STRING_CMP:
         base_req->resp = enc_text_cmp((EncStrCmpRequestData*)base_req);
         break;
+
     case CMD_STRING_ENC: {
         EncStrEncRequestData* req = (EncStrEncRequestData*)base_req;
         req->ciphertext.len = req->plaintext.len + IV_SIZE + TAG_SIZE;
@@ -119,6 +120,7 @@ int handle_ops(BaseRequest* base_req)
         req->plaintext.data[req->plaintext.len] = '\0';
         break;
     }
+
     default:
         break;
     }
