@@ -1,4 +1,3 @@
-\timing
 WITH revenue (supplier_no, total_revenue) as (
     SELECT
         l_suppkey,SUM(l_extendedprice * ('1'-l_discount))

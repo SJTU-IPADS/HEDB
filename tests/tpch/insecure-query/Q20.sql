@@ -1,4 +1,3 @@
-\timing
 select
     s_name, s_address
 from

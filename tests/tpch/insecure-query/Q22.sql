@@ -1,4 +1,3 @@
-\timing
 select
     cntrycode,
     count(*) as numcust,
