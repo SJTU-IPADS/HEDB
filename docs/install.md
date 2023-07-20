@@ -61,7 +61,11 @@ chmod +rw *.tbl
 
 ## Using HEDB scripts
 
-TODO
+If you encounter `FATAL:  password authentication failed for user "postgres"`,
+then update DBA's password with:
+```sql
+ALTER USER postgres WITH PASSWORD 'postgres';
+```
 
 # Unit Test
 

@@ -5,11 +5,11 @@
 #include <unistd.h> // fopen
 
 class Replayer{
-    FILE *file;
+    FILE *replay_file;
     std::vector<std::string> filenames;
     int previous_op;
     int replay_request(void *req_buffer);
-    Replayer(const std::vector<std::string>& fileList): file(nullptr), filenames(fileList) {}
+    Replayer(const std::vector<std::string>& fileList): replay_file(nullptr), filenames(fileList) {}
     ~Replayer(){}
 public:
     static Replayer& getInstance(const std::vector<std::string>& fileList){
@@ -23,7 +23,7 @@ public:
     /* this request type is not for replay */
     static const int NOT_REPLAY = -10087;
 
-    /* process request on the request buffer, base on replay file 
+    /* process request on the request buffer, base on replay file
     return value: status */
     int replay(void *request_buffer);
 

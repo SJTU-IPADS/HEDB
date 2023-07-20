@@ -12,15 +12,7 @@
 #include <unistd.h>
 #include "barrier.h"
 
-#define MAX_LOG_SIZE 50000
-
 TEEInvoker* TEEInvoker::invoker = nullptr;
-
-#define RR_MINIMUM false
-
-#define MAX_NAME_LENGTH 100
-#define MAX_PARALLEL_WORKER_SIZE 16 // TODO: the database can only see one buffer allocated to it.
-#define MAX_RECORDS_NUM (MAX_PARALLEL_WORKER_SIZE + 1)
 
 bool recordMode = false;
 bool replayMode = false;
@@ -32,10 +24,6 @@ char record_name_prefix[MAX_NAME_LENGTH];
 char record_names[MAX_RECORDS_NUM][MAX_NAME_LENGTH];
 
 uint64_t current_log_size = 0;
-#define ENC_FLOAT4_LENGTH_B64 BASE64_ENCODE_OUT_SIZE(ENC_FLOAT4_LENGTH)
-#define ENC_INT32_LENGTH_B64 BASE64_ENCODE_OUT_SIZE(ENC_INT32_LENGTH)
-#define ENC_STRING_LENGTH_B64 BASE64_ENCODE_OUT_SIZE(ENC_STRING_LENGTH)
-#define ENC_TIMESTAMP_LENGTH_B64 BASE64_ENCODE_OUT_SIZE(ENC_TIMESTAMP_LENGTH)
 
 TEEInvoker::~TEEInvoker()
 {
@@ -62,14 +50,14 @@ int TEEInvoker::sendRequest(Request* req)
     if (replayMode) {
         /* replay_request will answer request written to req_buffer */
         std::vector<std::string> filenames;
-        for (int i = 0; i < records_cnt; i++)
+        for (int i = 0; i < records_cnt; i++) {
             filenames.push_back(record_names[i]);
+        }
         static Replayer& replayer = Replayer::getInstance(filenames);
         if (updateReplayFile) {
             replayer.update_replay_files(filenames);
             updateReplayFile = false;
         }
-
         int resp = replayer.replay(req_buffer);
         if (resp != Replayer::NOT_REPLAY) {
             /* then copy result from req_buffer to destination buffer */

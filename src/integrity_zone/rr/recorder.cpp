@@ -1,3 +1,5 @@
+#include "stdafx.hpp"
+
 #include <recorder.hpp>
 
 #include <request.hpp>
@@ -60,8 +62,8 @@ void Recorder::record(void* req_buffer)
     BaseRequest* req_control = static_cast<BaseRequest*>(req_buffer);
     if (req_control->reqType != CMD_FLOAT_ENC
         && req_control->reqType != CMD_FLOAT_DEC
-        && req_control->reqType >= 101
-        && req_control->reqType <= 110) {
+        && req_control->reqType >= CMD_FLOAT_PLUS
+        && req_control->reqType <= CMD_FLOAT_SUM_BULK) {
         if (req_control->reqType == CMD_FLOAT_CMP) {
             EncFloatCmpRequestData* req = (EncFloatCmpRequestData*)req_buffer;
             size_t length = sizeof(int) * 3 + ENC_FLOAT4_LENGTH * 2 + sizeof(uint64_t);
@@ -106,8 +108,8 @@ void Recorder::record(void* req_buffer)
         }
 
     } // end of float
-    else if (req_control->reqType >= 1
-        && req_control->reqType <= 10
+    else if (req_control->reqType >= CMD_INT_PLUS
+        && req_control->reqType <= CMD_INT_SUM_BULK
         && req_control->reqType != CMD_INT_ENC
         && req_control->reqType != CMD_INT_DEC) {
         if (req_control->reqType == CMD_INT_CMP) {
@@ -154,8 +156,8 @@ void Recorder::record(void* req_buffer)
         }
     } else if (req_control->reqType != CMD_STRING_ENC
         && req_control->reqType != CMD_STRING_DEC
-        && req_control->reqType >= 201
-        && req_control->reqType <= 206) {
+        && req_control->reqType >= CMD_STRING_CMP
+        && req_control->reqType <= CMD_STRING_LIKE) {
         if (req_control->reqType == CMD_STRING_CMP || req_control->reqType == CMD_STRING_LIKE) {
             EncStrCmpRequestData* req = (EncStrCmpRequestData*)req_buffer;
             int left_length = encstr_size(req->left);
@@ -205,8 +207,8 @@ void Recorder::record(void* req_buffer)
                 sizeof(int), &req_control->resp,
                 sizeof(uint64_t), &timestamp);
         }
-    } else if (req_control->reqType >= 150
-        && req_control->reqType <= 153
+    } else if (req_control->reqType >= CMD_TIMESTAMP_CMP
+        && req_control->reqType <= CMD_TIMESTAMP_EXTRACT_YEAR
         && req_control->reqType != CMD_TIMESTAMP_DEC
         && req_control->reqType != CMD_TIMESTAMP_ENC) {
         if (req_control->reqType == CMD_TIMESTAMP_CMP) {

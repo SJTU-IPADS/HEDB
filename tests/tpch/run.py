@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # sudo apt-get install python3-pip
-# python3 -m pip install psycopg2
+# python3 -m pip install psycopg2 tqdm
 import psycopg2
 import os
 import argparse
@@ -86,15 +86,12 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none'):
         conn = psycopg2.connect(database = pgDB, user = pgUser, password = pgPW, host = pgIp, port = pgPort)
         cur = conn.cursor()
             
-        if record or replay:
-            cur.execute('set max_parallel_workers_per_gather = 0;')
-        
         queryStr = f"Q{i}"
         queryFile = queryDirectory + f"/Q{i}.sql" 
         outputFile = open(outputDir + f"/Q{i}.out", "w+");
 
         if record:
-            cur.execute('SELECT enable_record_mode(%s);', (queryStr, ))
+            cur.execute('SELECT enable_record_mode(%s, %s);', (queryStr, pgLogDir))
                             
         if replay:
             type = 'seq'
@@ -131,7 +128,7 @@ def main():
     
     if not args.load:
         RunTest(query=args.query, recordReplay=args.record_replay)
-    
         
 if __name__ == '__main__':
     main()
+

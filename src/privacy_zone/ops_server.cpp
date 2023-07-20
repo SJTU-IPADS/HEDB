@@ -8,6 +8,7 @@
 #include <sys/mman.h>
 #include <sys/shm.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "barrier.h"
@@ -121,11 +122,22 @@ void decrypt_wait(uint8_t* pDst, size_t exp_dst_len)
     // memcpy(pDst, plain_buffer, exp_dst_len);
 }
 
+static unsigned long encrypt_counter = 0;
+int encrypt_bytes(uint8_t* pSrc, size_t src_len, uint8_t* pDst, size_t exp_dst_len)
+{
+    size_t dst_len = exp_dst_len;
+    int resp = 0;
+
+    resp = gcm_encrypt(pSrc, src_len, pDst, &dst_len);
+    assert(dst_len == exp_dst_len);
+
+    encrypt_counter++;
+    return resp;
+}
+
 static unsigned long decrypt_counter = 0;
 int decrypt_bytes(uint8_t* pSrc, size_t src_len, uint8_t* pDst, size_t exp_dst_len)
 {
-    decrypt_counter++;
-
     size_t dst_len = 0;
     int resp = 0;
 
@@ -139,28 +151,7 @@ int decrypt_bytes(uint8_t* pSrc, size_t src_len, uint8_t* pDst, size_t exp_dst_l
         _print_hex("dec to ", pDst, dst_len);
     }
 
-    return resp;
-}
-
-/* Encrypts byte array by aesgcm mode
- @input: uint8_t array - pointer to a byte array
-         size_t - length of the array
-         uint8_t array - pointer to result array
-         size_t - length of result array (IV_SIZE + length of array +
- TAG_SIZE)
- @return:
-    * SGX_error, if there was an error during encryption/decryption
-    0, otherwise
-*/
-static unsigned long encrypt_counter = 0;
-int encrypt_bytes(uint8_t* pSrc, size_t src_len, uint8_t* pDst, size_t exp_dst_len)
-{
-    encrypt_counter++;
-    size_t dst_len = exp_dst_len;
-    int resp = 0;
-
-    resp = gcm_encrypt(pSrc, src_len, pDst, &dst_len);
-    assert(dst_len == exp_dst_len);
+    decrypt_counter++;
     return resp;
 }
 
@@ -197,12 +188,16 @@ void* get_shmem_ivshm(size_t size)
 pid_t fork_ops_process(void* shm_addr)
 {
     pid_t pid = fork();
-    if (pid != 0) { // father
+
+    // father
+    if (pid != 0) {
         return pid;
     }
+
     // child
     // after fork, child inherit all attached shared memory (man shmat)
-    printf("waiting on shm_addr %p\n", shm_addr);
+    pid = getpid();
+    // printf("[%d] waiting on shm_addr %p\n", pid, shm_addr);
 
     for (int i = 0; i < MAX_DECRYPT_THREAD; i++) {
         args_array[i].index = i;
@@ -211,8 +206,6 @@ pid_t fork_ops_process(void* shm_addr)
     }
 
     int counter = 0, non_enc_counter = 0;
-    int counters[300] = {};
-    std::chrono::duration<double> sum(0);
 
     BaseRequest* req = (BaseRequest*)shm_addr;
     while (1) {
@@ -223,13 +216,8 @@ pid_t fork_ops_process(void* shm_addr)
                     args_array[i].decrypt_status = EXIT;
                 }
             }
-            std::cout << "Exit: Total ops elapse time " << sum.count() << std::endl;
-            printf("ops counter: %d, non-enc counter %d, dec counter: %ld, enc counter: %ld\n", counter, non_enc_counter, decrypt_counter, encrypt_counter);
-            for (int i = 0; i <= 299; i++) {
-                if (counters[i])
-                    printf("%d: counter %d, ", i, counters[i]);
-            }
-            printf("\n");
+            printf("[%d] total ops: %d, dec: %ld, enc: %ld, others: %d\n", pid,
+                counter, decrypt_counter, encrypt_counter, non_enc_counter);
             req->status = NONE;
             exit(0);
         } else if (req->status == SENT) {
@@ -246,7 +234,6 @@ pid_t fork_ops_process(void* shm_addr)
                 && req->reqType != CMD_TIMESTAMP_ENC
                 && req->reqType != CMD_TIMESTAMP_DEC)
                 non_enc_counter++;
-            counters[req->reqType]++;
             if (req->reqType > 0)
                 handle_ops(req);
             else
@@ -281,11 +268,8 @@ int main(int argc, char* argv[])
                     SET(req->bitmap, i);
                     req->ret_id = i;
                     void* addr = (char*)req + REGION_N_OFFSET(i);
-                    // printf("allocate %d, base addr %p, alloc addr %p\n",i,req, addr);
                     pid_t child = fork_ops_process(addr);
-                    // printf("child pid %d\n",child);
                     child_pids[i] = child;
-                    printf("allocate %d, base addr %p, alloc addr %p\n", i, req, addr);
                     break;
                 }
             }
@@ -295,7 +279,8 @@ int main(int argc, char* argv[])
         } else if (req->status == SHM_FREE) {
             LOAD_BARRIER;
             int id = req->free_id;
-            BaseRequest* base_req = (BaseRequest*)((char*)req + REGION_N_OFFSET(id));
+            BaseRequest* base_req;
+            base_req = (BaseRequest*)((char*)req + REGION_N_OFFSET(id));
 
             base_req->status = EXIT;
             assert(GET(req->bitmap, id) == 1);
@@ -304,7 +289,6 @@ int main(int argc, char* argv[])
 
             STORE_BARRIER; // store everything before DONE.
             req->status = SHM_DONE;
-            printf("free %d, %p\n", id, base_req);
         } else {
             YIELD_PROCESSOR;
         }

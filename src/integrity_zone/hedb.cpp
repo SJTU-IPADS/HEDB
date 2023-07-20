@@ -26,10 +26,6 @@ Datum enable_client_mode(PG_FUNCTION_ARGS)
     PG_RETURN_VOID();
 }
 
-#define MAX_NAME_LENGTH 100
-#define MAX_PARALLEL_WORKER_SIZE 16
-#define MAX_RECORDS_NUM (MAX_PARALLEL_WORKER_SIZE + 1)
-
 extern bool recordMode;
 extern bool replayMode;
 extern bool updateRecordFile;
@@ -39,13 +35,29 @@ extern char record_name_prefix[MAX_NAME_LENGTH];
 extern char record_names[MAX_RECORDS_NUM][MAX_NAME_LENGTH];
 extern int records_cnt;
 
+/**
+    As the Ops have no idea of the bound of each SQL,
+    the client should invoke enable_record_mode() for each query
+*/
 Datum enable_record_mode(PG_FUNCTION_ARGS)
 {
     recordMode = true;
     updateRecordFile = true;
+
     char* s = PG_GETARG_CSTRING(0);
-    strncpy(record_name_prefix, s, strlen(s));
     // print_info("%s\n", s);
+
+    const char *default_dir = "/tmp";
+    const char* dir_arg = PG_GETARG_CSTRING(1);
+    if (strlen(dir_arg) == 0) {
+        dir_arg = default_dir;
+    }
+
+    memset(record_name_prefix, 0, MAX_NAME_LENGTH);
+    strncat(record_name_prefix, dir_arg, strlen(dir_arg));
+    strcat(record_name_prefix, "/");
+    strncat(record_name_prefix, s, strlen(s));
+
     PG_RETURN_VOID();
 }
 
@@ -63,8 +75,8 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
     strcat(record_name_prefix, "-");
     // print_info("%s\n", s);
 
-    char default_dir[22] = "/usr/local/pgsql/data";
-    char* dir_arg = PG_GETARG_CSTRING(1);
+    const char *default_dir = "/tmp";
+    const char* dir_arg = PG_GETARG_CSTRING(1);
     if (strlen(dir_arg) == 0) {
         dir_arg = default_dir;
     }
@@ -76,16 +88,18 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
         /* print all the files and directories within directory */
         while ((ent = readdir(dir)) != NULL) {
             if (0 == strncmp(record_name_prefix, ent->d_name, strlen(record_name_prefix))) { // if prefix match add to names list
-                strncpy(record_names[records_cnt], ent->d_name, strlen(ent->d_name));
+                strncpy(record_names[records_cnt], dir_arg, strlen(dir_arg)); // use whole path
+                strcat(record_names[records_cnt], "/");
+                strncat(record_names[records_cnt], ent->d_name, strlen(ent->d_name));
                 records_cnt++;
             }
         }
         char tmp[256];
-        sprintf(tmp, "find %d log files\n", records_cnt);
+        sprintf(tmp, "find %d log file(s)\n", records_cnt);
         for (int i = 0; i < records_cnt; i++) {
             sprintf(tmp + strlen(tmp), "%d: %s\n", i, record_names[i]);
         }
-        // print_info("%s\n",tmp);
+        print_info("%s\n",tmp);
         closedir(dir);
     } else {
         /* could not open directory */
@@ -99,6 +113,6 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
     }
 
     // print_info("mode: %s, seq: %d", mode, (int)sequence_replay);
-
     PG_RETURN_VOID();
 }
+

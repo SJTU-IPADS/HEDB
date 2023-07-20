@@ -4,7 +4,7 @@
 ```
 .
 ├── dbgen     # data generation tool
-├── doit.py   # python script to run TPCH
+├── run.py   # python script to run TPCH
 ├── README.md
 ├── tpch-config.json   # config file
 ├── tpch-schema-enc.sql  # encrypted schema for TPCH
@@ -13,6 +13,7 @@
 ```
 
 ## Run
+
 ### Step 1
 Config your environment in tpch-config.json.
 ``` json
@@ -20,8 +21,8 @@ Config your environment in tpch-config.json.
     "test_name": "tpch",
     "pg_ip": "127.0.0.1",
     "pg_port": "5432",
-    "pg_user": "ubuntu",
-    "pg_password": "ubuntu",
+    "pg_user": "postgres",
+    "pg_password": "postgres",
     "data_size": "0.01",
     "secure": "y",    // encryted or not, 'y' for yes
     "secure_query_dir": "secure-query",
@@ -33,8 +34,22 @@ Config your environment in tpch-config.json.
 ### Step 2
 Run the script (you may need to install python package `psycopg2`).
 
-``` shell
-$ python3 doit.py
+``` sh
+$ python3 run.py -l
+$ python3 run.py -sg
+```
+
+### Step 3
+
+Record:
+``` sh
+$ python3 run.py -sg -rr record
+```
+
+Replay:
+``` sh
+$ python3 run.py -sg -rr replay
 ```
 
 Use `-h` to see more options.
+
