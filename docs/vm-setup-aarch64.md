@@ -134,7 +134,7 @@ sudo -u postgres psql
 # psql
 DROP EXTENSION IF EXISTS hedb CASCADE;
 CREATE EXTENSION hedb;
-SELECT enc_int4_encrypt(1024) * enc_int4_encrypt(4096);
+SELECT 1024::enc_int4 * 4096::enc_int4;
 ```
 
 ``` sh

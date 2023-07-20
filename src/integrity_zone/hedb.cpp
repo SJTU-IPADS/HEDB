@@ -5,18 +5,30 @@
 #include <sys/types.h>
 
 extern "C" {
-PG_MODULE_MAGIC;
-PG_FUNCTION_INFO_V1(disable_client_mode);
-PG_FUNCTION_INFO_V1(enable_client_mode);
-PG_FUNCTION_INFO_V1(enable_record_mode);
-PG_FUNCTION_INFO_V1(enable_replay_mode);
+    PG_MODULE_MAGIC;
+    PG_FUNCTION_INFO_V1(disable_client_mode);
+    PG_FUNCTION_INFO_V1(enable_client_mode);
+    PG_FUNCTION_INFO_V1(enable_record_mode);
+    PG_FUNCTION_INFO_V1(enable_replay_mode);
+}
+
+bool clientMode = false; // by default
+
+Datum disable_client_mode(PG_FUNCTION_ARGS)
+{
+    clientMode = false;
+    PG_RETURN_VOID();
+}
+
+Datum enable_client_mode(PG_FUNCTION_ARGS)
+{
+    clientMode = true;
+    PG_RETURN_VOID();
 }
 
 #define MAX_NAME_LENGTH 100
 #define MAX_PARALLEL_WORKER_SIZE 16
 #define MAX_RECORDS_NUM (MAX_PARALLEL_WORKER_SIZE + 1)
-
-bool clientMode = true;
 
 extern bool recordMode;
 extern bool replayMode;
@@ -27,18 +39,6 @@ extern char record_name_prefix[MAX_NAME_LENGTH];
 extern char record_names[MAX_RECORDS_NUM][MAX_NAME_LENGTH];
 extern int records_cnt;
 
-Datum disable_client_mode(PG_FUNCTION_ARGS)
-{
-    clientMode = false;
-    PG_RETURN_INT32(0);
-}
-
-Datum enable_client_mode(PG_FUNCTION_ARGS)
-{
-    clientMode = true;
-    PG_RETURN_INT32(0);
-}
-
 Datum enable_record_mode(PG_FUNCTION_ARGS)
 {
     recordMode = true;
@@ -46,7 +46,7 @@ Datum enable_record_mode(PG_FUNCTION_ARGS)
     char* s = PG_GETARG_CSTRING(0);
     strncpy(record_name_prefix, s, strlen(s));
     // print_info("%s\n", s);
-    PG_RETURN_INT32(0);
+    PG_RETURN_VOID();
 }
 
 Datum enable_replay_mode(PG_FUNCTION_ARGS)
@@ -100,5 +100,5 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
 
     // print_info("mode: %s, seq: %d", mode, (int)sequence_replay);
 
-    PG_RETURN_INT32(0);
+    PG_RETURN_VOID();
 }

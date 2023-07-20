@@ -65,7 +65,6 @@ char *toBase64(const unsigned char *pIn, int nbIn, char *pOut)
         pIn += 3;
         if ((nCol += 4) >= B64_DARK_MAX || nbIn <= 0)
         {
-            *pOut++ = '\n';
             nCol = 0;
         }
     }
@@ -87,7 +86,6 @@ char *toBase64(const unsigned char *pIn, int nbIn, char *pOut)
             pOut[nbe] = ce;
         }
         pOut += 4;
-        *pOut++ = '\n';
     }
     *pOut = 0;
     return pOut;
