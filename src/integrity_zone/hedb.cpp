@@ -31,6 +31,7 @@ extern bool replayMode;
 extern bool updateRecordFile;
 extern bool updateReplayFile;
 extern bool sequence_replay;
+extern bool performance_replay;
 extern char record_name_prefix[MAX_NAME_LENGTH];
 extern char record_names[MAX_RECORDS_NUM][MAX_NAME_LENGTH];
 extern int records_cnt;
@@ -114,6 +115,10 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
     char* mode = PG_GETARG_CSTRING(2);
     if (strcmp(mode, "random") == 0) {
         sequence_replay = false;
+    }
+
+    if (strcmp(mode, "perf") == 0) {
+        performance_replay = true;
     }
 
     // print_info("mode: %s, seq: %d", mode, (int)sequence_replay);

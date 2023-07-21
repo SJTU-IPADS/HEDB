@@ -19,6 +19,7 @@ bool replayMode = false;
 bool updateRecordFile = false;
 bool updateReplayFile = false;
 bool sequence_replay = true;
+bool performance_replay = false;
 int records_cnt = 0;
 char record_name_prefix[MAX_NAME_LENGTH];
 char record_names[MAX_RECORDS_NUM][MAX_NAME_LENGTH];

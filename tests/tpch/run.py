@@ -6,6 +6,7 @@
 import psycopg2
 import os
 import argparse
+import time
 
 from util_py3.ssh_util import *
 from util_py3.prop_util import *
@@ -45,7 +46,7 @@ def PrepBenchmark(propFile = DEFAULT_TPCH_CONFIG):
     executeCommand("find . -name \"*.tbl\" | xargs rm")
     
     
-def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none'):
+def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none', mode='seq'):
     properties = loadPropertyFile(propFile)
     
     pgIp = properties['pg_ip']
@@ -85,7 +86,9 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none'):
     for i in queryRange:
         conn = psycopg2.connect(database = pgDB, user = pgUser, password = pgPW, host = pgIp, port = pgPort)
         cur = conn.cursor()
-            
+        
+        startTime = time.time()
+
         queryStr = f"Q{i}"
         queryFile = queryDirectory + f"/Q{i}.sql" 
         outputFile = open(outputDir + f"/Q{i}.out", "w+");
@@ -94,10 +97,8 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none'):
             cur.execute('SELECT enable_record_mode(%s, %s);', (queryStr, pgLogDir))
                             
         if replay:
-            type = 'seq'
-            cur.execute('SELECT enable_replay_mode(%s, %s, %s);', (queryStr, pgLogDir, type))
+            cur.execute('SELECT enable_replay_mode(%s, %s, %s);', (queryStr, pgLogDir, mode))
 
-        print("query " + queryFile)
         cur.execute(open(queryFile, "r").read())
         result = cur.fetchall()
 
@@ -108,6 +109,9 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none'):
         outputFile.close()
         
         conn.commit()
+
+        endTime = time.time()
+        print(f"query Q{i}: {int((endTime - startTime) * 1000)}ms")
 
         cur.close()
         conn.close()
@@ -121,13 +125,14 @@ def main():
     parser.add_argument('-l', '--load', action='store_true',
                         help='only generate data and load table(default: false)')
     parser.add_argument('-Q', '--query', type=int, default=0, help='run the given query')
+    parser.add_argument('-m', '--mode', type=str, default='seq', help='\'seq\' mode for essential replay, \'perf\' mode for performance replay')
     args = parser.parse_args()
     
     if not args.skip_generate:
         PrepBenchmark()
     
     if not args.load:
-        RunTest(query=args.query, recordReplay=args.record_replay)
+        RunTest(query=args.query, recordReplay=args.record_replay, mode=args.mode)
         
 if __name__ == '__main__':
     main()

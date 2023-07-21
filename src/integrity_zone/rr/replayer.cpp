@@ -1,18 +1,20 @@
 #include <replayer.hpp>
-
 #include <request.hpp>
 #include <request_types.h>
-
-#include <rrprintf.hpp>
-
+#include <rr_utils.hpp>
 #include <stdafx.hpp>
+
+static uint64_t last_record_timestamp = 0;
+static uint64_t last_real_timestamp = 0;
+extern bool performance_replay;
 
 int Replayer::replay_request(void* req_buffer)
 {
     BaseRequest* req_control = static_cast<BaseRequest*>(req_buffer);
     int reqType = req_control->reqType;
     int op, resp;
-    uint64_t timestamp;
+    uint64_t record_timestamp;
+    uint64_t real_timestamp;
     fread(&op, sizeof(int), 1, replay_file);
     if (op != reqType) {
         print_error("replay fail at %ld, op: %d, reqType: %d, previous_op: %d", ftell(replay_file), op, reqType, previous_op);
@@ -31,7 +33,7 @@ int Replayer::replay_request(void* req_buffer)
                 ENC_FLOAT4_LENGTH, &right,
                 sizeof(int), &cmp,
                 sizeof(int), &resp,
-                sizeof(uint64_t), &timestamp);
+                sizeof(uint64_t), &record_timestamp);
 
             if (memcmp(&req->left, &left, ENC_FLOAT4_LENGTH) || memcmp(&req->right, &right, ENC_FLOAT4_LENGTH)) {
                 // print_error("float cmp fail at %ld", ftell(read_file_ptr));
@@ -48,7 +50,7 @@ int Replayer::replay_request(void* req_buffer)
                 sizeof(int), &bulk_size,
                 ENC_FLOAT4_LENGTH, &res,
                 sizeof(int), &resp,
-                sizeof(uint64_t), &timestamp);
+                sizeof(uint64_t), &record_timestamp);
 
             if (bulk_size != req->bulk_size) {
                 // print_error("float sum fail at %ld, req->bulk_size: %d, bulk_size:%d", ftell(read_file_ptr), req->bulk_size, bulk_size);
@@ -79,7 +81,7 @@ int Replayer::replay_request(void* req_buffer)
                 ENC_FLOAT4_LENGTH, &right,
                 ENC_FLOAT4_LENGTH, &res,
                 sizeof(int), &resp,
-                sizeof(uint64_t), &timestamp);
+                sizeof(uint64_t), &record_timestamp);
 
             if (memcmp(&left, &req->left, ENC_FLOAT4_LENGTH) || memcmp(&right, &req->right, ENC_FLOAT4_LENGTH)) {
                 // print_error("float ops fail at %ld", ftell(read_file_ptr));
@@ -101,7 +103,7 @@ int Replayer::replay_request(void* req_buffer)
                 ENC_INT32_LENGTH, &right,
                 sizeof(int), &cmp,
                 sizeof(int), &resp,
-                sizeof(uint64_t), &timestamp);
+                sizeof(uint64_t), &record_timestamp);
 
             if (memcmp(&left, &req->left, ENC_INT32_LENGTH) || memcmp(&right, &req->right, ENC_INT32_OPE_LENGTH)) {
                 // print_error("int cmp fail at %ld", ftell(read_file_ptr));
@@ -119,7 +121,7 @@ int Replayer::replay_request(void* req_buffer)
                 sizeof(int), &bulk_size,
                 ENC_INT32_LENGTH, &res,
                 sizeof(int), &resp,
-                sizeof(uint64_t), &timestamp);
+                sizeof(uint64_t), &record_timestamp);
 
             if (bulk_size != req->bulk_size) {
                 // print_error("int sum fail at %ld, req->bulk_size: %d, bulk_size:%d", ftell(read_file_ptr), req->bulk_size, bulk_size);
@@ -150,7 +152,7 @@ int Replayer::replay_request(void* req_buffer)
                 ENC_INT32_LENGTH, &right,
                 ENC_INT32_LENGTH, &res,
                 sizeof(int), &resp,
-                sizeof(uint64_t), &timestamp);
+                sizeof(uint64_t), &record_timestamp);
 
             if (memcmp(&left, &req->left, ENC_INT32_LENGTH) || memcmp(&right, &req->right, ENC_INT32_LENGTH)) {
                 // print_error("int ops fail at %ld", ftell(read_file_ptr));
@@ -181,7 +183,7 @@ int Replayer::replay_request(void* req_buffer)
                 right_length, &right,
                 sizeof(int), &cmp,
                 sizeof(int), &resp,
-                sizeof(uint64_t), &timestamp);
+                sizeof(uint64_t), &record_timestamp);
 
             req->cmp = cmp;
         } else if (req_control->reqType == CMD_STRING_SUBSTRING) {
@@ -206,7 +208,7 @@ int Replayer::replay_request(void* req_buffer)
                 sizeof(int32_t), &length,
                 result_length, &res,
                 sizeof(int), &resp, 
-                sizeof(uint64_t), &timestamp);
+                sizeof(uint64_t), &record_timestamp);
 
             if (memcmp(&str, &req->str, str_length) || memcmp(&start, &req->start, sizeof(int32_t)) || memcmp(&length, &req->length, sizeof(int32_t))) {
                 // print_error("string substring fail at %ld, contents mismatch", ftell(read_file_ptr));
@@ -233,7 +235,7 @@ int Replayer::replay_request(void* req_buffer)
                 right_length, &right,
                 res_length, &res,
                 sizeof(int), &resp,
-                sizeof(uint64_t), &timestamp);
+                sizeof(uint64_t), &record_timestamp);
 
             if (memcmp(&left, &req->left, left_length) || memcmp(&right, &req->right, right_length)) {
                 // print_error("string ops fail at %ld, contents mismatch", ftell(read_file_ptr));
@@ -254,7 +256,7 @@ int Replayer::replay_request(void* req_buffer)
                 ENC_TIMESTAMP_LENGTH, &right,
                 sizeof(int), &cmp,
                 sizeof(int), &resp,
-                sizeof(uint64_t), &timestamp);
+                sizeof(uint64_t), &record_timestamp);
 
             if (memcmp(&left, &req->left, ENC_TIMESTAMP_LENGTH) || memcmp(&right, &req->right, ENC_TIMESTAMP_LENGTH)) {
                 // print_info("timestamp cmp fail at %ld", ftell(read_file_ptr));
@@ -272,7 +274,7 @@ int Replayer::replay_request(void* req_buffer)
                 ENC_TIMESTAMP_LENGTH, &in,
                 ENC_INT32_LENGTH, &out,
                 sizeof(int), &resp,
-                sizeof(uint64_t), &timestamp);
+                sizeof(uint64_t), &record_timestamp);
 
             if (memcmp(&in, &req->in, ENC_TIMESTAMP_LENGTH)) {
                 // print_info("timestamp extract fail at %ld", ftell(read_file_ptr));
@@ -282,6 +284,19 @@ int Replayer::replay_request(void* req_buffer)
         }
     }
     previous_op = op;
+
+    if (performance_replay) {
+        real_timestamp = get_timestamp();
+        if (last_real_timestamp && last_record_timestamp) {
+            uint64_t end_timestamp = last_real_timestamp + record_timestamp - last_record_timestamp;
+            do {
+                real_timestamp = get_timestamp();
+            } while (real_timestamp < end_timestamp);
+        }
+        last_real_timestamp = real_timestamp;
+        last_record_timestamp = record_timestamp;
+    }
+    
     return resp;
 }
 
