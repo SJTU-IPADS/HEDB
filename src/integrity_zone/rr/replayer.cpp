@@ -103,7 +103,7 @@ int Replayer::replay_request(void* req_buffer)
                 sizeof(int), &resp,
                 sizeof(uint64_t), &timestamp);
 
-            if (memcmp(&left, &req->left, ENC_INT32_LENGTH) || memcmp(&right, &req->right, ENC_INT32_OPE_LENGTH)) {
+            if (memcmp(&left, &req->left, ENC_INT32_LENGTH) || memcmp(&right, &req->right, ENC_INT32_LENGTH)) {
                 // print_error("int cmp fail at %ld", ftell(read_file_ptr));
                 return -RETRY_FAILED;
             }
