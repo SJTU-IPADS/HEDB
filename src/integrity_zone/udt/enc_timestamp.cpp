@@ -7,10 +7,10 @@ extern bool clientMode;
 #ifdef __cplusplus
 extern "C" {
 #endif
-PG_FUNCTION_INFO_V1(enc_timestamp_in);
-PG_FUNCTION_INFO_V1(enc_timestamp_out);
 PG_FUNCTION_INFO_V1(enc_timestamp_encrypt);
 PG_FUNCTION_INFO_V1(enc_timestamp_decrypt);
+PG_FUNCTION_INFO_V1(enc_timestamp_in);
+PG_FUNCTION_INFO_V1(enc_timestamp_out);
 PG_FUNCTION_INFO_V1(enc_timestamp_eq);
 PG_FUNCTION_INFO_V1(enc_timestamp_ne);
 PG_FUNCTION_INFO_V1(enc_timestamp_lt);
@@ -77,18 +77,68 @@ Timestamp pg_timestamp_in(char* str)
 }
 
 /*
+ *  Gets a string as a timestamp element, encrypts it and return enc_timestamp element as a string.
+ *   Converts the input string to a int64 element, encrypts one and return base64 encrypted result.
+ *    @input: string
+ *    @return: a string describing enc_timestamp element.
+ */
+Datum enc_timestamp_encrypt(PG_FUNCTION_ARGS)
+{
+    char* arg = PG_GETARG_CSTRING(0);
+
+    Timestamp time;
+    EncTimestamp* t = (EncTimestamp*)palloc0(ENC_TIMESTAMP_LENGTH);
+
+    time = pg_timestamp_in(arg);
+    enc_timestamp_encrypt(&time, t);
+    PG_RETURN_POINTER(t);
+}
+
+/*
+ *  Gets a string as a enc_timestamp element, decrypts it and return timestamp element as a string.
+ *  @input: enc_timestamp element
+ *   @return: string
+ */
+Datum enc_timestamp_decrypt(PG_FUNCTION_ARGS)
+{
+    EncTimestamp* t = PG_GETARG_ENCTimestamp(0);
+    Timestamp timestamp;
+    char* result;
+    struct pg_tm tt, *tm = &tt;
+    fsec_t fsec;
+    char buf[MAXDATELEN + 1];
+
+    enc_timestamp_decrypt(t, &timestamp);
+
+    if (timestamp2tm(timestamp, NULL, tm, &fsec, NULL, NULL) == 0)
+        EncodeDateTime(tm, fsec, false, 0, NULL, 1, buf);
+    else {
+        ereport(ERROR,
+            (errcode(ERRCODE_DATETIME_VALUE_OUT_OF_RANGE),
+                errmsg("timestamp out of range")));
+    }
+    result = pstrdup(buf);
+    PG_RETURN_CSTRING(result);
+}
+
+/*
  * The function converts string to enc_timestamp. It is called by dbms every time it parses a query and finds an enc_timestamp element.
  * @input: string as a postgres arg
  * @return: enc_timestamp element as a string
  */
 Datum enc_timestamp_in(PG_FUNCTION_ARGS)
 {
-    char* pSrc = PG_GETARG_CSTRING(0);
-    TIMESTAMP time;
-    EncTimestamp* t = (EncTimestamp*)palloc0(ENC_TIMESTAMP_LENGTH);
-    time = pg_timestamp_in(pSrc);
-    enc_timestamp_encrypt(&time, t);
-    PG_RETURN_POINTER(t);
+    char * pIn = PG_GETARG_CSTRING(0);
+    EncTimestamp* result = (EncTimestamp*)palloc0(ENC_TIMESTAMP_LENGTH);
+
+    if (clientMode == true) {
+        TIMESTAMP time = pg_timestamp_in(pIn);
+        enc_timestamp_encrypt(&time, result);
+    } else {
+        fromBase64(pIn, strlen(pIn), (unsigned char*)result);
+    }
+
+    PG_RETURN_POINTER(result);
 }
 /*
  * The function converts enc_timestamp element to a string. If flag debugDecryption is true it decrypts the string and return unencrypted result.
@@ -125,54 +175,6 @@ Datum enc_timestamp_out(PG_FUNCTION_ARGS)
         // ereport(INFO, (errmsg("base64('%p') = %s", t, base64_timestamp)));
         PG_RETURN_CSTRING(base64_timestamp);
     }
-}
-
-/*
- *  Gets a string as a timestamp element, encrypts it and return enc_timestamp element as a string.
- *   Converts the input string to a int64 element, encrypts one and return base64 encrypted result.
- *    @input: string
- *    @return: a string describing enc_timestamp element.
- */
-Datum enc_timestamp_encrypt(PG_FUNCTION_ARGS)
-{
-    char* arg = PG_GETARG_CSTRING(0);
-#ifdef NOT_USED
-    Oid typelem = PG_GETARG_OID(1);
-#endif
-
-    Timestamp time;
-    EncTimestamp* t = (EncTimestamp*)palloc0(ENC_TIMESTAMP_LENGTH);
-
-    time = pg_timestamp_in(arg);
-    enc_timestamp_encrypt(&time, t);
-    PG_RETURN_POINTER(t);
-}
-
-/*
- *  Gets a string as a enc_timestamp element, decrypts it and return timestamp element as a string.
- *  @input: enc_timestamp element
- *   @return: string
- */
-Datum enc_timestamp_decrypt(PG_FUNCTION_ARGS)
-{
-    EncTimestamp* t = PG_GETARG_ENCTimestamp(0);
-    Timestamp timestamp;
-    char* result;
-    struct pg_tm tt, *tm = &tt;
-    fsec_t fsec;
-    char buf[MAXDATELEN + 1];
-
-    enc_timestamp_decrypt(t, &timestamp);
-
-    if (timestamp2tm(timestamp, NULL, tm, &fsec, NULL, NULL) == 0)
-        EncodeDateTime(tm, fsec, false, 0, NULL, 1, buf);
-    else {
-        ereport(ERROR,
-            (errcode(ERRCODE_DATETIME_VALUE_OUT_OF_RANGE),
-                errmsg("timestamp out of range")));
-    }
-    result = pstrdup(buf);
-    PG_RETURN_CSTRING(result);
 }
 
 /*

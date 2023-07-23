@@ -14,8 +14,6 @@
         uint8_t data[data_size];             \
     } type_name;
 
-/* enc_int type */
-
 DEFINE_ENCTYPE(EncInt, INT32_LENGTH);
 DEFINE_ENCTYPE(EncFloat, FLOAT4_LENGTH);
 DEFINE_ENCTYPE(EncTimestamp, TIMESTAMP_LENGTH);
@@ -38,5 +36,5 @@ typedef struct
 #define ENCSTRLEN(len) (sizeof(uint32_t) + sizeof(uint32_t) + IV_SIZE + TAG_SIZE + len)
 static int inline encstr_size(EncStr estr)
 {
-    return sizeof(estr.len) + sizeof(estr.order) + estr.len;
+    return sizeof(estr.order) + sizeof(estr.len) + estr.len;
 }

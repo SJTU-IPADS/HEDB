@@ -216,8 +216,8 @@ pid_t fork_ops_process(void* shm_addr)
                     args_array[i].decrypt_status = EXIT;
                 }
             }
-            printf("[%d] total ops: %d, dec: %ld, enc: %ld, others: %d\n", pid,
-                counter, decrypt_counter, encrypt_counter, non_enc_counter);
+            printf("[%d] total ops: %d, enc: %ld, dec: %ld, others: %d\n", pid,
+                counter, encrypt_counter, decrypt_counter, non_enc_counter);
             req->status = NONE;
             exit(0);
         } else if (req->status == SENT) {
@@ -245,8 +245,9 @@ pid_t fork_ops_process(void* shm_addr)
             }
             STORE_BARRIER;
             req->status = DONE;
-        } else
+        } else {
             YIELD_PROCESSOR;
+        }
     }
 
     // child should never return.

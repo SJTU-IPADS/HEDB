@@ -2,11 +2,11 @@ select
     l_shipmode,
     sum(case 
         when o_orderpriority ='1-URGENT'::enc_text or o_orderpriority ='2-HIGH'::enc_text
-        then 1::enc_int4 else 0::enc_int4 end) as high_line_count,
+        then '1'::enc_int4 else '0'::enc_int4 end) as high_line_count,
     sum(case 
         when o_orderpriority <> '1-URGENT'::enc_text
         and o_orderpriority <> '2-HIGH'::enc_text
-        then 1::enc_int4 else 0::enc_int4 end) as low_line_count
+        then '1'::enc_int4 else '0'::enc_int4 end) as low_line_count
 from
     orders,lineitem
 where

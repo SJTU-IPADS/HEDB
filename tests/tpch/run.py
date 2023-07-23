@@ -40,7 +40,7 @@ def PrepBenchmark(propFile = DEFAULT_TPCH_CONFIG):
     cmd = f"PGPASSWORD={pgPW} psql -h {pgIp} -p {pgPort} -U {pgUser} -f {schema}"
     executeCommand(cmd)
     for table in tables:
-        cmd = f"cat {table}.tbl | PGPASSWORD={pgPW} psql -h {pgIp} -p {pgPort} -U {pgUser} -d {pgDB} -c \"copy {table} from stdin with DELIMITER as '|';\""
+        cmd = f"cat {table}.tbl | PGPASSWORD={pgPW} psql -h {pgIp} -p {pgPort} -U {pgUser} -d {pgDB} -c \"SELECT enable_client_mode(); COPY {table} FROM stdin WITH DELIMITER AS '|';\""
         executeCommand(cmd)
         
     executeCommand("find . -name \"*.tbl\" | xargs rm")
@@ -86,6 +86,8 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none', mode
     for i in queryRange:
         conn = psycopg2.connect(database = pgDB, user = pgUser, password = pgPW, host = pgIp, port = pgPort)
         cur = conn.cursor()
+
+        cur.execute('SELECT enable_client_mode();') ## FIXME: remove this when enabled sql in-place encryption
         
         startTime = time.time()
 

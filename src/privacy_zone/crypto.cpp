@@ -33,12 +33,12 @@ int gcm_encrypt(uint8_t* in, uint64_t in_sz, uint8_t* out, uint64_t* out_sz)
     uint8_t* data_pos = out + IV_SIZE + TAG_SIZE;
 
     uint8_t iv[IV_SIZE] = { 0 };
+    // randombytes_buf(iv, sizeof iv); TODO: ADD a way to get entropy
     memcpy(iv_pos, iv, IV_SIZE);
 
     // Initialise the GCM cipher...
     res = mbedtls_gcm_crypt_and_tag(&aes, MBEDTLS_GCM_ENCRYPT, in_sz, iv_pos, IV_SIZE, NULL, 0, in, data_pos, TAG_SIZE, tag_pos);
     *out_sz = in_sz + IV_SIZE + TAG_SIZE;
-    // randombytes_buf(nonce, sizeof nonce); TODO: ADD a way to get entropy
 
 #ifdef DEBUG_OUTPUT
     printf("huk-key length %d\n", sizeof(huk_key));

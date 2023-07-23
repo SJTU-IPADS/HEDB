@@ -90,3 +90,67 @@ char *toBase64(const unsigned char *pIn, int nbIn, char *pOut)
     *pOut = 0;
     return pOut;
 }
+
+/* Skip over text which is not base64 numeral(s). */
+static char *skipNonB64(char *s, int nc)
+{
+    char c;
+    while (nc-- > 0 && (c = *s) && !IS_BX_DIGIT(BX_DV_PROTO(c)))
+        ++s;
+    return s;
+}
+
+/* Decode base64 text into a byte buffer. */
+unsigned char *fromBase64(char *pIn, int ncIn, unsigned char *pOut)
+{
+    if (ncIn > 0 && pIn[ncIn - 1] == '\n')
+        --ncIn;
+    while (ncIn > 0 && *pIn != PAD_CHAR)
+    {
+        static signed char nboi[] = {0, 0, 1, 2, 3};
+        char *pUse = skipNonB64(pIn, ncIn);
+        unsigned long qv = 0L;
+        int nti, nbo, nac;
+        ncIn -= (pUse - pIn);
+        pIn = pUse;
+        nti = (ncIn > 4) ? 4 : ncIn;
+        ncIn -= nti;
+        nbo = nboi[nti];
+        if (nbo == 0)
+            break;
+        for (nac = 0; nac < 4; ++nac)
+        {
+            char c = (nac < nti) ? *pIn++ : b64Numerals[0];
+            unsigned char bdp = BX_DV_PROTO(c);
+            switch (bdp)
+            {
+            case ND:
+                /*  Treat dark non-digits as pad, but they terminate decode too. */
+                ncIn = 0;
+                deliberate_fall_through;
+            case WS:
+                /* Treat whitespace as pad and terminate this group.*/
+                nti = nac;
+                deliberate_fall_through;
+            case PC:
+                bdp = 0;
+                --nbo;
+                deliberate_fall_through;
+            default: /* bdp is the digit value. */
+                qv = qv << 6 | bdp;
+                break;
+            }
+        }
+        switch (nbo)
+        {
+        case 3:
+            pOut[2] = (qv)&0xff;
+        case 2:
+            pOut[1] = (qv >> 8) & 0xff;
+        case 1:
+            pOut[0] = (qv >> 16) & 0xff;
+        }
+        pOut += nbo;
+    }
+    return pOut;
+}

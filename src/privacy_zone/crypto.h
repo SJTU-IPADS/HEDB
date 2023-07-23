@@ -14,10 +14,8 @@
 extern "C" {
 #endif
 
-int gcm_encrypt(uint8_t* in, uint64_t in_sz,
-    uint8_t* out, uint64_t* out_sz);
-int gcm_decrypt(uint8_t* in, uint64_t in_sz,
-    uint8_t* out, uint64_t* out_sz);
+int gcm_encrypt(uint8_t* in, uint64_t in_sz, uint8_t* out, uint64_t* out_sz);
+int gcm_decrypt(uint8_t* in, uint64_t in_sz, uint8_t* out, uint64_t* out_sz);
 
 #ifdef __cplusplus
 }

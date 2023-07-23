@@ -8,6 +8,8 @@ extern bool clientMode;
 #ifdef __cplusplus
 extern "C" {
 #endif
+PG_FUNCTION_INFO_V1(enc_int4_encrypt);
+PG_FUNCTION_INFO_V1(enc_int4_decrypt);
 PG_FUNCTION_INFO_V1(enc_int4_in);
 PG_FUNCTION_INFO_V1(enc_int4_out);
 PG_FUNCTION_INFO_V1(enc_int4_add);
@@ -23,29 +25,47 @@ PG_FUNCTION_INFO_V1(enc_int4_lt);
 PG_FUNCTION_INFO_V1(enc_int4_le);
 PG_FUNCTION_INFO_V1(enc_int4_gt);
 PG_FUNCTION_INFO_V1(enc_int4_ge);
-PG_FUNCTION_INFO_V1(enc_int4_encrypt);
-PG_FUNCTION_INFO_V1(enc_int4_decrypt);
 PG_FUNCTION_INFO_V1(enc_int4_max);
 PG_FUNCTION_INFO_V1(enc_int4_min);
 PG_FUNCTION_INFO_V1(enc_int4_sum_bulk);
 PG_FUNCTION_INFO_V1(enc_int4_avg_bulk);
 PG_FUNCTION_INFO_V1(enc_int4_min_bulk);
 PG_FUNCTION_INFO_V1(enc_int4_max_bulk);
-PG_FUNCTION_INFO_V1(int4_to_enc_int4);
-PG_FUNCTION_INFO_V1(int8_to_enc_int4);
+// PG_FUNCTION_INFO_V1(int4_to_enc_int4);
+// PG_FUNCTION_INFO_V1(int8_to_enc_int4);
 #ifdef __cplusplus
 }
 #endif
+
+Datum enc_int4_encrypt(PG_FUNCTION_ARGS)
+{
+    EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
+    int in = PG_GETARG_INT32(0);
+    enc_int_encrypt(in, out);
+    // ereport(LOG, (errmsg("function encrypt, output: %s", ans)));
+    PG_RETURN_CSTRING(out);
+}
+
+Datum enc_int4_decrypt(PG_FUNCTION_ARGS)
+{
+    int ans = 0;
+    EncInt* in = PG_GETARG_ENCINT(0);
+    enc_int_decrypt(in, &ans);
+    // ereport(LOG, (errmsg("function decrypt, output: %d", ans)));
+    PG_RETURN_INT32(ans);
+}
 
 Datum enc_int4_in(PG_FUNCTION_ARGS)
 {
     char* pIn = PG_GETARG_CSTRING(0);
     EncInt* result = (EncInt*)palloc0(sizeof(EncInt));
 
-    int in = atoi(pIn);
-    enc_int_encrypt(in, result);
-    // ereport(INFO, (errmsg("encrypt return")));
-
+    if (clientMode == true) { // from plain int4 to cipher int4
+        int in = atoi(pIn);
+        enc_int_encrypt(in, result);
+    } else { // base64 decode to cipher int4
+        fromBase64(pIn, strlen(pIn), (unsigned char*)result);
+    }
     PG_RETURN_POINTER(result);
 }
 
@@ -53,7 +73,7 @@ Datum enc_int4_out(PG_FUNCTION_ARGS)
 {
     EncInt* in = PG_GETARG_ENCINT(0);
 
-    if (clientMode == true) {
+    if (clientMode == true) { // from cipher int4 to plain int4
         int out;
         char* str = (char*)palloc0(sizeof(EncInt)); // this length is not really meaningful
 
@@ -61,7 +81,7 @@ Datum enc_int4_out(PG_FUNCTION_ARGS)
         sprintf(str, "%d", out);
         // ereport(INFO, (errmsg("auto decryption('%p') = %d", in, out)));
         PG_RETURN_CSTRING(str);
-    } else {
+    } else { // base64 encode of cipher int4
 #define ENC_INT_B64_LENGTH 45 // ((4 * n / 3) + 3) & ~3
         char base64_int4[ENC_INT_B64_LENGTH + 1] = { 0 };
 
@@ -249,26 +269,6 @@ Datum enc_int4_ge(PG_FUNCTION_ARGS)
     PG_RETURN_BOOL(cmp);
 }
 
-// DEBUG FUNCTION, WILL BE DELETED IN THE PRODUCT
-Datum enc_int4_encrypt(PG_FUNCTION_ARGS)
-{
-    EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
-    int in = PG_GETARG_INT32(0);
-    enc_int_encrypt(in, out);
-    // ereport(LOG, (errmsg("function encrypt, output: %s", ans)));
-    PG_RETURN_CSTRING(out);
-}
-
-// WILL BE DELETED IN THE PRODUCT
-Datum enc_int4_decrypt(PG_FUNCTION_ARGS)
-{
-    int ans = 0;
-    EncInt* in = PG_GETARG_ENCINT(0);
-    enc_int_decrypt(in, &ans);
-    // ereport(LOG, (errmsg("function decrypt, output: %d", ans)));
-    PG_RETURN_INT32(ans);
-}
-
 /*
  * The function
  * @input: two enc_int4 values
@@ -443,21 +443,22 @@ Datum enc_int4_max_bulk(PG_FUNCTION_ARGS)
     PG_RETURN_CSTRING(pMax);
 }
 
-Datum int4_to_enc_int4(PG_FUNCTION_ARGS)
-{
-    int in = PG_GETARG_INT32(0);
-    EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
-    enc_int_encrypt(in, out);
-    // ereport(LOG, (errmsg("function encrypt, output: %s", ans)));
-    PG_RETURN_CSTRING(out);
-}
+// Datum int4_to_enc_int4(PG_FUNCTION_ARGS)
+// {
+//     
+//     int in = PG_GETARG_INT32(0);
+//     EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
+//     enc_int_encrypt(in, out);
+//     // ereport(LOG, (errmsg("function encrypt, output: %s", ans)));
+//     PG_RETURN_CSTRING(out);
+// }
 
-Datum int8_to_enc_int4(PG_FUNCTION_ARGS)
-{
-
-    int in = PG_GETARG_INT64(0);
-    EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
-    enc_int_encrypt(in, out);
-    // ereport(LOG, (errmsg("function encrypt, output: %s", ans)));
-    PG_RETURN_CSTRING(out);
-}
+// Datum int8_to_enc_int4(PG_FUNCTION_ARGS)
+// {
+//     
+//     int in = PG_GETARG_INT64(0);
+//     EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
+//     enc_int_encrypt(in, out);
+//     // ereport(LOG, (errmsg("function encrypt, output: %s", ans)));
+//     PG_RETURN_CSTRING(out);
+// }

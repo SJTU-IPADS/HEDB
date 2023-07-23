@@ -3,13 +3,13 @@
 #include <stdafx.hpp>
 #include <enc_types.h>
 
-//variable length text.  this type is for storage 
+// variable length text.  this type is for storage 
 // 4 byte length + flexible length.
 typedef struct varlena EncText;
-typedef struct {
-    int32_t size;
-    char data[FLEXIBLE_ARRAY_MEMBER];
-} lentext;
+// typedef struct {
+//     int32_t size;
+//     char data[FLEXIBLE_ARRAY_MEMBER];
+// } lentext;
 
 #define DatumGetEncInt(X)  ((EncInt *) DatumGetPointer(X))
 #define PG_GETARG_ENCINT(n) DatumGetEncInt(PG_GETARG_DATUM(n))

@@ -8,10 +8,10 @@ extern bool clientMode;
 #ifdef __cplusplus
 extern "C" {
 #endif
-PG_FUNCTION_INFO_V1(enc_float4_in);
-PG_FUNCTION_INFO_V1(enc_float4_out);
 PG_FUNCTION_INFO_V1(enc_float4_encrypt);
 PG_FUNCTION_INFO_V1(enc_float4_decrypt);
+PG_FUNCTION_INFO_V1(enc_float4_in);
+PG_FUNCTION_INFO_V1(enc_float4_out);
 PG_FUNCTION_INFO_V1(enc_float4_sum_bulk);
 PG_FUNCTION_INFO_V1(enc_float4_avg_bulk);
 PG_FUNCTION_INFO_V1(enc_float4_eval_expr);
@@ -31,14 +31,30 @@ PG_FUNCTION_INFO_V1(enc_float4_gt);
 PG_FUNCTION_INFO_V1(enc_float4_ge);
 PG_FUNCTION_INFO_V1(enc_float4_cmp);
 PG_FUNCTION_INFO_V1(enc_float4_mod);
-PG_FUNCTION_INFO_V1(float4_to_enc_float4);
-PG_FUNCTION_INFO_V1(numeric_to_enc_float4);
-PG_FUNCTION_INFO_V1(double_to_enc_float4);
-PG_FUNCTION_INFO_V1(int8_to_enc_float4);
-PG_FUNCTION_INFO_V1(int4_to_enc_float4);
+// PG_FUNCTION_INFO_V1(float4_to_enc_float4);
+// PG_FUNCTION_INFO_V1(numeric_to_enc_float4);
+// PG_FUNCTION_INFO_V1(double_to_enc_float4);
+// PG_FUNCTION_INFO_V1(int8_to_enc_float4);
+// PG_FUNCTION_INFO_V1(int4_to_enc_float4);
 #ifdef __cplusplus
 }
 #endif
+
+Datum enc_float4_encrypt(PG_FUNCTION_ARGS)
+{
+    float src = PG_GETARG_FLOAT4(0);
+    EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
+    enc_float_encrypt(src, f);
+    PG_RETURN_CSTRING(f);
+}
+
+Datum enc_float4_decrypt(PG_FUNCTION_ARGS)
+{
+    EncFloat* s = PG_GETARG_ENCFlOAT(0);
+    float ans;
+    enc_float_decrypt(s, &ans);
+    PG_RETURN_FLOAT4(ans);
+}
 
 float4 pg_float4_in(char* num);
 
@@ -85,12 +101,16 @@ get_float4_nan(void)
  */
 Datum enc_float4_in(PG_FUNCTION_ARGS)
 {
-    char* s = PG_GETARG_CSTRING(0);
-    float val = pg_float4_in(s);
-    EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
-    enc_float_encrypt(val, f);
-
-    PG_RETURN_POINTER(f);
+    char* pIn = PG_GETARG_CSTRING(0);
+    EncFloat* result = (EncFloat*)palloc0(sizeof(EncFloat));
+    
+    if (clientMode == true) {
+        float val = pg_float4_in(pIn);
+        enc_float_encrypt(val, result);
+    } else {
+        fromBase64(pIn, strlen(pIn), (unsigned char*)result);
+    }
+    PG_RETURN_POINTER(result);
 }
 
 /*
@@ -118,116 +138,94 @@ Datum enc_float4_out(PG_FUNCTION_ARGS)
     }
 }
 
-/*
- * The function converts a float to enc_float4 value. This function is called by sql function CAST.
- * @input: float4
- * @return: an encrypted result.
- */
-Datum float4_to_enc_float4(PG_FUNCTION_ARGS)
-{
-    float src = PG_GETARG_FLOAT4(0);
-    EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
-    enc_float_encrypt(src, f);
-    PG_RETURN_POINTER(f);
-}
+// /*
+//  * The function converts a float to enc_float4 value. This function is called by sql function CAST.
+//  * @input: float4
+//  * @return: an encrypted result.
+//  */
+// Datum float4_to_enc_float4(PG_FUNCTION_ARGS)
+// {
+//     float src = PG_GETARG_FLOAT4(0);
+//     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
+//     enc_float_encrypt(src, f);
+//     PG_RETURN_POINTER(f);
+// }
 
-/*
- * The function converts a numeric datatype(postgres variable datatype can be any of int2, int4, int8, float4, float8) to enc_float4 value.
- * This function is called by sql function CAST. It uses function pg_float4_in to convert it to float4 and return an error if it can't
- * @input: float4
- * @return: an enc_float4 result.
- */
-Datum numeric_to_enc_float4(PG_FUNCTION_ARGS)
-{
-    Numeric num = PG_GETARG_NUMERIC(0);
-    EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
-    float4 src;
-    char* tmp = DatumGetCString(DirectFunctionCall1(numeric_out, NumericGetDatum(num)));
+// /*
+//  * The function converts a numeric datatype(postgres variable datatype can be any of int2, int4, int8, float4, float8) to enc_float4 value.
+//  * This function is called by sql function CAST. It uses function pg_float4_in to convert it to float4 and return an error if it can't
+//  * @input: float4
+//  * @return: an enc_float4 result.
+//  */
+// Datum numeric_to_enc_float4(PG_FUNCTION_ARGS)
+// {
+//     Numeric num = PG_GETARG_NUMERIC(0);
+//     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
+//     float4 src;
+//     char* tmp = DatumGetCString(DirectFunctionCall1(numeric_out, NumericGetDatum(num)));
 
-    src = pg_float4_in(tmp);
-    enc_float_encrypt(src, f);
-    // pfree(tmp);
-    PG_RETURN_POINTER(f);
-}
+//     src = pg_float4_in(tmp);
+//     enc_float_encrypt(src, f);
+//     // pfree(tmp);
+//     PG_RETURN_POINTER(f);
+// }
 
-/*
- * The function converts a double precision datatype to enc_float4 value.
- * This function is called by sql function CAST. It uses function pg_float4_in to convert it to float4 and return an error if it can't
- * @input: float8
- * @return: an enc_float4 result.
- */
-Datum double_to_enc_float4(PG_FUNCTION_ARGS)
-{
-    float8 num = PG_GETARG_FLOAT8(0);
-    EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
-    float src;
-    char* tmp = DatumGetCString(DirectFunctionCall1(float8out, Float8GetDatum(num)));
+// /*
+//  * The function converts a double precision datatype to enc_float4 value.
+//  * This function is called by sql function CAST. It uses function pg_float4_in to convert it to float4 and return an error if it can't
+//  * @input: float8
+//  * @return: an enc_float4 result.
+//  */
+// Datum double_to_enc_float4(PG_FUNCTION_ARGS)
+// {
+//     float8 num = PG_GETARG_FLOAT8(0);
+//     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
+//     float src;
+//     char* tmp = DatumGetCString(DirectFunctionCall1(float8out, Float8GetDatum(num)));
 
-    src = pg_float4_in(tmp);
-    enc_float_encrypt(src, f);
-    // pfree(tmp);
-    PG_RETURN_POINTER(f);
-}
+//     src = pg_float4_in(tmp);
+//     enc_float_encrypt(src, f);
+//     // pfree(tmp);
+//     PG_RETURN_POINTER(f);
+// }
 
-/*
- * The function converts a bigint (int8) datatype to enc_float4 value.
- * This function is called by sql function CAST. It uses function pg_float4_in to convert it to float4 and return an error if it can't
- * @input: int8
- * @return: an enc_float4 result.
- */
-Datum int8_to_enc_float4(PG_FUNCTION_ARGS)
-{
-    int8 num = PG_GETARG_INT64(0);
-    EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
-    float4 src;
-    char* tmp = DatumGetCString(DirectFunctionCall1(int8out, Int8GetDatum(num)));
+// /*
+//  * The function converts a bigint (int8) datatype to enc_float4 value.
+//  * This function is called by sql function CAST. It uses function pg_float4_in to convert it to float4 and return an error if it can't
+//  * @input: int8
+//  * @return: an enc_float4 result.
+//  */
+// Datum int8_to_enc_float4(PG_FUNCTION_ARGS)
+// {
+//     int8 num = PG_GETARG_INT64(0);
+//     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
+//     float4 src;
+//     char* tmp = DatumGetCString(DirectFunctionCall1(int8out, Int8GetDatum(num)));
 
-    src = pg_float4_in(tmp);
-    enc_float_encrypt(src, f);
-    // pfree(tmp);
-    PG_RETURN_POINTER(f);
-}
+//     src = pg_float4_in(tmp);
+//     enc_float_encrypt(src, f);
+//     // pfree(tmp);
+//     PG_RETURN_POINTER(f);
+// }
 
-/*
- * The function converts a int (int4) datatype to enc_float4 value.
- * This function is called by sql function CAST. It uses function pg_float4_in to convert it to float4 and return an error if it can't
- * @input: int4
- * @return: an enc_float4 result.
- */
-Datum int4_to_enc_float4(PG_FUNCTION_ARGS)
-{
-    int num = PG_GETARG_INT32(0);
-    EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
-    float4 src;
-    char* tmp = DatumGetCString(DirectFunctionCall1(int4out, Int32GetDatum(num)));
+// /*
+//  * The function converts a int (int4) datatype to enc_float4 value.
+//  * This function is called by sql function CAST. It uses function pg_float4_in to convert it to float4 and return an error if it can't
+//  * @input: int4
+//  * @return: an enc_float4 result.
+//  */
+// Datum int4_to_enc_float4(PG_FUNCTION_ARGS)
+// {
+//     int num = PG_GETARG_INT32(0);
+//     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
+//     float4 src;
+//     char* tmp = DatumGetCString(DirectFunctionCall1(int4out, Int32GetDatum(num)));
 
-    src = pg_float4_in(tmp);
-    enc_float_encrypt(src, f);
-    // pfree(tmp);
-    PG_RETURN_POINTER(f);
-}
-
-// TODO
-//  DEBUG FUNCTION
-//  WILL BE DELETED IN THE PRODUCT
-Datum enc_float4_encrypt(PG_FUNCTION_ARGS)
-{
-    float src = PG_GETARG_FLOAT4(0);
-    EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
-    enc_float_encrypt(src, f);
-    PG_RETURN_CSTRING(f);
-}
-
-// TODO
-//  DEBUG FUNCTION
-//  WILL BE DELETED IN THE PRODUCT
-Datum enc_float4_decrypt(PG_FUNCTION_ARGS)
-{
-    EncFloat* s = PG_GETARG_ENCFlOAT(0);
-    float ans;
-    enc_float_decrypt(s, &ans);
-    PG_RETURN_FLOAT4(ans);
-}
+//     src = pg_float4_in(tmp);
+//     enc_float_encrypt(src, f);
+//     // pfree(tmp);
+//     PG_RETURN_POINTER(f);
+// }
 
 Datum enc_float4_sum_bulk(PG_FUNCTION_ARGS)
 {

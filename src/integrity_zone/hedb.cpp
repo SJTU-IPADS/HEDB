@@ -6,23 +6,23 @@
 
 extern "C" {
     PG_MODULE_MAGIC;
-    PG_FUNCTION_INFO_V1(disable_client_mode);
     PG_FUNCTION_INFO_V1(enable_client_mode);
+    PG_FUNCTION_INFO_V1(enable_server_mode);
     PG_FUNCTION_INFO_V1(enable_record_mode);
     PG_FUNCTION_INFO_V1(enable_replay_mode);
 }
 
 bool clientMode = false; // by default
 
-Datum disable_client_mode(PG_FUNCTION_ARGS)
-{
-    clientMode = false;
-    PG_RETURN_VOID();
-}
-
 Datum enable_client_mode(PG_FUNCTION_ARGS)
 {
     clientMode = true;
+    PG_RETURN_VOID();
+}
+
+Datum enable_server_mode(PG_FUNCTION_ARGS)
+{
+    clientMode = false;
     PG_RETURN_VOID();
 }
 

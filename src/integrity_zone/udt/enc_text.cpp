@@ -8,6 +8,8 @@ extern bool clientMode;
 #ifdef __cplusplus
 extern "C" {
 #endif
+PG_FUNCTION_INFO_V1(enc_text_encrypt);
+PG_FUNCTION_INFO_V1(enc_text_decrypt);
 PG_FUNCTION_INFO_V1(enc_text_in);
 PG_FUNCTION_INFO_V1(enc_text_out);
 PG_FUNCTION_INFO_V1(enc_text_eq);
@@ -17,33 +19,15 @@ PG_FUNCTION_INFO_V1(enc_text_lt);
 PG_FUNCTION_INFO_V1(enc_text_ge);
 PG_FUNCTION_INFO_V1(enc_text_gt);
 PG_FUNCTION_INFO_V1(enc_text_cmp);
-PG_FUNCTION_INFO_V1(enc_text_encrypt);
-PG_FUNCTION_INFO_V1(enc_text_decrypt);
 PG_FUNCTION_INFO_V1(enc_text_concatenate);
 PG_FUNCTION_INFO_V1(enc_text_like);
 PG_FUNCTION_INFO_V1(enc_text_notlike);
 PG_FUNCTION_INFO_V1(enc_text_set_order);
 PG_FUNCTION_INFO_V1(substring);
-PG_FUNCTION_INFO_V1(varchar_to_enc_text);
+// PG_FUNCTION_INFO_V1(varchar_to_enc_text);
 #ifdef __cplusplus
 }
 #endif
-
-/*
- * cstring_to_text_with_len
- *
- * Same as cstring_to_text except the caller specifies the string length;
- * the string need not be null_terminated.
- */
-text* cstring_to_text_with_len(const char* s, int len)
-{
-    text* result = (text*)palloc0(len + VARHDRSZ);
-
-    SET_VARSIZE(result, len + VARHDRSZ);
-    memcpy(VARDATA(result), s, len);
-
-    return result;
-}
 
 EncText* cstring_to_enctext_with_len(const char* s, uint32_t len)
 {
@@ -62,13 +46,49 @@ EncText* cstring_to_enctext_with_len(const char* s, uint32_t len)
     return result;
 }
 
+Datum enc_text_encrypt(PG_FUNCTION_ARGS)
+{
+    char* s = PG_GETARG_CSTRING(0);
+    EncText* result;
+    result = (EncText*)cstring_to_enctext_with_len(s, strlen(s));
+
+    PG_RETURN_POINTER(result);
+}
+
+Datum enc_text_decrypt(PG_FUNCTION_ARGS)
+{
+    EncText* s = PG_GETARG_ENCTEXT_P(0);
+    EncStr* estr = (EncStr*)VARDATA(s);
+    Str str;
+    enc_text_decrypt(estr, &str);
+
+    char* res = (char*)palloc0(str.len + 1);
+    memcpy(res, str.data, str.len);
+    res[str.len] = '\0';
+    PG_RETURN_CSTRING(res);
+}
+
 // The input function converts a string to an enc_text element.
 // @input: string
 // @return: pointer to a structure describing enc_text element.
 Datum enc_text_in(PG_FUNCTION_ARGS)
 {
-    char* s = PG_GETARG_CSTRING(0);
-    EncText* result = (EncText*)cstring_to_enctext_with_len(s, strlen(s));
+    char * pIn = PG_GETARG_CSTRING(0);
+    EncText* result;
+
+    if (clientMode == true) {
+        result = (EncText*)cstring_to_enctext_with_len(pIn, strlen(pIn));
+    } else {
+#define ENC_STRING_B64_LENGTH 345 // ((4 * n / 3) + 3) & ~3
+        EncStr* estr = (EncStr*)palloc0(ENC_STRING_B64_LENGTH);
+        memset(estr, 0, ENC_STRING_B64_LENGTH);
+        fromBase64(pIn, strlen(pIn), (unsigned char*)estr);
+        result = (EncText*)palloc0(estr->len + VARHDRSZ);
+        size_t new_sz = estr->len + 12; // TODO: figure out where 12 is from
+        memcpy(VARDATA(result), estr, new_sz);
+        SET_VARSIZE(result, new_sz + VARHDRSZ);
+        pfree(estr);
+    }
     PG_RETURN_POINTER(result);
 }
 
@@ -89,10 +109,9 @@ Datum enc_text_out(PG_FUNCTION_ARGS)
         res[str.len] = '\0';
         PG_RETURN_CSTRING(res);
     } else {
-#define ENC_STRING_B64_LENGTH 1405 // ((4 * n / 3) + 3) & ~3
+#define ENC_STRING_B64_LENGTH 345 // ((4 * n / 3) + 3) & ~3
         char base64_text[ENC_STRING_B64_LENGTH + 1] = { 0 };
-
-        toBase64((const unsigned char*)&estr->enc_cstr, estr->len, base64_text);
+        toBase64((const unsigned char*)&VARDATA(s), VARSIZE(s), base64_text);
         // ereport(INFO, (errmsg("base64('%p') = %s", &estr->enc_cstr, base64_text)));
         PG_RETURN_CSTRING(base64_text);
     }
@@ -375,14 +394,14 @@ Datum substring(PG_FUNCTION_ARGS)
 // The input function converts a string to an enc_text element.
 // @input: varying char
 // @return: pointer to a structure describing enc_text element.
-Datum varchar_to_enc_text(PG_FUNCTION_ARGS)
-{
-    Datum txt = PG_GETARG_DATUM(0);
-    char* s = TextDatumGetCString(txt);
-    EncText* result;
-    result = (EncText*)cstring_to_enctext_with_len(s, strlen(s));
-    PG_RETURN_POINTER(result);
-}
+// Datum varchar_to_enc_text(PG_FUNCTION_ARGS)
+// {
+//     Datum txt = PG_GETARG_DATUM(0);
+//     char* s = TextDatumGetCString(txt);
+//     EncText* result;
+//     result = (EncText*)cstring_to_enctext_with_len(s, strlen(s));
+//     PG_RETURN_POINTER(result);
+// }
 
 Datum enc_text_set_order(PG_FUNCTION_ARGS)
 {
@@ -398,32 +417,4 @@ Datum enc_text_set_order(PG_FUNCTION_ARGS)
     SET_VARSIZE(result, ENCSTRLEN(s_in_str->len) + VARHDRSZ);
 
     PG_RETURN_POINTER(result);
-}
-
-// The function encrypts the input string.
-// IT'S A DEBUG FUNCTION SHOULD BE DELETED IN THE PRODUCT
-// !!!!!!!!!!!!!!!!!!!!!!!!!
-Datum enc_text_encrypt(PG_FUNCTION_ARGS)
-{
-    char* s = PG_GETARG_CSTRING(0);
-    EncText* result;
-    result = (EncText*)cstring_to_enctext_with_len(s, strlen(s));
-
-    PG_RETURN_POINTER(result);
-}
-
-// The function decrypts the input enc_text element.
-// IT'S A DEBUG FUNCTION SHOULD BE DELETED IN THE PRODUCT
-// !!!!!!!!!!!!!!!!!!!!!!!!!
-Datum enc_text_decrypt(PG_FUNCTION_ARGS)
-{
-    EncText* s = PG_GETARG_ENCTEXT_P(0);
-    EncStr* estr = (EncStr*)VARDATA(s);
-    Str str;
-    enc_text_decrypt(estr, &str);
-
-    char* res = (char*)palloc0(str.len + 1);
-    memcpy(res, str.data, str.len);
-    res[str.len] = '\0';
-    PG_RETURN_CSTRING(res);
 }
