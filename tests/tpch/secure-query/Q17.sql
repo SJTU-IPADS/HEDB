@@ -1,14 +1,14 @@
 select
-    sum(l_extendedprice) / '7.0' as avg_yearly
+    sum(l_extendedprice) / enc_float4_encrypt('7.0') as avg_yearly
 from
     lineitem, part
 where
     p_partkey = l_partkey
-    and p_brand = 'Brand#15' 
-    and p_container = 'JUMBO CASE'
+    and p_brand = enc_text_encrypt('Brand#15')
+    and p_container = enc_text_encrypt('JUMBO CASE')
     and l_quantity < (
         select
-            '0.2' * avg(l_quantity)
+            enc_float4_encrypt('0.2') * avg(l_quantity)
         from
             lineitem
         where

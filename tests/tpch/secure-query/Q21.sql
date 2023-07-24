@@ -5,7 +5,7 @@ from
 where
     s_suppkey = l1.l_suppkey
     and o_orderkey = l1.l_orderkey
-    and o_orderstatus = 'F'
+    and o_orderstatus = enc_text_encrypt('F')
     and l1.l_receiptdate > l1.l_commitdate
     and exists (
         select * from lineitem l2 where
@@ -20,7 +20,7 @@ where
             and l3.l_receiptdate > l3.l_commitdate
         )
     and s_nationkey = n_nationkey
-    and n_name = 'JAPAN' 
+    and n_name = enc_text_encrypt('JAPAN')
 group by
     s_name
 order by

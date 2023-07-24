@@ -5,16 +5,16 @@ from
     partsupp,part
 where
     p_partkey = ps_partkey
-    and p_brand <> 'Brand#12'
-    and p_type not like 'PROMO%'
-    and p_size in ('10', '12', '14', '16', '18', '20' , '22', '24')
+    and p_brand <> enc_text_encrypt('Brand#12')
+    and p_type not like enc_text_encrypt('PROMO%')
+    and p_size in (enc_int4_encrypt('10'), enc_int4_encrypt('12'), enc_int4_encrypt('14'), enc_int4_encrypt('16'), enc_int4_encrypt('18'), enc_int4_encrypt('20') , enc_int4_encrypt('22'), enc_int4_encrypt('24'))
     and ps_suppkey not in (
         select
             s_suppkey
         from
             supplier
         where
-            s_comment like '%Customer%Complaints%'
+            s_comment like enc_text_encrypt('%Customer%Complaints%')
     )
 group by
     p_brand,p_type,p_size
