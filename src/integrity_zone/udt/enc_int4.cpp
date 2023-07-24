@@ -347,14 +347,16 @@ Datum enc_int4_avg_bulk(PG_FUNCTION_ARGS)
     ArrayType* v = PG_GETARG_ARRAYTYPE_P(0);
     bool isnull;
     Datum value;
-    int ndims1 = ARR_NDIM(v); // array dimension
-    int* dims1 = ARR_DIMS(v);
-    int nitems = ArrayGetNItems(ndims1, dims1); // number of items in array
+    // int ndims1 = ARR_NDIM(v); // array dimension
+    // int* dims1 = ARR_DIMS(v);
+    // int nitems = ArrayGetNItems(ndims1, dims1); // number of items in array
 
     EncInt sum;
     EncInt* res = (EncInt*)palloc0(sizeof(EncInt));
     EncInt array[BULK_SIZE];
     EncInt num;
+    EncInt unit; // cipher of '1'
+    EncInt num_array[BULK_SIZE]; // nitems of '1'
     int counter; // sum will be at array[0]
 
     ArrayMetaState* my_extra = (ArrayMetaState*)fcinfo->flinfo->fn_extra;
@@ -364,20 +366,28 @@ Datum enc_int4_avg_bulk(PG_FUNCTION_ARGS)
     sum = *DatumGetEncInt(value);
     array[0] = sum;
     counter = 1;
+    enc_int_div(&array[0], &array[0], &unit); // get the cipher of '1'
+    for (int i = 0; i < BULK_SIZE; ++i) { // get nitems of '1'
+        num_array[i] = unit;
+    }
     while (array_iterate(array_iterator, &value, &isnull)) {
         array[counter] = *DatumGetEncInt(value);
+        num_array[counter] = unit;
         counter++;
         if (counter == BULK_SIZE) {
             enc_int_sum_bulk(BULK_SIZE, array, &sum);
+            enc_int_sum_bulk(BULK_SIZE, num_array, &num);
             array[0] = sum;
+            num_array[0] = num;
             counter = 1;
         }
     }
 
     if (counter > 1) {
         enc_int_sum_bulk(counter, array, &sum);
+        enc_int_sum_bulk(counter, num_array, &num);
     }
-    enc_int_encrypt(nitems, &num);
+    // enc_int_encrypt(nitems, &num);
     enc_int_div(&sum, &num, res);
 
     PG_RETURN_CSTRING(res);

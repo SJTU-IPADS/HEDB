@@ -575,14 +575,14 @@ CREATE AGGREGATE avg (enc_float4)
    finalfunc = enc_float4_avg_bulk
 );
 
-CREATE FUNCTION enc_float4_avg_simple(enc_float4[])
-RETURNS enc_float4 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
-CREATE AGGREGATE avg_simple (enc_float4)
-(
-   sfunc = array_append,
-   stype = enc_float4[],
-   finalfunc = enc_float4_avg_simple
-);
+-- CREATE FUNCTION enc_float4_avg_simple(enc_float4[])
+-- RETURNS enc_float4 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+-- CREATE AGGREGATE avg_simple (enc_float4)
+-- (
+--    sfunc = array_append,
+--    stype = enc_float4[],
+--    finalfunc = enc_float4_avg_simple
+-- );
 
 CREATE FUNCTION enc_float4_sum_bulk(enc_float4[])
 RETURNS enc_float4 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
