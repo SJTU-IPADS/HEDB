@@ -22,37 +22,37 @@ INSERT INTO test_table VALUES (3, '3', '3.1', 'from', '2022-01-01');
 INSERT INTO test_table VALUES (3, '3', '3.1', 'hedb', '2023-01-01');
 
 SELECT results_eq(
-   'SELECT SUM(num_i) from test_table',
+   'SELECT SUM(num_i) FROM test_table',
     $$VALUES ('9'::enc_int4)$$,
     'enc_int4: SUM function '
 );
 
 SELECT results_eq(
-   'SELECT MIN(num_i) from test_table',
+   'SELECT MIN(num_i) FROM test_table',
     $$VALUES ('1'::enc_int4)$$,
     'enc_int4: MIN function '
 );
 
 SELECT results_eq(
-   'SELECT MAX(num_i) from test_table',
+   'SELECT MAX(num_i) FROM test_table',
     $$VALUES ('3'::enc_int4)$$,
     'enc_int4: MAX function '
 );
 
 SELECT results_eq(
-   'SELECT AVG(num_i) from test_table',
+   'SELECT AVG(num_i) FROM test_table',
     $$VALUES ('2'::enc_int4)$$,
     'enc_int4: AVG function (with rounding)'
 );
 
 SELECT results_eq(
-   'SELECT SUM(num_f) from test_table',
+   'SELECT SUM(num_f) FROM test_table',
     $$VALUES ('9.4'::enc_float4)$$,
     'enc_float4: SUM function'
 );
 
 SELECT results_eq(
-   'SELECT AVG(num_f) from test_table',
+   'SELECT AVG(num_f) FROM test_table',
     $$VALUES ('2.35'::enc_float4)$$,
     'enc_float4: AVG function'
 );

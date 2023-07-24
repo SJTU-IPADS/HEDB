@@ -47,8 +47,7 @@ Set up the privacy-zone VM for Operators:
 $ cp ubuntu-23.04-server-cloudimg-arm64.img ops.img
 $ qemu-img resize ops.img 10G
 $ qemu-system-aarch64 \
-	-cpu host -enable-kvm -m 1G -nographic \
-    -M virt,gic-version=3 -bios QEMU_EFI.fd \
+    -cpu host -enable-kvm -m 1G -nographic -M virt,gic-version=3 -bios QEMU_EFI.fd \
     -device virtio-blk-device,drive=image -drive if=none,id=image,file=ops.img \
     -device virtio-blk-device,drive=cloud -drive if=none,id=cloud,file=cloud.img \
     -device ivshmem-plain,memdev=hostmem -object memory-backend-file,size=16M,share=on,mem-path=/dev/shm/ivshmem,id=hostmem \
@@ -91,9 +90,8 @@ Make up the integrity-zone VM for DBMS:
 $ cp ubuntu-23.04-server-cloudimg-arm64.img dbms.img
 $ qemu-img resize dbms.img 10G
 $ cloud-localds --disk-format qcow2 cloud2.img cloud.yaml
-$ qemu-system-aarch64 \
-	-cpu host -enable-kvm -m 4G -nographic \
-    -M virt,gic-version=3 -bios QEMU_EFI.fd \
+$ qemu-system-aarch6 \
+    -cpu host -enable-kvm -m 4G -nographic -M virt,gic-version=3 -bios QEMU_EFI.fd \
     -device virtio-blk-device,drive=image -drive if=none,id=image,file=dbms.img \
     -device virtio-blk-device,drive=cloud -drive if=none,id=cloud,file=cloud2.img \
     -device ivshmem-plain,memdev=hostmem,master=on -object memory-backend-file,size=16M,share=on,mem-path=/dev/shm/ivshmem,id=hostmem \
