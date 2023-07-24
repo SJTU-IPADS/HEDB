@@ -3,9 +3,11 @@
 
 # sudo apt-get install python3-pip
 # python3 -m pip install psycopg2 tqdm
+
 import psycopg2
-import os
 import argparse
+import os
+import re
 import time
 
 from util_py3.ssh_util import *
@@ -45,7 +47,54 @@ def PrepBenchmark(propFile = DEFAULT_TPCH_CONFIG):
         
     executeCommand("find . -name \"*.tbl\" | xargs rm")
     
+
+def PrepProcess(propFile = DEFAULT_TPCH_CONFIG):
+    properties = loadPropertyFile(propFile)
+
+    pgIp = properties['pg_ip']
+    pgPort = properties['pg_port']
+    pgUser = properties['pg_user']
+    pgPW = properties['pg_password']
+    secureQueryDir = properties['secure_query_dir']
+    cipherQueryDir = properties['cipher_query_dir']
+    pgDB = "secure_test"
+
+    folder = os.path.exists(cipherQueryDir)
+    if not folder:
+        os.makedirs(cipherQueryDir)
+
+    queryRange = range(1, 23)
     
+    for i in queryRange:
+        conn = psycopg2.connect(database = pgDB, user = pgUser, password = pgPW, host = pgIp, port = pgPort)
+        cur = conn.cursor()
+
+        queryFile = secureQueryDir + f"/Q{i}.sql"
+        current_query = open(queryFile, "r").read()
+
+        ### TODO: the following code is a rush, and needs repairment
+        # parse and transform
+        suffix_pattern = r'_encrypt\(.*?\)'
+        keyword_pattern = r'enc_[^)]*_encrypt\([^)]*\)'
+        matches = re.findall(keyword_pattern, current_query)
+        for match in matches:
+            cur.execute('SELECT %s;' % (match)) # fetch each cipher
+            prefix = re.sub(suffix_pattern, '', match)
+            replacement_value = '\'%s\'::%s' % (cur.fetchall()[0][0], prefix)
+            prefix_pattern = prefix + r'_encrypt\([^)]*\)'
+            current_query = re.sub(prefix_pattern, replacement_value, current_query)
+
+        # generate a =query whose constants become base64 cipher
+        outputQueryFile = open(cipherQueryDir + f"/Q{i}.sql", "w+");
+        outputQueryFile.write(current_query)
+        outputQueryFile.close()
+
+        print(f"query Q{i}: done")
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
 def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none', mode='seq'):
     properties = loadPropertyFile(propFile)
     
@@ -56,6 +105,7 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none', mode
     pgLogDir = properties['pg_log_dir']
     secureQuery = properties['secure']
     secureQueryDir = properties['secure_query_dir']
+    cipherQueryDir = properties['cipher_query_dir']
     insecureQueryDir = properties['insecure_query_dir']
     outputDir = properties['output_dir']
     
@@ -64,7 +114,7 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none', mode
     
     if secureQuery == 'y':
         pgDB = 'secure_test'
-        queryDirectory = secureQueryDir
+        queryDirectory = cipherQueryDir
         
         if recordReplay == 'record':
             record = True
@@ -87,8 +137,6 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none', mode
         conn = psycopg2.connect(database = pgDB, user = pgUser, password = pgPW, host = pgIp, port = pgPort)
         cur = conn.cursor()
 
-        cur.execute('SELECT enable_client_mode();') ## FIXME: remove this when enabled sql in-place encryption
-        
         startTime = time.time()
 
         queryStr = f"Q{i}"
@@ -128,14 +176,19 @@ def main():
                         help='only generate data and load table(default: false)')
     parser.add_argument('-Q', '--query', type=int, default=0, help='run the given query')
     parser.add_argument('-m', '--mode', type=str, default='seq', help='\'seq\' mode for essential replay, \'perf\' mode for performance replay')
+    parser.add_argument('-t', '--transform', action='store_true', help='construct cipher queries')
     args = parser.parse_args()
-    
+
+    if args.transform:
+         PrepProcess()
+         return
+
     if not args.skip_generate:
         PrepBenchmark()
     
     if not args.load:
         RunTest(query=args.query, recordReplay=args.record_replay, mode=args.mode)
-        
+
 if __name__ == '__main__':
     main()
 
