@@ -17,7 +17,7 @@ file(GLOB SRC
   "*.cpp"
   "udt/*.cpp"
   "interface/*.cpp"
-  "invoke_ops/*.cpp"
+  "ops_client/*.cpp"
   "rr/*.cpp"
   "../utils/*.cpp"
   )

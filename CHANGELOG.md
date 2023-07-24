@@ -4,7 +4,8 @@
 
 - Add doc for QEMU-based mode switch.
 - New base64.
-- WIP: server_mode only allows for base64 ciphers.
+- server_mode only allows for base64 ciphers.
+- Fully replay without invoking ops: sql preprocessing.
 
 ## 2023.6
 
