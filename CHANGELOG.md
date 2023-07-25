@@ -4,7 +4,7 @@
 
 - Add doc for QEMU-based mode switch.
 - New base64.
-- server_mode only allows for base64 ciphers.
+- Add server mode that only allows for base64 ciphers.
 - Fully replay without invoking ops: sql preprocessing.
 
 ## 2023.6
@@ -24,7 +24,7 @@
 
 ## 2022.10
 
-- Basic record-and-replay.
+- Record-and-replay for ops trace.
 - KLEE for recording execution trace.
 
 ## 2022.9
@@ -35,7 +35,7 @@
 
 ## 2022.8
 
-- ARMv8.4 S-EL2 backend.
+- ARMv8.4 S-EL2 backend: CVM interface.
 
 ## 2022.4
 
@@ -64,3 +64,6 @@
 
 - Smuggle attacks to StealthDB using native ops.
 
+## 2021.1
+
+- Discovery and birth of smuggle attacks.

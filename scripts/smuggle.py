@@ -8,12 +8,10 @@
 import psycopg2
 
 # put your DBA account info here
-con = psycopg2.connect(database='secure_test', user='postgres', password='postgres')
+con = psycopg2.connect(database='secure_test', user='postgres', password='postgres', host='127.0.0.1', port='5432')
 
 with con:
     cur = con.cursor()
-    ### enable HEDB server mode
-    cur.execute('SELECT disable_client_mode();')
     ### count the number to be breached
     cur.execute('SELECT COUNT(p_size) FROM part;')
     num = cur.fetchone()[0]

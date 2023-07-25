@@ -8,27 +8,36 @@ PORT = 8000
 
 cwd = os.getcwd()
 
+actions = [
+    "os_instance_failure",
+    "os_hugepage_update [value] between 64 and 1024",
+    "os_coredump_space_full",
+    "db_space_full",
+    "db_query_hung",
+    "db_buffer_update [value] between 64 and 2048 MB (requires restart)",
+]
+
 def Maintenance_Template(action, value):
-    if action == "os_instance_failure":
+    if action == actions[0]:
         return os.popen(cwd + "/" + "service_restart").read()
     
-    elif action == "os_hugepage_update [value] between 64 and 1024":
+    elif action == actions[1]:
         if 64 <= int(value) and int(value) <= 1024:
             return os.popen(cwd + "/" + "hugepage_update " + value).read()
         else:
             return "os_hugepage_update [value] invalid: " + value
     
-    elif action == "os_coredump_space_full":
+    elif action == actions[2]:
         return os.popen("rm /var/crash/*.crash").read()
     
-    elif action == "db_space_full":
+    elif action == actions[3]:
         return os.popen("psql -c 'VACUUM FULL;'").read()
     
-    elif action == "db_query_hung":
+    elif action == actions[4]:
         # no check: let the dbms do the check
         return os.popen("psql -c 'SELECT pg_cancel_backend(" + value + ");'").read()
     
-    elif action == "db_buffer_update [value] between 64 and 2048 MB (requires restart)":
+    elif action == actions[5]:
         if 64 <= int(value) and int(value) <= 2048:
             return os.popen("psql -c 'ALTER SYSTEM SET shared_buffers TO \"" + value + "MB\";'").read()
         else:
