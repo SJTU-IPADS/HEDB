@@ -15,7 +15,6 @@ PG_FUNCTION_INFO_V1(enc_float4_out);
 PG_FUNCTION_INFO_V1(enc_float4_sum_bulk);
 PG_FUNCTION_INFO_V1(enc_float4_avg_bulk);
 PG_FUNCTION_INFO_V1(enc_float4_eval_expr);
-// PG_FUNCTION_INFO_V1(enc_float4_avg_simple);
 PG_FUNCTION_INFO_V1(enc_float4_min);
 PG_FUNCTION_INFO_V1(enc_float4_max);
 PG_FUNCTION_INFO_V1(enc_float4_add);
@@ -31,11 +30,6 @@ PG_FUNCTION_INFO_V1(enc_float4_gt);
 PG_FUNCTION_INFO_V1(enc_float4_ge);
 PG_FUNCTION_INFO_V1(enc_float4_cmp);
 PG_FUNCTION_INFO_V1(enc_float4_mod);
-// PG_FUNCTION_INFO_V1(float4_to_enc_float4);
-// PG_FUNCTION_INFO_V1(numeric_to_enc_float4);
-// PG_FUNCTION_INFO_V1(double_to_enc_float4);
-// PG_FUNCTION_INFO_V1(int8_to_enc_float4);
-// PG_FUNCTION_INFO_V1(int4_to_enc_float4);
 #ifdef __cplusplus
 }
 #endif
@@ -56,7 +50,7 @@ Datum enc_float4_decrypt(PG_FUNCTION_ARGS)
     PG_RETURN_FLOAT4(ans);
 }
 
-float4 pg_float4_in(char* num);
+static float4 pg_float4_in(char* num);
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4756)
@@ -138,102 +132,13 @@ Datum enc_float4_out(PG_FUNCTION_ARGS)
     }
 }
 
-// /*
-//  * The function converts a float to enc_float4 value. This function is called by sql function CAST.
-//  * @input: float4
-//  * @return: an encrypted result.
-//  */
-// Datum float4_to_enc_float4(PG_FUNCTION_ARGS)
-// {
-//     float src = PG_GETARG_FLOAT4(0);
-//     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
-//     enc_float_encrypt(src, f);
-//     PG_RETURN_POINTER(f);
-// }
-
-// /*
-//  * The function converts a numeric datatype(postgres variable datatype can be any of int2, int4, int8, float4, float8) to enc_float4 value.
-//  * This function is called by sql function CAST. It uses function pg_float4_in to convert it to float4 and return an error if it can't
-//  * @input: float4
-//  * @return: an enc_float4 result.
-//  */
-// Datum numeric_to_enc_float4(PG_FUNCTION_ARGS)
-// {
-//     Numeric num = PG_GETARG_NUMERIC(0);
-//     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
-//     float4 src;
-//     char* tmp = DatumGetCString(DirectFunctionCall1(numeric_out, NumericGetDatum(num)));
-
-//     src = pg_float4_in(tmp);
-//     enc_float_encrypt(src, f);
-//     // pfree(tmp);
-//     PG_RETURN_POINTER(f);
-// }
-
-// /*
-//  * The function converts a double precision datatype to enc_float4 value.
-//  * This function is called by sql function CAST. It uses function pg_float4_in to convert it to float4 and return an error if it can't
-//  * @input: float8
-//  * @return: an enc_float4 result.
-//  */
-// Datum double_to_enc_float4(PG_FUNCTION_ARGS)
-// {
-//     float8 num = PG_GETARG_FLOAT8(0);
-//     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
-//     float src;
-//     char* tmp = DatumGetCString(DirectFunctionCall1(float8out, Float8GetDatum(num)));
-
-//     src = pg_float4_in(tmp);
-//     enc_float_encrypt(src, f);
-//     // pfree(tmp);
-//     PG_RETURN_POINTER(f);
-// }
-
-// /*
-//  * The function converts a bigint (int8) datatype to enc_float4 value.
-//  * This function is called by sql function CAST. It uses function pg_float4_in to convert it to float4 and return an error if it can't
-//  * @input: int8
-//  * @return: an enc_float4 result.
-//  */
-// Datum int8_to_enc_float4(PG_FUNCTION_ARGS)
-// {
-//     int8 num = PG_GETARG_INT64(0);
-//     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
-//     float4 src;
-//     char* tmp = DatumGetCString(DirectFunctionCall1(int8out, Int8GetDatum(num)));
-
-//     src = pg_float4_in(tmp);
-//     enc_float_encrypt(src, f);
-//     // pfree(tmp);
-//     PG_RETURN_POINTER(f);
-// }
-
-// /*
-//  * The function converts a int (int4) datatype to enc_float4 value.
-//  * This function is called by sql function CAST. It uses function pg_float4_in to convert it to float4 and return an error if it can't
-//  * @input: int4
-//  * @return: an enc_float4 result.
-//  */
-// Datum int4_to_enc_float4(PG_FUNCTION_ARGS)
-// {
-//     int num = PG_GETARG_INT32(0);
-//     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
-//     float4 src;
-//     char* tmp = DatumGetCString(DirectFunctionCall1(int4out, Int32GetDatum(num)));
-
-//     src = pg_float4_in(tmp);
-//     enc_float_encrypt(src, f);
-//     // pfree(tmp);
-//     PG_RETURN_POINTER(f);
-// }
-
 Datum enc_float4_sum_bulk(PG_FUNCTION_ARGS)
 {
     ArrayType* v = PG_GETARG_ARRAYTYPE_P(0);
     bool isnull;
     Datum value;
     EncFloat* sum = (EncFloat*)palloc0(sizeof(EncFloat));
-    EncFloat array[BULK_SIZE];
+    EncFloat sum_array[BULK_SIZE];
     int counter = 1; // sum will be at array[0]
 
     ArrayMetaState* my_extra = (ArrayMetaState*)fcinfo->flinfo->fn_extra;
@@ -241,18 +146,18 @@ Datum enc_float4_sum_bulk(PG_FUNCTION_ARGS)
 
     array_iterate(array_iterator, &value, &isnull);
     *sum = *DatumGetEncFloat(value);
-    array[0] = *sum;
+    sum_array[0] = *sum;
     while (array_iterate(array_iterator, &value, &isnull)) {
-        array[counter] = *DatumGetEncFloat(value);
+        sum_array[counter] = *DatumGetEncFloat(value);
         counter++;
         if (counter == BULK_SIZE) {
-            enc_float_sum_bulk(BULK_SIZE, array, sum);
-            array[0] = *sum;
+            enc_float_sum_bulk(BULK_SIZE, sum_array, sum);
+            sum_array[0] = *sum;
             counter = 1;
         }
     }
     if (counter > 1) {
-        enc_float_sum_bulk(counter, array, sum);
+        enc_float_sum_bulk(counter, sum_array, sum);
     }
 
     PG_RETURN_POINTER(sum);
@@ -263,14 +168,11 @@ Datum enc_float4_avg_bulk(PG_FUNCTION_ARGS)
     ArrayType* v = PG_GETARG_ARRAYTYPE_P(0);
     bool isnull;
     Datum value;
-    // int ndims1 = ARR_NDIM(v); // array dimension
-    // int* dims1 = ARR_DIMS(v);
-    // int nitems = ArrayGetNItems(ndims1, dims1); // number of items in array
 
     EncFloat sum;
     EncFloat* res = (EncFloat*)palloc0(sizeof(EncFloat));
     EncFloat num;
-    EncFloat array[BULK_SIZE];
+    EncFloat sum_array[BULK_SIZE];
     EncFloat unit; // cipher of '1'
     EncFloat num_array[BULK_SIZE]; // nitems of '1'
     int counter; // sum will be at array[0]
@@ -280,35 +182,34 @@ Datum enc_float4_avg_bulk(PG_FUNCTION_ARGS)
 
     array_iterate(array_iterator, &value, &isnull);
     sum = *DatumGetEncFloat(value);
-    array[0] = sum;
+    sum_array[0] = sum;
     counter = 1;
-    enc_float_div(&array[0], &array[0], &unit); // get the cipher of '1'
+    enc_float_div(&sum_array[0], &sum_array[0], &unit); // get the cipher of '1'
     for (int i = 0; i < BULK_SIZE; ++i) { // get nitems of '1'
         num_array[i] = unit;
     }
     while (array_iterate(array_iterator, &value, &isnull)) {
-        array[counter] = *DatumGetEncFloat(value);
+        sum_array[counter] = *DatumGetEncFloat(value);
         num_array[counter] = unit;
         counter++;
         if (counter == BULK_SIZE) {
-            enc_float_sum_bulk(BULK_SIZE, array, &sum);
+            enc_float_sum_bulk(BULK_SIZE, sum_array, &sum);
             enc_float_sum_bulk(BULK_SIZE, num_array, &num);
-            array[0] = sum;
+            sum_array[0] = sum;
             num_array[0] = num;
             counter = 1;
         }
     }
     if (counter > 1) {
-        enc_float_sum_bulk(counter, array, &sum);
+        enc_float_sum_bulk(counter, sum_array, &sum);
         enc_float_sum_bulk(counter, num_array, &num);
     }
-    // enc_float_encrypt(nitems * 1.0, &num);
     enc_float_div(&sum, &num, res);
 
     PG_RETURN_POINTER(res);
 }
 
-char* remove_space(char* expr)
+static char* remove_space(char* expr)
 {
     int i, j;
     char* expr_no_space = expr;
@@ -322,7 +223,7 @@ char* remove_space(char* expr)
     return expr_no_space;
 }
 
-int get_precedance(const int op)
+static int get_precedance(const int op)
 {
     if (op == '+' || op == '-')
         return 0;
@@ -339,7 +240,7 @@ int get_precedance(const int op)
  * @param expr
  * @param out_expr
  */
-void convert_expr(char* expr, char* out_expr)
+static void convert_expr(char* expr, char* out_expr)
 {
     int num, op_top_pos = -1;
     size_t i, out_len = 0;
@@ -440,8 +341,6 @@ Datum enc_float4_eval_expr(PG_FUNCTION_ARGS)
 
     for (i = 1; i < nargs; i++) {
         arr[i - 1] = DatumGetEncFloat(args[i]);
-        // enc_float_decrypt(arr[i-1], &tmp);
-        // ereport(INFO, (errmsg("%f", tmp)));
     }
 
     str->len = strlen(s_postfix);
@@ -451,35 +350,6 @@ Datum enc_float4_eval_expr(PG_FUNCTION_ARGS)
     pfree(str);
     PG_RETURN_POINTER(res);
 }
-
-// Datum enc_float4_avg_simple(PG_FUNCTION_ARGS)
-// {
-//     ArrayType* v = PG_GETARG_ARRAYTYPE_P(0);
-//     bool isnull;
-//     Datum value;
-//     int ndims1 = ARR_NDIM(v); // array dimension
-//     int* dims1 = ARR_DIMS(v);
-//     int nitems = ArrayGetNItems(ndims1, dims1); // number of items in array
-
-//     EncFloat* sum = (EncFloat*)palloc0(sizeof(EncFloat));
-//     EncFloat* res = (EncFloat*)palloc0(sizeof(EncFloat));
-//     EncFloat num, tmp;
-
-//     ArrayMetaState* my_extra = (ArrayMetaState*)fcinfo->flinfo->fn_extra;
-//     ArrayIterator array_iterator = array_create_iterator(v, 0, my_extra);
-
-//     array_iterate(array_iterator, &value, &isnull);
-//     *sum = *DatumGetEncFloat(value);
-//     while (array_iterate(array_iterator, &value, &isnull)) {
-//         tmp = *DatumGetEncFloat(value);
-//         enc_float_add(sum, &tmp, sum);
-//     }
-
-//     enc_float_encrypt(nitems * 1.0, &num);
-//     enc_float_div(sum, &num, res);
-//     pfree(sum);
-//     PG_RETURN_POINTER(res);
-// }
 
 /*
  * return the less between the two.
@@ -741,7 +611,7 @@ Datum enc_float4_cmp(PG_FUNCTION_ARGS)
     PG_RETURN_INT32(cmp);
 }
 
-float4 pg_float4_in(char* num)
+static float4 pg_float4_in(char* num)
 {
     char* orig_num;
     double val;

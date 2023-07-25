@@ -31,8 +31,6 @@ PG_FUNCTION_INFO_V1(enc_int4_sum_bulk);
 PG_FUNCTION_INFO_V1(enc_int4_avg_bulk);
 PG_FUNCTION_INFO_V1(enc_int4_min_bulk);
 PG_FUNCTION_INFO_V1(enc_int4_max_bulk);
-// PG_FUNCTION_INFO_V1(int4_to_enc_int4);
-// PG_FUNCTION_INFO_V1(int8_to_enc_int4);
 #ifdef __cplusplus
 }
 #endif
@@ -42,7 +40,6 @@ Datum enc_int4_encrypt(PG_FUNCTION_ARGS)
     EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
     int in = PG_GETARG_INT32(0);
     enc_int_encrypt(in, out);
-    // ereport(LOG, (errmsg("function encrypt, output: %s", ans)));
     PG_RETURN_CSTRING(out);
 }
 
@@ -51,7 +48,6 @@ Datum enc_int4_decrypt(PG_FUNCTION_ARGS)
     int ans = 0;
     EncInt* in = PG_GETARG_ENCINT(0);
     enc_int_decrypt(in, &ans);
-    // ereport(LOG, (errmsg("function decrypt, output: %d", ans)));
     PG_RETURN_INT32(ans);
 }
 
@@ -316,7 +312,7 @@ Datum enc_int4_sum_bulk(PG_FUNCTION_ARGS)
     Datum value;
 
     EncInt* sum = (EncInt*)palloc0(sizeof(EncInt));
-    EncInt array[BULK_SIZE];
+    EncInt sum_array[BULK_SIZE];
     int counter = 1;
 
     // TODO: two copies happens here, for array of encint.
@@ -325,18 +321,18 @@ Datum enc_int4_sum_bulk(PG_FUNCTION_ARGS)
 
     array_iterate(array_iterator, &value, &isnull);
     *sum = *DatumGetEncInt(value);
-    array[0] = *sum;
+    sum_array[0] = *sum;
     while (array_iterate(array_iterator, &value, &isnull)) {
-        array[counter] = *DatumGetEncInt(value);
+        sum_array[counter] = *DatumGetEncInt(value);
         counter++;
         if (counter == BULK_SIZE) {
-            enc_int_sum_bulk(BULK_SIZE, array, sum);
-            array[0] = *sum;
+            enc_int_sum_bulk(BULK_SIZE, sum_array, sum);
+            sum_array[0] = *sum;
             counter = 1;
         }
     }
     if (counter > 1) {
-        enc_int_sum_bulk(counter, array, sum);
+        enc_int_sum_bulk(counter, sum_array, sum);
     }
 
     PG_RETURN_CSTRING(sum);
@@ -347,13 +343,10 @@ Datum enc_int4_avg_bulk(PG_FUNCTION_ARGS)
     ArrayType* v = PG_GETARG_ARRAYTYPE_P(0);
     bool isnull;
     Datum value;
-    // int ndims1 = ARR_NDIM(v); // array dimension
-    // int* dims1 = ARR_DIMS(v);
-    // int nitems = ArrayGetNItems(ndims1, dims1); // number of items in array
 
     EncInt sum;
     EncInt* res = (EncInt*)palloc0(sizeof(EncInt));
-    EncInt array[BULK_SIZE];
+    EncInt sum_array[BULK_SIZE];
     EncInt num;
     EncInt unit; // cipher of '1'
     EncInt num_array[BULK_SIZE]; // nitems of '1'
@@ -364,30 +357,29 @@ Datum enc_int4_avg_bulk(PG_FUNCTION_ARGS)
 
     array_iterate(array_iterator, &value, &isnull);
     sum = *DatumGetEncInt(value);
-    array[0] = sum;
+    sum_array[0] = sum;
     counter = 1;
-    enc_int_div(&array[0], &array[0], &unit); // get the cipher of '1'
+    enc_int_div(&sum_array[0], &sum_array[0], &unit); // get the cipher of '1'
     for (int i = 0; i < BULK_SIZE; ++i) { // get nitems of '1'
         num_array[i] = unit;
     }
     while (array_iterate(array_iterator, &value, &isnull)) {
-        array[counter] = *DatumGetEncInt(value);
+        sum_array[counter] = *DatumGetEncInt(value);
         num_array[counter] = unit;
         counter++;
         if (counter == BULK_SIZE) {
-            enc_int_sum_bulk(BULK_SIZE, array, &sum);
+            enc_int_sum_bulk(BULK_SIZE, sum_array, &sum);
             enc_int_sum_bulk(BULK_SIZE, num_array, &num);
-            array[0] = sum;
+            sum_array[0] = sum;
             num_array[0] = num;
             counter = 1;
         }
     }
 
     if (counter > 1) {
-        enc_int_sum_bulk(counter, array, &sum);
+        enc_int_sum_bulk(counter, sum_array, &sum);
         enc_int_sum_bulk(counter, num_array, &num);
     }
-    // enc_int_encrypt(nitems, &num);
     enc_int_div(&sum, &num, res);
 
     PG_RETURN_CSTRING(res);
@@ -452,23 +444,3 @@ Datum enc_int4_max_bulk(PG_FUNCTION_ARGS)
 
     PG_RETURN_CSTRING(pMax);
 }
-
-// Datum int4_to_enc_int4(PG_FUNCTION_ARGS)
-// {
-//     
-//     int in = PG_GETARG_INT32(0);
-//     EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
-//     enc_int_encrypt(in, out);
-//     // ereport(LOG, (errmsg("function encrypt, output: %s", ans)));
-//     PG_RETURN_CSTRING(out);
-// }
-
-// Datum int8_to_enc_int4(PG_FUNCTION_ARGS)
-// {
-//     
-//     int in = PG_GETARG_INT64(0);
-//     EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
-//     enc_int_encrypt(in, out);
-//     // ereport(LOG, (errmsg("function encrypt, output: %s", ans)));
-//     PG_RETURN_CSTRING(out);
-// }

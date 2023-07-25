@@ -24,12 +24,11 @@ PG_FUNCTION_INFO_V1(enc_text_like);
 PG_FUNCTION_INFO_V1(enc_text_notlike);
 PG_FUNCTION_INFO_V1(enc_text_set_order);
 PG_FUNCTION_INFO_V1(substring);
-// PG_FUNCTION_INFO_V1(varchar_to_enc_text);
 #ifdef __cplusplus
 }
 #endif
 
-EncText* cstring_to_enctext_with_len(const char* s, uint32_t len)
+static EncText* cstring_to_enctext_with_len(const char* s, uint32_t len)
 {
     EncText* result = (EncText*)palloc0(ENCSTRLEN(len) + VARHDRSZ);
 
@@ -390,18 +389,6 @@ Datum substring(PG_FUNCTION_ARGS)
 
     PG_RETURN_CSTRING(res);
 }
-
-// The input function converts a string to an enc_text element.
-// @input: varying char
-// @return: pointer to a structure describing enc_text element.
-// Datum varchar_to_enc_text(PG_FUNCTION_ARGS)
-// {
-//     Datum txt = PG_GETARG_DATUM(0);
-//     char* s = TextDatumGetCString(txt);
-//     EncText* result;
-//     result = (EncText*)cstring_to_enctext_with_len(s, strlen(s));
-//     PG_RETURN_POINTER(result);
-// }
 
 Datum enc_text_set_order(PG_FUNCTION_ARGS)
 {

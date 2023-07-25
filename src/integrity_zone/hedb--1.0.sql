@@ -219,21 +219,6 @@ CREATE AGGREGATE max (enc_int4)
    combinefunc = enc_int4_max
 );
 
--- CREATE FUNCTION enc_int4_min_bulk(enc_int4[])
--- RETURNS enc_int4 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
-
--- CREATE FUNCTION enc_int4_max_bulk(enc_int4[])
--- RETURNS enc_int4 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
-
--- CREATE FUNCTION enc_int4(int4)
--- RETURNS enc_int4 AS 'MODULE_PATHNAME', 'int4_to_enc_int4' LANGUAGE C STRICT IMMUTABLE;
--- CREATE CAST (int4 AS enc_int4) WITH FUNCTION enc_int4(int4) AS IMPLICIT;
-
--- CREATE FUNCTION enc_int4(int8)
--- RETURNS enc_int4 AS 'MODULE_PATHNAME', 'int8_to_enc_int4' LANGUAGE C STRICT IMMUTABLE;
--- CREATE CAST (int8 AS enc_int4) WITH FUNCTION enc_int4(int8) AS IMPLICIT;
-
-
 --------------------------------------------------------------------------------
 -- ENCRYPTED STRING TYPE (randomized)
 --------------------------------------------------------------------------------
@@ -371,10 +356,6 @@ CREATE OPERATOR !~~ (
 
 CREATE FUNCTION pg_catalog.substring(enc_text, int4, int4)
 RETURNS enc_text AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
-
--- CREATE FUNCTION enc_text(varchar)
--- RETURNS enc_text AS 'MODULE_PATHNAME', 'varchar_to_enc_text' LANGUAGE C STRICT IMMUTABLE ;
--- CREATE CAST (varchar AS enc_text) WITH FUNCTION enc_text(varchar) AS IMPLICIT;
 
 -- sets the order in the text field in enc_text
 CREATE FUNCTION enc_text_set_order(enc_text, int4)
@@ -575,15 +556,6 @@ CREATE AGGREGATE avg (enc_float4)
    finalfunc = enc_float4_avg_bulk
 );
 
--- CREATE FUNCTION enc_float4_avg_simple(enc_float4[])
--- RETURNS enc_float4 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
--- CREATE AGGREGATE avg_simple (enc_float4)
--- (
---    sfunc = array_append,
---    stype = enc_float4[],
---    finalfunc = enc_float4_avg_simple
--- );
-
 CREATE FUNCTION enc_float4_sum_bulk(enc_float4[])
 RETURNS enc_float4 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 CREATE AGGREGATE sum (enc_float4)
@@ -594,26 +566,6 @@ CREATE AGGREGATE sum (enc_float4)
    COMBINEFUNC = array_cat,
    finalfunc = enc_float4_sum_bulk  
 );
-
--- CREATE FUNCTION enc_float4(float4)
--- RETURNS enc_float4 AS 'MODULE_PATHNAME', 'float4_to_enc_float4' LANGUAGE C STRICT IMMUTABLE ;
--- CREATE CAST (float4 AS enc_float4) WITH FUNCTION enc_float4(float4) AS IMPLICIT;
-
--- CREATE FUNCTION enc_float4(double precision)
--- RETURNS enc_float4 AS 'MODULE_PATHNAME', 'double_to_enc_float4' LANGUAGE C STRICT IMMUTABLE ;
--- CREATE CAST (double precision AS enc_float4) WITH FUNCTION enc_float4(double precision) AS IMPLICIT;
-
--- CREATE FUNCTION enc_float4(numeric)
--- RETURNS enc_float4 AS 'MODULE_PATHNAME', 'numeric_to_enc_float4' LANGUAGE C STRICT IMMUTABLE ;
--- CREATE CAST (numeric AS enc_float4) WITH FUNCTION enc_float4(numeric) AS IMPLICIT;
-
--- CREATE FUNCTION enc_float4(int8)
--- RETURNS enc_float4 AS 'MODULE_PATHNAME', 'int8_to_enc_float4' LANGUAGE C STRICT IMMUTABLE ;
--- CREATE CAST (int8 AS enc_float4) WITH FUNCTION enc_float4(int8) AS IMPLICIT;
-
--- CREATE FUNCTION enc_float4(int4)
--- RETURNS enc_float4 AS 'MODULE_PATHNAME', 'int4_to_enc_float4' LANGUAGE C STRICT IMMUTABLE ;
--- CREATE CAST (int4 AS enc_float4) WITH FUNCTION enc_float4(int4) AS IMPLICIT;
 
 CREATE FUNCTION enc_float4_eval_expr(VARIADIC "any")
 RETURNS enc_float4 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
@@ -730,16 +682,6 @@ AS
 
 CREATE FUNCTION pg_catalog.date_part(text, enc_timestamp)
 RETURNS enc_int4 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
-
--- CREATE FUNCTION enc_timestamp(timestamp)
--- RETURNS enc_timestamp AS 'MODULE_PATHNAME', 'enc_timestamp_encrypt' LANGUAGE C STRICT IMMUTABLE ;
--- CREATE CAST (timestamp AS enc_timestamp) WITH FUNCTION enc_timestamp(timestamp) AS IMPLICIT;
-
--- CREATE CAST (varchar AS enc_timestamp) WITH FUNCTION enc_timestamp(varchar) AS IMPLICIT;
--- CREATE FUNCTION enc_text(varchar)
---     RETURNS enc_text
---     AS 'MODULE_PATHNAME', 'varchar_to_enc_timestamp'
---     LANGUAGE C STRICT IMMUTABLE ;
 
 -- sets order info in EncStr.order field
 -- if order info not available, order is set to -1, and comparison goes to TEE

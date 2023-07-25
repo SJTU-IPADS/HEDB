@@ -27,7 +27,7 @@ PG_FUNCTION_INFO_V1(date_part);
  * @input: string as a postgres argument
 `* @return: timestamp
 */
-Timestamp pg_timestamp_in(char* str)
+static Timestamp pg_timestamp_in(char* str)
 {
     Timestamp result;
     char workbuf[MAXDATELEN + MAXDATEFIELDS];

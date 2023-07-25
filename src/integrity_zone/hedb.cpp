@@ -46,7 +46,6 @@ Datum enable_record_mode(PG_FUNCTION_ARGS)
     updateRecordFile = true;
 
     char* s = PG_GETARG_CSTRING(0);
-    // print_info("%s\n", s);
 
     const char *default_dir = "/tmp";
     const char* dir_arg = PG_GETARG_CSTRING(1);
@@ -74,7 +73,6 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
     memset(record_name_prefix, 0, MAX_NAME_LENGTH);
     strncpy(record_name_prefix, s, strlen(s));
     strcat(record_name_prefix, "-");
-    // print_info("%s\n", s);
 
     for (int i = 0; i < MAX_RECORDS_NUM; ++i) {
         memset(record_names[i], 0, MAX_NAME_LENGTH);
