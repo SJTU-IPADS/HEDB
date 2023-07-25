@@ -6,7 +6,7 @@ cmake-build-debug/
 *.out
 *.o
 *.d
-benchmark
+*.DS_Store
 */ramdisk
 __pycache__
 *.eps

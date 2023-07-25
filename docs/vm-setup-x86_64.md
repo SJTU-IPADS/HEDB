@@ -48,31 +48,31 @@ We recommend you to wait a while till the message `ci-info: no authorized SSH ke
 
 After you log into the privacy-zone VM, install the dependencies:
 ```sh
-sudo apt-get update
-sudo apt-get install -y build-essential cmake libmbedtls-dev
+$ sudo apt-get update
+$ sudo apt-get install -y build-essential cmake libmbedtls-dev
 ```
 
 Then pull the HEDB repo:
 ```sh
-git clone https://github.com/SJTU-IPADS/HEDB
-cd HEDB
-make
+$ git clone https://github.com/SJTU-IPADS/HEDB
+$ cd HEDB
+$ make
 ```
 
 Install the HEDB uio-ivshmem kernel driver:
 ```sh
-cd HEDB/tools/drivers/ivshmem-driver
-make
-sudo insmod uio-<kernel-version>.ko
-sudo insmod uio-ivshmem.ko
-sudo chmod a+rwx /dev/uio0
+$ cd HEDB/tools/drivers/ivshmem-driver
+$ make
+$ sudo insmod uio.ko
+$ sudo insmod uio-ivshmem.ko
+$ sudo chmod a+rwx /dev/uio0
 ```
-You may need to replace <kernel-version> with a right one.
+Check ivshmem-driver `README` if you run into trouble.
 
 In the end, run the ops inside the privacy zone:
 ```sh
-cd HEDB
-./build/ops_server
+$ cd HEDB
+$ ./build/ops_server
 ```
 
 # Integrity Zone
@@ -88,44 +88,45 @@ $ qemu-system-x86_64 \
     -drive if=virtio,format=raw,file=cloud2.img \
     -device ivshmem-plain,memdev=hostmem,master=on \
     -object memory-backend-file,size=16M,share=on,mem-path=/dev/shm/ivshmem,id=hostmem \
-    -device virtio-net-pci,netdev=net0 -netdev user,id=net0,hostfwd=tcp::8000-:8000 \
+    -device virtio-net-pci,netdev=net0 -netdev user,id=net0,hostfwd=tcp::8000-:8000
 ```
 (If you wish to experiment with local shmem, at least 2 vcpus must be assigned, or otherwise the busy-polling shmem will be blocked.)
 Note that the `hostfwd` is for HEDB's template-hotfix server, and `master=on` is for HEDB's CVM fork (via QEMU VM snapshot even with ivshmem).
 
 After you log into the integrity-zone VM, install the postgresql server:
 ```sh
-sudo apt-get update
-sudo apt-get install -y build-essential cmake libmbedtls-dev \
+$ sudo apt-get update
+$ sudo apt-get install -y build-essential cmake libmbedtls-dev \
     postgresql postgresql-contrib postgresql-server-dev-all
 ```
 
 Then pull the HEDB repo, build and install:
 ```sh
-git clone https://github.com/SJTU-IPADS/HEDB
-cd HEDB
-make
-sudo make install
+$ git clone https://github.com/SJTU-IPADS/HEDB
+$ cd HEDB
+$ make
+$ sudo make install
 ```
 
 Install the HEDB uio-ivshmem kernel driver:
 ```sh
-cd HEDB/tools/drivers/ivshmem-driver
-make
-sudo insmod uio-<kernel-version>.ko
-sudo insmod uio-ivshmem.ko
-sudo chmod a+rwx /dev/uio0
+$ cd HEDB/tools/drivers/ivshmem-driver
+$ make
+$ sudo insmod uio.ko
+$ sudo insmod uio-ivshmem.ko
+$ sudo chmod a+rwx /dev/uio0
 ```
-You may need to replace <kernel-version> with a right one.
+Check ivshmem-driver `README` if you run into trouble.
 
 Now you can try the 1st SQL:
 ``` sh
-sudo -u postgres psql
+$ sudo -u postgres psql
 
 # psql
 DROP EXTENSION IF EXISTS hedb CASCADE;
 CREATE EXTENSION hedb;
-SELECT 1024::enc_int4 * 4096::enc_int4;
+
+SELECT '1024'::enc_int4 * '4096'::enc_int4;
 ```
 
 # How to do Mode Switch?
@@ -145,7 +146,7 @@ First, append this line to qemu command line of integrity zone:
 
 Second, log into the integrity zone VM via telnet:
 ```sh
-telnet localhost 4321
+$ telnet localhost 4321
 ```
 
 Third, you can issue commands to the qemu monitor.
@@ -166,5 +167,5 @@ Please refer to the README of `tools/hotfix`.
 
 To shrink the VM image size, you can use:
 ```
-qemu-img convert -c -O qcow2 dbms.img dbms-new.img
+$ qemu-img convert -c -O qcow2 dbms.img dbms-new.img
 ```

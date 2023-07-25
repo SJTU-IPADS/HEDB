@@ -57,31 +57,37 @@ We recommend you to wait a while till the message `ci-info: no authorized SSH ke
 
 After you log into the privacy-zone VM, install the dependencies:
 ```sh
-sudo apt-get update
-sudo apt-get install -y build-essential cmake libmbedtls-dev
+$ sudo apt-get update
+$ sudo apt-get install -y build-essential cmake libmbedtls-dev
 ```
 
 Then pull the HEDB repo:
 ```sh
-git clone https://github.com/SJTU-IPADS/HEDB
-cd HEDB
-make
+$ git clone https://github.com/SJTU-IPADS/HEDB
+$ cd HEDB
+$ make
 ```
 
-Install the HEDB uio-ivshmem kernel driver:
+Install the HEDB uio-ivshmem kernel driver and arm-pmu kernel driver:
 ```sh
-cd HEDB/tools/drivers/ivshmem-driver
-make
-sudo insmod uio-<kernel-version>.ko
-sudo insmod uio-ivshmem.ko
-sudo chmod a+rwx /dev/uio0
+$ cd HEDB/tools/drivers/ivshmem-driver
+$ make
+$ sudo insmod uio.ko
+$ sudo insmod uio-ivshmem.ko
+$ sudo chmod a+rwx /dev/uio0
 ```
-You may need to replace <kernel-version> with a right one.
+Check ivshmem-driver `README` if you run into trouble.
+
+```sh
+$ cd HEDB/tools/drivers/arm-pmu-driver
+$ make
+$ sudo insmod pmu_el0_cycle_counter.ko
+```
 
 In the end, run the ops inside the privacy zone:
 ```sh
-cd HEDB
-./build/ops_server
+$ cd HEDB
+$ ./build/ops_server
 ```
 
 # Integrity Zone
@@ -103,67 +109,43 @@ Note that the `hostfwd` is for HEDB's template-hotfix server, and `master=on` is
 
 After you log into the integrity-zone VM, install the postgresql server:
 ``` sh
-sudo apt-get update
-sudo apt-get install -y build-essential cmake libmbedtls-dev \
+$ sudo apt-get update
+$ sudo apt-get install -y build-essential cmake libmbedtls-dev \
     postgresql postgresql-contrib postgresql-server-dev-all
 ```
 
 Then pull the HEDB repo, build and install:
 ```sh
-git clone https://github.com/SJTU-IPADS/HEDB
-cd HEDB
-make
-sudo make install
+$ git clone https://github.com/SJTU-IPADS/HEDB
+$ cd HEDB
+$ make
+$ sudo make install
 ```
 
-Install the HEDB uio-ivshmem kernel driver:
+Install the HEDB uio-ivshmem kernel driver and arm-pmu kernel driver:
 ```sh
-cd HEDB/tools/drivers/ivshmem-driver
-make
-sudo insmod uio-<kernel-version>.ko
-sudo insmod uio-ivshmem.ko
-sudo chmod a+rwx /dev/uio0
+$ cd HEDB/tools/drivers/ivshmem-driver
+$ make
+$ sudo insmod uio.ko
+$ sudo insmod uio-ivshmem.ko
+$ sudo chmod a+rwx /dev/uio0
 ```
-You may need to replace <kernel-version> with a right one.
+Check ivshmem-driver `README` if you run into trouble.
+
+```sh
+$ cd HEDB/tools/drivers/arm-pmu-driver
+$ make
+$ sudo insmod pmu_el0_cycle_counter.ko
+```
 
 Now you can try the 1st SQL:
 ``` sh
-sudo -u postgres psql
+$ sudo -u postgres psql
 
 # psql
 DROP EXTENSION IF EXISTS hedb CASCADE;
 CREATE EXTENSION hedb;
-SELECT 1024::enc_int4 * 4096::enc_int4;
-```
-
-``` sh
-cd benchmark/pgTAP-1.2.0
-make && sudo make install
-sudo apt install libtap-parser-sourcehandler-pgtap-perl
-
-sudo su postgres
-cp -a benchmark/ ~
-```
-
-perform unit tests:
-``` sh
-cd ~/benchmark/pgTAP-1.2.0/
-pg_prove unit-test.sql
-```
-
-create database superuser for current user:
-``` sh 
-sudo -i -u postgres psql
-
-# psql
-create user ubuntu superuser;
-create database ubuntu owner ubuntu;
-```
-
-perform tpch tests:
-``` sh
-cd ~/benchmark/tpch-small
-bash doit.sh s
+SELECT '1024'::enc_int4 * '4096'::enc_int4;
 ```
 
 # How to do Mode Switch?
@@ -183,7 +165,7 @@ First, append this line to qemu command line of integrity zone:
 
 Second, log into the integrity zone VM via telnet:
 ```sh
-telnet localhost 4321
+$ telnet localhost 4321
 ```
 
 Third, you can issue commands to the qemu monitor.

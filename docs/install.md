@@ -10,19 +10,21 @@ $ sudo chmod a+rwx /dev/shm/ivshmem
 
 Install the dependencies:
 ```sh
-sudo apt-get update
-sudo apt-get install -y build-essential cmake libmbedtls-dev \
+$ sudo apt-get update
+$ sudo apt-get install -y build-essential cmake libmbedtls-dev \
     postgresql postgresql-contrib postgresql-server-dev-all
+$ sudo service postgresql restart
 ```
 
 Pull the HEDB repo, build and install:
 ```sh
-git clone https://github.com/SJTU-IPADS/HEDB
-cd HEDB
-make
-sudo make install
-./build/ops_server &
-sudo -u postgres psql
+$ git clone https://github.com/SJTU-IPADS/HEDB
+$ cd HEDB
+$ make
+$ sudo make install
+$ ./build/ops_server &
+
+$ sudo -u postgres psql
 ```
 
 Run your 1st SQL:
@@ -44,18 +46,19 @@ SELECT '1024'::enc_int4 * '4096'::enc_int4;
 ### (Optional) Manually Install PGTAP
 
 ```sh
-wget https://github.com/theory/pgtap/releases/download/v1.2.0/pgTAP-1.2.0.zip
-unzip pgTAP-1.2.0.zip
-cd pgTAP-1.2.0
-make && sudo make install
-sudo apt install libtap-parser-sourcehandler-pgtap-perl
+$ wget https://github.com/theory/pgtap/releases/download/v1.2.0/pgTAP-1.2.0.zip
+$ unzip pgTAP-1.2.0.zip
+$ cd pgTAP-1.2.0
+$ make
+$ sudo make install
 ```
 
 ### Using HEDB scripts
 
 ```sh
-cd tests/unit-test
-sudo -u postgres pg_prove unit-test.sql
+$ sudo apt-get install pgtap libtap-parser-sourcehandler-pgtap-perl
+$ cd tests/unit-test
+$ sudo -u postgres pg_prove unit-test.sql
 ```
 
 ## Run TPC-H
@@ -65,27 +68,28 @@ TPC-H is a decision support benchmark. It consists of a suite of business-orient
 ### (Optional) Manually Install TPC-H DBGEN
 
 ```sh
-wget https://github.com/electrum/tpch-dbgen/archive/refs/heads/master.zip
-unzip master.zip
-cd tpch-dbgen-master/
-echo "#define EOL_HANDLING 1" >> config.h # remove the tail '|'
-make
-./dbgen -s 1
-chmod +rw *.tbl
+$ wget https://github.com/electrum/tpch-dbgen/archive/refs/heads/master.zip
+$ unzip master.zip
+$ cd tpch-dbgen-master/
+$ echo "#define EOL_HANDLING 1" >> config.h # remove the tail '|'
+$ make
 ```
 
 ### Using HEDB scripts
 
 ```sh
-cd tests/tpch
+## install dependencies
+$ pip3 install psycopg2 tqdm
+
+$ cd tests/tpch
 ## generate and load data
-python3 run.py -l
+$ python3 run.py -l
 ## transform TPC-H queries
-python3 run.py -t
+$ python3 run.py -t
 ## record TPC-H
-python3 run.py -sg -rr record
+$ python3 run.py -sg -rr record
 ## replay TPC-H
-python3 run.py -sg -rr replay
+$ python3 run.py -sg -rr replay
 ```
 
 If you encounter `FATAL:  password authentication failed for user "postgres"`,
@@ -116,4 +120,3 @@ Likewise, you should use the random value as the encryption key, not hard-coded 
 3. Prevent Admin login
 
 Replace admin's password with a random long key.
-

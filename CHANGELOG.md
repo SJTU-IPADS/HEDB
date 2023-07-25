@@ -2,58 +2,57 @@
 
 ## 2023.7
 
-- Add doc for QEMU-based mode switch.
-- New base64.
-- Add server mode that only allows for base64 ciphers.
-- Fully replay without invoking ops: sql preprocessing.
+- Docs: QEMU-based mode switch.
+- Refactor: new base64.
+- Feature: server mode that only allows for base64 ciphers.
+- Feature: replay without invoking ops by SQL preprocessing.
 
 ## 2023.6
 
-- Add hotfix templates.
-- Fix substring bug.
-- Fix text orderby bug.
+- Feature: templated hotfix.
+- Fix: substring bug.
+- Fix: text orderby bug.
 
 ## 2023.4
 
-- Automatic scripts for artifact evaluation.
-- Add Z3-based desensitizer: log anonymizer.
+- Test: automatic scripts for artifact evaluation.
+- Feature: Z3-based desensitizer as log anonymizer.
 
 ## 2022.11
 
-- Add Python3 smuggle attack scripts using psycopg2.
+- Feature: Python3 smuggle attack scripts using psycopg2.
 
 ## 2022.10
 
-- Record-and-replay for ops trace.
-- KLEE for recording execution trace.
+- Feature: record-and-replay for ops trace.
+- Feature: KLEE for recording execution trace.
 
 ## 2022.9
 
-- Parallel crypto.
-- Text order.
-- 2-VM ivshmem.
+- Perf: parallel crypto.
+- Perf: text order.
+- Feature: 2-VM ivshmem.
 
 ## 2022.8
 
-- ARMv8.4 S-EL2 backend: CVM interface.
+- Feature: ARMv8.4 S-EL2 backend: CVM interface.
 
 ## 2022.4
 
-- Fully encrypted schemas of TPC-H.
+- Test: fully encrypted schemas of TPC-H.
 
 ## 2022.2
 
-- ARMv8 TrustZone backend using OP-TEE TA.
+- Feature: ARMv8 TrustZone backend using OP-TEE TA.
 
 ## 2022.1
 
-- SGX Enclave backend.
-- `enc_int4`, `enc_float4`.
+- Feature: Intel SGX Enclave backend using Intel SGX SDK.
 
 ## 2021.12
 
-- Plaintext UDT and UDFs PostgreSQL extension. Learn much from StealthDB!
-- Memory copy optimization: cstring -> pointer.
+- Feature: plaintext UDT and UDFs PostgreSQL extension. Learn much from StealthDB!
+- Perf: memory copy optimization: cstring -> pointer.
 
 ## 2021.11
 
