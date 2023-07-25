@@ -97,7 +97,7 @@ Datum enc_float4_in(PG_FUNCTION_ARGS)
 {
     char* pIn = PG_GETARG_CSTRING(0);
     EncFloat* result = (EncFloat*)palloc0(sizeof(EncFloat));
-    
+
     if (clientMode == true) {
         float val = pg_float4_in(pIn);
         enc_float_encrypt(val, result);

@@ -1,15 +1,14 @@
 #pragma once
 
-extern "C"
-{
+extern "C" {
 #include <defs.h>
 #include <enc_types.h>
 #include <request_types.h>
 }
 
 #define IS_ENCSTR(a) (sizeof(*a) == sizeof(EncStr))
-#define ENCSTR_LEN(a) (((EncStr *)a)->len)
-#define ENCSTR_DATA(a) (&((EncStr *)a)->enc_cstr)
+#define ENCSTR_LEN(a) (((EncStr*)a)->len)
+#define ENCSTR_DATA(a) (&((EncStr*)a)->enc_cstr)
 #define COPY_ENC(to, from)                                          \
     {                                                               \
         ENCSTR_LEN(to) = ENCSTR_LEN(from);                          \
@@ -17,50 +16,40 @@ extern "C"
     }
 
 #define IS_STR(a) (sizeof(*a) == sizeof(Str))
-#define STR_LEN(a) (((Str *)a)->len)
-#define STR_DATA(a) (((Str *)a)->data)
+#define STR_LEN(a) (((Str*)a)->len)
+#define STR_DATA(a) (((Str*)a)->data)
 #define COPY_PLAIN(to, from)                               \
     {                                                      \
         STR_LEN(to) = STR_LEN(from);                       \
         memcpy(STR_DATA(to), STR_DATA(from), STR_LEN(to)); \
     }
 
-#define COPY(to, from)            \
-    {                             \
-        if (IS_STR(from))         \
-        {                         \
-            COPY_PLAIN(to, from); \
-        }                         \
-        else if (IS_ENCSTR(from)) \
-        {                         \
-            COPY_ENC(to, from);   \
-        }                         \
-        else                      \
-            *to = *from;          \
+#define COPY(to, from)                \
+    {                                 \
+        if (IS_STR(from)) {           \
+            COPY_PLAIN(to, from);     \
+        } else if (IS_ENCSTR(from)) { \
+            COPY_ENC(to, from);       \
+        } else                        \
+            *to = *from;              \
     }
 
 #define TYPESIZE(a, size)                                 \
     {                                                     \
-        if (IS_STR(a))                                    \
-        {                                                 \
+        if (IS_STR(a)) {                                  \
             size = sizeof(STR_LEN(a)) + STR_LEN(a);       \
-        }                                                 \
-        else if (IS_ENCSTR(a))                            \
-        {                                                 \
+        } else if (IS_ENCSTR(a)) {                        \
             size = sizeof(ENCSTR_LEN(a)) + ENCSTR_LEN(a); \
-        }                                                 \
-        else                                              \
-        {                                                 \
+        } else {                                          \
             size = sizeof(*a);                            \
         }                                                 \
     }
 
-class Request
-{
+class Request {
 public:
-    virtual void serializeTo(void *buffer) const = 0;
+    virtual void serializeTo(void* buffer) const = 0;
 
-    virtual inline void copyResultFrom(void *buffer) const = 0;
+    virtual inline void copyResultFrom(void* buffer) const = 0;
 
     // virtual void genLog(void *buffer) const = 0;
     virtual inline int size() const { return 0; };
@@ -71,19 +60,23 @@ private:
 /* DataType should be one of CMP DATA */
 
 template <typename EncType, int reqType>
-class CmpRequest : public Request
-{
+class CmpRequest : public Request {
 public:
     DEFINE_ENCTYPE_CMP_ReqData(EncType);
-    CmpRequest(EncType *left, EncType *right, int *cmp) : left(left), right(right), cmp(cmp) {}
-
-    EncType *left;
-    EncType *right;
-    int *cmp;
-
-    void serializeTo(void *buffer) const override
+    CmpRequest(EncType* left, EncType* right, int* cmp)
+        : left(left)
+        , right(right)
+        , cmp(cmp)
     {
-        auto *req = (EncTypeCmpRequestData *)buffer;
+    }
+
+    EncType* left;
+    EncType* right;
+    int* cmp;
+
+    void serializeTo(void* buffer) const override
+    {
+        auto* req = (EncTypeCmpRequestData*)buffer;
         req->common.reqType = reqType;
         COPY(&req->left, left);
         COPY(&req->right, right);
@@ -91,9 +84,9 @@ public:
         // req->right = *right;
     }
 
-    inline void copyResultFrom(void *buffer) const override
+    inline void copyResultFrom(void* buffer) const override
     {
-        auto *req = (EncTypeCmpRequestData *)buffer;
+        auto* req = (EncTypeCmpRequestData*)buffer;
         *cmp = req->cmp;
     }
 
@@ -109,29 +102,34 @@ public:
 };
 
 template <typename EncType>
-class CalcRequest : public Request
-{
+class CalcRequest : public Request {
 public:
     DEFINE_ENCTYPE_CALC_ReqData(EncType);
     int op;
-    EncType *left;
-    EncType *right;
-    EncType *res;
+    EncType* left;
+    EncType* right;
+    EncType* res;
 
-    CalcRequest(int op, EncType *left, EncType *right, EncType *res) : op(op), left(left), right(right), res(res) {}
-
-    void serializeTo(void *buffer) const override
+    CalcRequest(int op, EncType* left, EncType* right, EncType* res)
+        : op(op)
+        , left(left)
+        , right(right)
+        , res(res)
     {
-        auto *req = (EncTypeCalcRequestData *)buffer;
+    }
+
+    void serializeTo(void* buffer) const override
+    {
+        auto* req = (EncTypeCalcRequestData*)buffer;
         req->common.reqType = op;
         req->op = op;
         COPY(&req->left, left);
         COPY(&req->right, right);
     }
 
-    inline void copyResultFrom(void *buffer) const override
+    inline void copyResultFrom(void* buffer) const override
     {
-        auto *req = (EncTypeCalcRequestData *)buffer;
+        auto* req = (EncTypeCalcRequestData*)buffer;
         COPY(res, &req->res);
         // *res = req->res;
     }
@@ -151,29 +149,32 @@ public:
 // }
 
 template <typename EncType>
-class BulkRequest : public Request
-{
+class BulkRequest : public Request {
 public:
     DEFINE_ENCTYPE_BULK_ReqData(EncType) int bulk_type;
     int bulk_size;
-    EncType *items; // begin of items
-    EncType *res;   // Maybe EncFloat in average, use union that-wise
+    EncType* items; // begin of items
+    EncType* res; // Maybe EncFloat in average, use union that-wise
 
-    BulkRequest(int bulkType, int bulkSize, EncType *items, EncType *res) : bulk_type(bulkType),
-                                                                            bulk_size(bulkSize), items(items),
-                                                                            res(res) {}
-
-    void serializeTo(void *buffer) const override
+    BulkRequest(int bulkType, int bulkSize, EncType* items, EncType* res)
+        : bulk_type(bulkType)
+        , bulk_size(bulkSize)
+        , items(items)
+        , res(res)
     {
-        auto *req = (EncTypeBulkRequestData *)buffer;
+    }
+
+    void serializeTo(void* buffer) const override
+    {
+        auto* req = (EncTypeBulkRequestData*)buffer;
         req->common.reqType = bulk_type;
         req->bulk_size = bulk_size;
         memcpy(req->items, items, sizeof(EncType) * bulk_size);
     }
 
-    inline void copyResultFrom(void *buffer) const override
+    inline void copyResultFrom(void* buffer) const override
     {
-        auto *req = (EncTypeBulkRequestData *)buffer;
+        auto* req = (EncTypeBulkRequestData*)buffer;
         *res = req->res;
     }
     inline int size() const override
@@ -183,35 +184,38 @@ public:
 };
 
 template <typename EncType>
-class EvalExprRequest : public Request
-{
+class EvalExprRequest : public Request {
 public:
     DEFINE_ENCTYPE_EVALEXPR_ReqData(EncType) int eval_type;
     int arg_cnt;
     Str expr;
-    EncType **items;
-    EncType *res;
+    EncType** items;
+    EncType* res;
 
-    EvalExprRequest(int eval_type, int argCnt, Str expr, EncType **items, EncType *res) : eval_type(eval_type), arg_cnt(argCnt),
-                                                                                          expr(expr), items(items),
-                                                                                          res(res) {}
-
-    void serializeTo(void *buffer) const override
+    EvalExprRequest(int eval_type, int argCnt, Str expr, EncType** items, EncType* res)
+        : eval_type(eval_type)
+        , arg_cnt(argCnt)
+        , expr(expr)
+        , items(items)
+        , res(res)
     {
-        auto *req = (EncTypeEvalExprRequestData *)buffer;
+    }
+
+    void serializeTo(void* buffer) const override
+    {
+        auto* req = (EncTypeEvalExprRequestData*)buffer;
         req->common.reqType = eval_type;
         req->arg_cnt = arg_cnt;
         // memcpy(req->items, items, sizeof(EncType) * arg_cnt);
-        for (int i = 0; i < arg_cnt; ++i)
-        {
+        for (int i = 0; i < arg_cnt; ++i) {
             memcpy(&(req->items[i]), items[i], sizeof(EncType));
         }
         memcpy(&(req->expr), &expr, sizeof(expr));
     }
 
-    inline void copyResultFrom(void *buffer) const override
+    inline void copyResultFrom(void* buffer) const override
     {
-        auto *req = (EncTypeEvalExprRequestData *)buffer;
+        auto* req = (EncTypeEvalExprRequestData*)buffer;
         *res = req->res;
     }
 };
@@ -220,19 +224,22 @@ public:
          change encstr type to {size, char[]}
 */
 template <typename PlainType, typename EncType, int reqType>
-class EncRequest : public Request
-{
+class EncRequest : public Request {
 public:
     DEFINE_ENCTYPE_ENC_ReqData(EncType, PlainType);
 
-    PlainType *plaintext;
-    EncType *res;
+    PlainType* plaintext;
+    EncType* res;
 
-    EncRequest(PlainType *plaintext, EncType *res) : plaintext(plaintext), res(res) {}
-
-    void serializeTo(void *buffer) const override
+    EncRequest(PlainType* plaintext, EncType* res)
+        : plaintext(plaintext)
+        , res(res)
     {
-        auto *req = (EncTypeEncRequestData *)buffer;
+    }
+
+    void serializeTo(void* buffer) const override
+    {
+        auto* req = (EncTypeEncRequestData*)buffer;
         req->common.reqType = reqType;
         // req->plaintext = *plaintext;
         COPY(&req->plaintext, plaintext);
@@ -244,9 +251,9 @@ public:
         // }
     }
 
-    inline void copyResultFrom(void *buffer) const override
+    inline void copyResultFrom(void* buffer) const override
     {
-        auto *req = (EncTypeEncRequestData *)buffer;
+        auto* req = (EncTypeEncRequestData*)buffer;
         COPY(res, &req->ciphertext);
     }
     inline int size() const override
@@ -259,27 +266,30 @@ public:
 };
 
 template <typename EncType, typename PlainType, int reqType>
-class DecRequest : public Request
-{
+class DecRequest : public Request {
 public:
     DEFINE_ENCTYPE_DEC_ReqData(EncType, PlainType);
-    EncType *ciphertext;
-    PlainType *res;
+    EncType* ciphertext;
+    PlainType* res;
 
-    DecRequest(EncType *ciphertext, PlainType *res) : ciphertext(ciphertext), res(res) {}
-
-    void serializeTo(void *buffer) const override
+    DecRequest(EncType* ciphertext, PlainType* res)
+        : ciphertext(ciphertext)
+        , res(res)
     {
-        auto *req = (EncTypeDecRequestData *)buffer;
+    }
+
+    void serializeTo(void* buffer) const override
+    {
+        auto* req = (EncTypeDecRequestData*)buffer;
         req->common.reqType = reqType;
 
         COPY(&req->ciphertext, ciphertext);
         // req->ciphertext = *ciphertext;
     }
 
-    inline void copyResultFrom(void *buffer) const override
+    inline void copyResultFrom(void* buffer) const override
     {
-        auto *req = (EncTypeDecRequestData *)buffer;
+        auto* req = (EncTypeDecRequestData*)buffer;
 
         COPY(res, &req->plaintext);
         // *res = req->plaintext;
@@ -294,25 +304,28 @@ public:
 };
 
 template <typename Type1, typename Type2, int reqType>
-class OneArgRequest : public Request
-{
+class OneArgRequest : public Request {
 public:
     DEFINE_ENCTYPE_1ARG_ReqData(Type1, Type2, OneArgRequestData);
-    Type1 *in;
-    Type2 *res;
+    Type1* in;
+    Type2* res;
 
-    OneArgRequest(Type1 *in, Type2 *res) : in(in), res(res) {}
-
-    void serializeTo(void *buffer) const override
+    OneArgRequest(Type1* in, Type2* res)
+        : in(in)
+        , res(res)
     {
-        auto *req = (OneArgRequestData *)buffer;
+    }
+
+    void serializeTo(void* buffer) const override
+    {
+        auto* req = (OneArgRequestData*)buffer;
         req->common.reqType = reqType;
         COPY(&req->in, in);
     }
 
-    inline void copyResultFrom(void *buffer) const override
+    inline void copyResultFrom(void* buffer) const override
     {
-        auto *req = (OneArgRequestData *)buffer;
+        auto* req = (OneArgRequestData*)buffer;
         *res = req->res;
     }
     inline int size() const override
@@ -324,24 +337,29 @@ public:
 };
 
 template <typename Type1,
-          typename Type2,
-          typename Type3,
-          typename resType,
-          int reqType>
-class ThreeArgRequest : public Request
-{
+    typename Type2,
+    typename Type3,
+    typename resType,
+    int reqType>
+class ThreeArgRequest : public Request {
 public:
     DEFINE_ENCTYPE_3ARG_ReqData(Type1, arg1, Type2, arg2, Type3, arg3, resType, ThreeArgRequestData);
-    Type1 *arg1;
-    Type2 *arg2;
-    Type3 *arg3;
-    resType *res;
+    Type1* arg1;
+    Type2* arg2;
+    Type3* arg3;
+    resType* res;
 
-    ThreeArgRequest(Type1 *arg1, Type2 *arg2, Type3 *arg3, resType *res) : arg1(arg1), arg2(arg2), arg3(arg3), res(res) {}
-
-    void serializeTo(void *buffer) const override
+    ThreeArgRequest(Type1* arg1, Type2* arg2, Type3* arg3, resType* res)
+        : arg1(arg1)
+        , arg2(arg2)
+        , arg3(arg3)
+        , res(res)
     {
-        auto *req = (ThreeArgRequestData *)buffer;
+    }
+
+    void serializeTo(void* buffer) const override
+    {
+        auto* req = (ThreeArgRequestData*)buffer;
         req->common.reqType = reqType;
         COPY(&req->arg1, arg1);
         // req->arg1 = *arg1;
@@ -349,9 +367,9 @@ public:
         req->arg3 = *arg3;
     }
 
-    inline void copyResultFrom(void *buffer) const override
+    inline void copyResultFrom(void* buffer) const override
     {
-        auto *req = (ThreeArgRequestData *)buffer;
+        auto* req = (ThreeArgRequestData*)buffer;
 
         COPY(res, &req->res);
         // *res = req->res;

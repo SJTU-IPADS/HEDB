@@ -1,3 +1,4 @@
+#include "barrier.h"
 #include <ctype.h>
 #include <extension.hpp>
 #include <interface.hpp>
@@ -10,9 +11,8 @@
 #include <tee_interface.hpp>
 #include <timer.hpp>
 #include <unistd.h>
-#include "barrier.h"
 
-TEEInvoker *TEEInvoker::invoker = nullptr;
+TEEInvoker* TEEInvoker::invoker = nullptr;
 
 bool recordMode = false;
 bool replayMode = false;
@@ -28,7 +28,7 @@ uint64_t current_log_size = 0;
 
 void exit_handler()
 {
-    TEEInvoker *invoker = TEEInvoker::getInstance();
+    TEEInvoker* invoker = TEEInvoker::getInstance();
     delete invoker;
 }
 
@@ -36,33 +36,27 @@ void exit_handler()
 
 TEEInvoker::TEEInvoker()
 {
-    if (!replayMode)
-    {
+    if (!replayMode) {
         req_buffer = getSharedBuffer(sizeof(EncIntBulkRequestData));
-    }
-    else
-    {
+    } else {
         req_buffer = calloc(1, SHM_SIZE);
     }
-    BaseRequest *req_control = static_cast<BaseRequest *>(req_buffer);
+    BaseRequest* req_control = static_cast<BaseRequest*>(req_buffer);
     req_control->status = NONE;
     atexit(exit_handler);
 }
 
 TEEInvoker::~TEEInvoker()
 {
-    if (!replayMode)
-    {
+    if (!replayMode) {
         freeBuffer(req_buffer);
-    }
-    else
-    {
+    } else {
         free(req_buffer);
     }
 }
 #define RETRY_FAILED 10086
 
-int TEEInvoker::sendRequest(Request *req)
+int TEEInvoker::sendRequest(Request* req)
 {
     int resp;
 
@@ -76,25 +70,21 @@ int TEEInvoker::sendRequest(Request *req)
         xxxRequest-specific parameters...
     }
     */
-    BaseRequest *req_control = static_cast<BaseRequest *>(req_buffer);
+    BaseRequest* req_control = static_cast<BaseRequest*>(req_buffer);
 
-    if (replayMode)
-    {
+    if (replayMode) {
         /* replay_request will answer request written to req_buffer */
         std::vector<std::string> filenames;
-        for (int i = 0; i < records_cnt; i++)
-        {
+        for (int i = 0; i < records_cnt; i++) {
             filenames.push_back(record_names[i]);
         }
-        static Replayer &replayer = Replayer::getInstance(filenames);
-        if (updateReplayFile)
-        {
+        static Replayer& replayer = Replayer::getInstance(filenames);
+        if (updateReplayFile) {
             replayer.update_replay_files(filenames);
             updateReplayFile = false;
         }
         int resp = replayer.replay(req_buffer);
-        if (resp != Replayer::NOT_REPLAY)
-        {
+        if (resp != Replayer::NOT_REPLAY) {
             /* then copy result from req_buffer to destination buffer */
             req->copyResultFrom(req_buffer);
             return resp;
@@ -114,11 +104,9 @@ int TEEInvoker::sendRequest(Request *req)
     resp = req_control->resp;
 
     /* record */
-    if (recordMode)
-    {
-        static Recorder &recorder = Recorder::getInstance(record_name_prefix);
-        if (updateRecordFile)
-        {
+    if (recordMode) {
+        static Recorder& recorder = Recorder::getInstance(record_name_prefix);
+        if (updateRecordFile) {
             recorder.update_write_fd(record_name_prefix);
             updateRecordFile = false;
         }
@@ -135,12 +123,10 @@ int TEEInvoker::sendRequest(Request *req)
 /* currently useless */
 void enter_replay_mode()
 {
-    if (recordMode)
-    {
+    if (recordMode) {
         recordMode = false;
         // print_info("record file could be not fully written\n");
         /* should add flush */
     }
     replayMode = true;
 }
-

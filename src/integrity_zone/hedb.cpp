@@ -5,11 +5,11 @@
 #include <sys/types.h>
 
 extern "C" {
-    PG_MODULE_MAGIC;
-    PG_FUNCTION_INFO_V1(enable_client_mode);
-    PG_FUNCTION_INFO_V1(enable_server_mode);
-    PG_FUNCTION_INFO_V1(enable_record_mode);
-    PG_FUNCTION_INFO_V1(enable_replay_mode);
+PG_MODULE_MAGIC;
+PG_FUNCTION_INFO_V1(enable_client_mode);
+PG_FUNCTION_INFO_V1(enable_server_mode);
+PG_FUNCTION_INFO_V1(enable_record_mode);
+PG_FUNCTION_INFO_V1(enable_replay_mode);
 }
 
 bool clientMode = false; // by default
@@ -47,7 +47,7 @@ Datum enable_record_mode(PG_FUNCTION_ARGS)
 
     char* s = PG_GETARG_CSTRING(0);
 
-    const char *default_dir = "/tmp";
+    const char* default_dir = "/tmp";
     const char* dir_arg = PG_GETARG_CSTRING(1);
     if (strlen(dir_arg) == 0) {
         dir_arg = default_dir;
@@ -78,7 +78,7 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
         memset(record_names[i], 0, MAX_NAME_LENGTH);
     }
 
-    const char *default_dir = "/tmp";
+    const char* default_dir = "/tmp";
     const char* dir_arg = PG_GETARG_CSTRING(1);
     if (strlen(dir_arg) == 0) {
         dir_arg = default_dir;
@@ -102,7 +102,7 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
         for (int i = 0; i < records_cnt; i++) {
             sprintf(tmp + strlen(tmp), "%d: %s\n", i, record_names[i]);
         }
-        print_info("%s\n",tmp);
+        print_info("%s\n", tmp);
         closedir(dir);
     } else {
         /* could not open directory */
@@ -122,4 +122,3 @@ Datum enable_replay_mode(PG_FUNCTION_ARGS)
     // print_info("mode: %s, seq: %d", mode, (int)sequence_replay);
     PG_RETURN_VOID();
 }
-

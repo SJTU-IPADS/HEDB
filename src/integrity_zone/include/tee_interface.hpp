@@ -6,9 +6,9 @@ extern "C" {
 #endif
 
 /* get shared buffer for asynchronous call, return buffer pointer */
-void *getSharedBuffer(size_t size);
+void* getSharedBuffer(size_t size);
 /* free shared buffer. */
-void freeBuffer(void *buffer);
+void freeBuffer(void* buffer);
 
 #ifdef __cplusplus
 }

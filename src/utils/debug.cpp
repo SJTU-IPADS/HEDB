@@ -4,7 +4,7 @@
 
 void _print_hex(const char* what, const void* v, const unsigned long l)
 {
-    char tmp[500];
+    char tmp[512];
     const unsigned char* p = (const unsigned char*)v;
     unsigned long x, y = 0, z;
     sprintf(tmp, "%s contents: \n", what);

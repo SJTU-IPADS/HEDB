@@ -8,4 +8,3 @@
 #define LOAD_BARRIER asm volatile("dsb ld" ::: "memory")
 #define STORE_BARRIER asm volatile("dsb st" ::: "memory")
 #endif
-

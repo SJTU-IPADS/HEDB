@@ -1,6 +1,6 @@
 #include "enc_text_ops.h"
-#include <like_match.h>
 #include "plain_text_ops.h"
+#include <like_match.h>
 
 int enc_text_cmp(EncStrCmpRequestData* req)
 {

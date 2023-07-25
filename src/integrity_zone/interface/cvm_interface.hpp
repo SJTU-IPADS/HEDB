@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include <unistd.h>
 
@@ -6,8 +6,8 @@
 extern "C" {
 #endif
 
-void *getSharedBuffer(size_t size);
-void freeBuffer(void *buffer);
+void* getSharedBuffer(size_t size);
+void freeBuffer(void* buffer);
 
 #ifdef __cplusplus
 }

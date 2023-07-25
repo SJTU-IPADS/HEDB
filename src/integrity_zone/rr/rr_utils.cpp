@@ -7,12 +7,12 @@
  *  args_num: the number of buffers need to be copied
  *  va_args: int, char *, int, char *, ... (int for length)
  */
-void rrprintf(int mode, char *fix_buf, int args_num, ...)
+void rrprintf(int mode, char* fix_buf, int args_num, ...)
 {
     bool number;
     int length;
     int count;
-    char *buffer;
+    char* buffer;
     va_list arg;
 
     number = true;
@@ -24,7 +24,7 @@ void rrprintf(int mode, char *fix_buf, int args_num, ...)
             length = va_arg(arg, size_t);
             number = false;
         } else {
-            buffer = va_arg(arg, char *);
+            buffer = va_arg(arg, char*);
             number = true;
             count++;
 

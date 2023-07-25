@@ -207,7 +207,7 @@ int Replayer::replay_request(void* req_buffer)
                 sizeof(int32_t), &start,
                 sizeof(int32_t), &length,
                 result_length, &res,
-                sizeof(int), &resp, 
+                sizeof(int), &resp,
                 sizeof(uint64_t), &record_timestamp);
 
             if (memcmp(&str, &req->str, str_length) || memcmp(&start, &req->start, sizeof(int32_t)) || memcmp(&length, &req->length, sizeof(int32_t))) {
@@ -296,11 +296,11 @@ int Replayer::replay_request(void* req_buffer)
         last_real_timestamp = real_timestamp;
         last_record_timestamp = record_timestamp;
     }
-    
+
     return resp;
 }
 
-void Replayer::update_replay_files(const std::vector<std::string> &fileList)
+void Replayer::update_replay_files(const std::vector<std::string>& fileList)
 {
     filenames = fileList;
     replay_file = nullptr;

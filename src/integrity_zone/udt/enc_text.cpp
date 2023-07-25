@@ -72,7 +72,7 @@ Datum enc_text_decrypt(PG_FUNCTION_ARGS)
 // @return: pointer to a structure describing enc_text element.
 Datum enc_text_in(PG_FUNCTION_ARGS)
 {
-    char * pIn = PG_GETARG_CSTRING(0);
+    char* pIn = PG_GETARG_CSTRING(0);
     EncText* result;
 
     if (clientMode == true) {

@@ -5,8 +5,8 @@
 #include <request.hpp>
 #include <request_types.h>
 
-#include <rr_utils.hpp>
 #include <assert.h>
+#include <rr_utils.hpp>
 
 void Recorder::update_write_fd(std::string filename_prefix)
 {
@@ -54,7 +54,7 @@ void Recorder::record(void* req_buffer)
             size_t length = sizeof(int) * 3 + ENC_FLOAT4_LENGTH * 2 + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
             uint64_t timestamp = get_timestamp();
-            rrprintf(1, dst, 6, 
+            rrprintf(1, dst, 6,
                 sizeof(int), &req_control->reqType,
                 ENC_FLOAT4_LENGTH, &req->left,
                 ENC_FLOAT4_LENGTH, &req->right,
@@ -83,7 +83,7 @@ void Recorder::record(void* req_buffer)
             size_t length = sizeof(int) * 2 + ENC_FLOAT4_LENGTH * 3 + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
             uint64_t timestamp = get_timestamp();
-            rrprintf(1, dst, 6, 
+            rrprintf(1, dst, 6,
                 sizeof(int), &req->op,
                 ENC_FLOAT4_LENGTH, &req->left,
                 ENC_FLOAT4_LENGTH, &req->right,
@@ -131,7 +131,7 @@ void Recorder::record(void* req_buffer)
             size_t length = sizeof(int) * 2 + ENC_INT32_LENGTH * 3 + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
             uint64_t timestamp = get_timestamp();
-            rrprintf(1, dst, 6, 
+            rrprintf(1, dst, 6,
                 sizeof(int), &req->op,
                 ENC_INT32_LENGTH, &req->left,
                 ENC_INT32_LENGTH, &req->right,
@@ -201,7 +201,7 @@ void Recorder::record(void* req_buffer)
             int length = sizeof(int) * 3 + ENC_TIMESTAMP_LENGTH * 2 + sizeof(uint64_t);
             char* dst = get_write_buffer(length);
             uint64_t timestamp = get_timestamp();
-            rrprintf(1, dst, 6, 
+            rrprintf(1, dst, 6,
                 sizeof(int), &req_control->reqType,
                 ENC_TIMESTAMP_LENGTH, &req->left,
                 ENC_TIMESTAMP_LENGTH, &req->right,
@@ -222,4 +222,3 @@ void Recorder::record(void* req_buffer)
         }
     }
 }
-

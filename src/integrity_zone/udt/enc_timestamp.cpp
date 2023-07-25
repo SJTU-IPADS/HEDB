@@ -128,7 +128,7 @@ Datum enc_timestamp_decrypt(PG_FUNCTION_ARGS)
  */
 Datum enc_timestamp_in(PG_FUNCTION_ARGS)
 {
-    char * pIn = PG_GETARG_CSTRING(0);
+    char* pIn = PG_GETARG_CSTRING(0);
     EncTimestamp* result = (EncTimestamp*)palloc0(ENC_TIMESTAMP_LENGTH);
 
     if (clientMode == true) {

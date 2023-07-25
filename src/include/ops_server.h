@@ -18,6 +18,6 @@ typedef struct ops_server {
     int __res; // reserved filed, avoid cache false sharing.
     ShmReqStat volatile status;
     int free_id; // free region id
-    int ret_id; // return region id
+    int ret_id;  // return region id
     unsigned int bitmap;
 } OpsServer;

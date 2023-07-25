@@ -5,24 +5,30 @@
 #include <chrono>
 using namespace std;
 using namespace chrono;
-class myTime
-{
+class myTime {
 private:
-	time_point<high_resolution_clock> start;
-	time_point<high_resolution_clock> end;
-	double duration;
+    time_point<high_resolution_clock> start;
+    time_point<high_resolution_clock> end;
+    double duration;
+
 public:
-	myTime():start(),end(),duration(-1) {};
-	~myTime() { };
-	void tic(){
-	    start = high_resolution_clock::now();
+    myTime()
+        : start()
+        , end()
+        , duration(-1) {};
+    ~myTime() {};
+    void tic()
+    {
+        start = high_resolution_clock::now();
     };
-	void toc(){
+    void toc()
+    {
         end = high_resolution_clock::now();
         auto dur = duration_cast<nanoseconds>(end - start);
         duration = double(dur.count()) * nanoseconds::period::num / nanoseconds::period::den * 1000000000;
     };
-    double getDuration(){
+    double getDuration()
+    {
         return duration;
     };
 };

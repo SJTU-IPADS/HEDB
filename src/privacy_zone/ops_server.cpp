@@ -7,8 +7,8 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/shm.h>
-#include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "barrier.h"
@@ -225,14 +225,7 @@ pid_t fork_ops_process(void* shm_addr)
             // auto start = std::chrono::system_clock::now();
             // printf("request received %d\n", req->reqType);
             counter++;
-            if (req->reqType != CMD_INT_ENC
-                && req->reqType != CMD_INT_DEC
-                && req->reqType != CMD_FLOAT_ENC
-                && req->reqType != CMD_FLOAT_DEC
-                && req->reqType != CMD_STRING_ENC
-                && req->reqType != CMD_STRING_DEC
-                && req->reqType != CMD_TIMESTAMP_ENC
-                && req->reqType != CMD_TIMESTAMP_DEC)
+            if (req->reqType != CMD_INT_ENC && req->reqType != CMD_INT_DEC && req->reqType != CMD_FLOAT_ENC && req->reqType != CMD_FLOAT_DEC && req->reqType != CMD_STRING_ENC && req->reqType != CMD_STRING_DEC && req->reqType != CMD_TIMESTAMP_ENC && req->reqType != CMD_TIMESTAMP_DEC)
                 non_enc_counter++;
             if (req->reqType > 0)
                 handle_ops(req);
