@@ -6,7 +6,7 @@ First you need to have a CVM in hand, like AMD SEV or Intel TDX.
 
 Then you can install PostgreSQL or MySQL inside the CVM.
 
-Finally, make sure you are using an SSH tunnel to communicate with the CVM and PostgreSQL.
+Finally, make sure you are using an SSH tunnel to communicate with the CVM and PostgreSQL/MySQL.
 
 In order to prevent data breach from the untrusted storage, you can use Linux `dm-crypt` for convenience.
 
@@ -14,7 +14,7 @@ In order to prevent data breach from the untrusted storage, you can use Linux `d
 
 ```bash
 sudo apt install cryptsetup
-sudo modprobe brd rd_nr=1 rd_size=$((10*1024*1024))
+sudo modprobe brd rd_nr=1 rd_size=$((2*1024*1024*1024))
 ls /dev/ram0
 fallocate -l 2M crypthdr.img
 sudo cryptsetup luksFormat /dev/ram0 --header crypthdr.img

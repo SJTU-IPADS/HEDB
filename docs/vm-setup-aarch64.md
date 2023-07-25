@@ -64,12 +64,13 @@ sudo apt-get install -y build-essential cmake libmbedtls-dev
 Then pull the HEDB repo:
 ```sh
 git clone https://github.com/SJTU-IPADS/HEDB
+cd HEDB
 make
 ```
 
 Install the HEDB uio-ivshmem kernel driver:
 ```sh
-cd HEDB/src/driver/ivshmem-driver
+cd HEDB/tools/drivers/ivshmem-driver
 make
 sudo insmod uio-<kernel-version>.ko
 sudo insmod uio-ivshmem.ko
@@ -117,7 +118,7 @@ sudo make install
 
 Install the HEDB uio-ivshmem kernel driver:
 ```sh
-cd HEDB/src/driver/ivshmem-driver
+cd HEDB/tools/drivers/ivshmem-driver
 make
 sudo insmod uio-<kernel-version>.ko
 sudo insmod uio-ivshmem.ko
@@ -197,7 +198,7 @@ Note that the migration back to CVM phase should check the VM integrity carefull
 
 # How to Apply HotFix?
 
-Please refer to the README of `scripts/template_hotfix`.
+Please refer to the README of `tools/hotfix`.
 
 # Misc
 
