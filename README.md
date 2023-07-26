@@ -7,7 +7,7 @@
 
 HEDB is an extension of PostgreSQL to compute SQL over ciphertexts, in addition to a suite of maintenance tools.
 
-* HEDB is now under active development and intensive refinement.
+*HEDB is now under active development and intensive refinement.*
 
 Here is a quick overview for any newcomer to understand the purpose of HEDB. It would take 15 minutes for you.
 
@@ -68,7 +68,7 @@ We recommend you to use 2-VM setup, which is exactly how HEDB works.
 
 #### Is HEDB limited to ARM?
 
-*Absolutely not!* You can deploy it to any TEE or CC platform that you like. For exmaple, confidential VM (CVM) is widely available on today's trusted hardware, such as AMD SEV(-ES,-SNP), Intel TDX, IBM PEF, ARMv9 Realm. You can deploy HEDB's integrity zone (DBMS+extension) using one CVM, and HEDB's privacy zone (operators) in another CVM. That's it!
+**Absolutely not!** You can deploy it to any TEE or CC platform that you like. For exmaple, confidential VM (CVM) is widely available on today's trusted hardware, such as AMD SEV(-ES,-SNP), Intel TDX, IBM PEF, ARMv9 Realm. You can deploy HEDB's integrity zone (DBMS+extension) using one CVM, and HEDB's privacy zone (operators) in another CVM. That's it!
 
 To reproduce the performance evaluation results, you can run HEDB using two CVMs on a CC machine.
 
