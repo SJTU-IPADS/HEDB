@@ -59,8 +59,8 @@ The 17th USENIX Symposium on Operating Systems Design and Implementation (OSDI �
 
 ### How to Build?
 
-- For non-VM setup, refer to `docs/install.md`. Note that this is for development only.
-- For 2-VM setup, please refer to `docs/vm-setup.md`.
+- For non-VM setup, refer to [install.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/install.md). Note that this is for development only.
+- For 2-VM setup, please refer to [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md).
 
 We recommend you to use 2-VM setup, which is exactly how HEDB works.
 
@@ -68,7 +68,7 @@ We recommend you to use 2-VM setup, which is exactly how HEDB works.
 
 #### Is HEDB limited to ARM?
 
-**Absolutely not!** You can deploy it to any TEE or CC platform that you like. For exmaple, confidential VM (CVM) is widely available on today's trusted hardware, such as AMD SEV(-ES,-SNP), Intel TDX, IBM PEF, ARMv9 Realm. You can deploy HEDB's integrity zone (DBMS+extension) using one CVM, and HEDB's privacy zone (operators) in another CVM. That's it!
+**Absolutely not!** You can deploy it to any TEE or CC platform you like. For exmaple, confidential VM (CVM) is widely available on today's trusted hardware, such as AMD SEV(-ES,-SNP), Intel TDX, IBM PEF, ARMv9 Realm. You can deploy HEDB's integrity zone (DBMS+extension) using one CVM, and HEDB's privacy zone (operators) in another CVM. That's it!
 
 To reproduce the performance evaluation results, you can run HEDB using two CVMs on a CC machine.
 
@@ -103,9 +103,9 @@ HEDB's current implementation has several limitations.
 The proof-of-concept of HEDB has some insecure implementations:
 
 1. The prototype contains encryption and decryption operators (e.g., `enc_int4_encrypt`) for the purpose of debugging. They should be all eliminated. A DBA should only see ciphertexts in the `base64` form, by turning on `SELECT enable_server_mode()`.
-2. The operators uses a hard-coded key and iv for data en/decryption; see `src/privacy_zone/crypto.cpp`. A good practice would harness cliend-side encryption. See [Acra](https://github.com/cossacklabs/acra).
+2. The operators uses a hard-coded key and iv for data en/decryption; see [src/privacy_zone/crypto.cpp](https://github.com/SJTU-IPADS/HEDB/blob/main/src/privacy_zone/crypto.cpp). A good practice would harness cliend-side encryption. See [Acra](https://github.com/cossacklabs/acra).
 3. The anonymized replay does not support troubleshooting cryptographic algorithms (e.g., mbedtls), because concolic executors such as KLEE cannot scale over them. You may be interested in this [research direction](https://ieeexplore.ieee.org/document/8023121).
-4. The authenticated replay does not support query rewriting. Replay should use search instead of match. Improve them in `src/integrity_zone/rr`.
+4. The authenticated replay does not support query rewriting. Replay should use search instead of match. Improve them in [src/integrity_zone/rr](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/rr).
 
 #### Anecdotes
 
@@ -124,4 +124,4 @@ HEDB is pronounced [haɪdiːbiː] or 嗨嘀哔.
 ## Acknowledgement
 
 - Database and Storage Lab@Alibaba DAMO Academy, who provides insights of real-world DBA tasks. Special thanks to Huorong Li and Sheng Wang!
-- [StealthDB](https://github.com/cryptograph/stealthdb), who provides the initial version of EDB for PostgreSQL.
+- [StealthDB](https://github.com/cryptograph/stealthdb), who provides the initial version of EDB extensions for PostgreSQL.
