@@ -354,7 +354,7 @@ CREATE OPERATOR !~~ (
   PROCEDURE = enc_text_notlike
 );
 
-CREATE FUNCTION pg_catalog.substring(enc_text, int4, int4)
+CREATE FUNCTION pg_catalog.substring(enc_text, enc_int4, enc_int4)
 RETURNS enc_text AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 
 -- sets the order in the text field in enc_text

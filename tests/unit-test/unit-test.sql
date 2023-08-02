@@ -10,8 +10,8 @@ SELECT enable_client_mode();
 
 SELECT plan(46);
 
-SELECT ok(enc_int4_decrypt(enc_int4_encrypt(1)) = 1::int4, 'enc_int4: encryption/decryption test');
-SELECT ok(enc_float4_decrypt(enc_float4_encrypt(1.1)) = 1.1::float4, 'enc_float4: encryption/decryption test');
+SELECT ok(enc_int4_decrypt(enc_int4_encrypt('1')) = '1'::int4, 'enc_int4: encryption/decryption test');
+SELECT ok(enc_float4_decrypt(enc_float4_encrypt('1.1')) = '1.1'::float4, 'enc_float4: encryption/decryption test');
 
 DROP TABLE IF EXISTS test_table;
 CREATE TABLE test_table (id int, num_i enc_int4, num_f enc_float4, str enc_text, time enc_timestamp);
@@ -98,7 +98,7 @@ SELECT ok('test1'::enc_text = 'test1'::enc_text, 'enc_text: inequality test, ope
 SELECT ok('test1'::enc_text != 'test2'::enc_text, 'enc_text: inequality test, operator !=');
 SELECT ok('test1'::enc_text <> 'test2'::enc_text, 'enc_text: inequality test, operator <>');
 SELECT ok('hello'::enc_text || 'world'::enc_text = 'helloworld'::enc_text, 'enc_text: operator ||');
-SELECT ok('edb'::enc_text = substring('hedb'::enc_text, 2, 3), 'enc_text: operator substring');
+SELECT ok('edb'::enc_text = substring('hedb'::enc_text, '2'::enc_int4, '3'::enc_int4), 'enc_text: operator substring');
 
 SELECT * FROM finish();
 DROP TABLE IF EXISTS test_table;

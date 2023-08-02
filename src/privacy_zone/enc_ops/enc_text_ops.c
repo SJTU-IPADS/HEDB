@@ -81,10 +81,14 @@ int enc_text_substring(SubstringRequestData* req)
         return resp;
     str.data[str.len] = '\0';
 
-    memcpy(&start, (uint8_t*)&req->start, sizeof(start));
-    memcpy(&length, (uint8_t*)&req->length, sizeof(length));
-    // resp = decrypt_bytes((uint8_t*)&req->start, sizeof(req->start), (uint8_t*)&start, sizeof(start));
-    // resp = decrypt_bytes((uint8_t*)&req->length, sizeof(req->length), (uint8_t*)&length, sizeof(length));
+    // memcpy(&start, (uint8_t*)&req->start, sizeof(start));
+    // memcpy(&length, (uint8_t*)&req->length, sizeof(length));
+    resp = decrypt_bytes((uint8_t*)&req->start, sizeof(req->start), (uint8_t*)&start, sizeof(start));
+    if (resp != 0)
+        return resp;
+    resp = decrypt_bytes((uint8_t*)&req->length, sizeof(req->length), (uint8_t*)&length, sizeof(length));
+    if (resp != 0)
+        return resp;
 
     plain_text_substring(str.data, start, length, sub.data);
     sub.len = length;

@@ -89,7 +89,7 @@ def PrepProcess(propFile = DEFAULT_TPCH_CONFIG):
         outputQueryFile.write(current_query)
         outputQueryFile.close()
 
-        print(f"query Q{i}: done")
+        # print(f"query Q{i}: done")
 
         conn.commit()
         cur.close()
@@ -123,7 +123,10 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none', mode
     else:
         pgDB = 'insecure_test'
         queryDirectory = insecureQueryDir
-    
+
+    if record:
+        PrepProcess()
+
     folder = os.path.exists(outputDir)
     if not folder:
         os.makedirs(outputDir)
@@ -178,10 +181,6 @@ def main():
     parser.add_argument('-m', '--mode', type=str, default='seq', help='\'seq\' mode for essential replay, \'perf\' mode for performance replay')
     parser.add_argument('-t', '--transform', action='store_true', help='construct cipher queries')
     args = parser.parse_args()
-
-    if args.transform:
-         PrepProcess()
-         return
 
     if not args.skip_generate:
         PrepBenchmark()

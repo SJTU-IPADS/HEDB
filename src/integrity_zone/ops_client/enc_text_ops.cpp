@@ -38,9 +38,9 @@ int enc_text_concatenate(EncStr* left, EncStr* right, EncStr* res)
     return resp;
 }
 
-int enc_text_substring(EncStr* str, int32_t start, int32_t length, EncStr* res)
+int enc_text_substring(EncStr* str, EncInt* start, EncInt* length, EncStr* res)
 {
-    auto req = ThreeArgRequest<EncStr, int32_t, int32_t, EncStr, CMD_STRING_SUBSTRING>(str, &start, &length, res);
+    auto req = ThreeArgRequest<EncStr, EncInt, EncInt, EncStr, CMD_STRING_SUBSTRING>(str, start, length, res);
     TEEInvoker* invoker = TEEInvoker::getInstance();
     int resp = invoker->sendRequest(&req);
     return resp;
