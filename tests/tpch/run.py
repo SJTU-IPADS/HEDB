@@ -84,8 +84,8 @@ def PrepProcess(propFile = DEFAULT_TPCH_CONFIG):
             cur.execute('SELECT %s;' % (match)) # fetch each cipher
             prefix = re.sub(suffix_pattern, '', match)
             replacement_value = '\'%s\'::%s' % (cur.fetchall()[0][0], prefix)
-            prefix_pattern = prefix + r'_encrypt\([^)]*\)'
-            current_query = re.sub(prefix_pattern, replacement_value, current_query)
+            # print('%s => %s' % (match, replacement_value))
+            current_query = current_query.replace(match, replacement_value)
 
         # generate a =query whose constants become base64 cipher
         outputQueryFile = open(cipherQueryDir + f"/Q{i}.sql", "w+");
@@ -184,6 +184,10 @@ def main():
     parser.add_argument('-m', '--mode', type=str, default='seq', help='\'seq\' mode for essential replay, \'perf\' mode for performance replay')
     parser.add_argument('-t', '--transform', action='store_true', help='construct cipher queries')
     args = parser.parse_args()
+
+    if args.transform:
+        PrepProcess()
+        return
 
     if not args.skip_generate:
         PrepBenchmark()
