@@ -15,7 +15,7 @@ Here is a quick overview for any newcomer to understand the purpose of HEDB. It 
 
 Today's database systems contain much sensitive data, and some are outsourced to third-parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary.
 
-**Option-1**: To build an encrypted database (EDB), one can put an entire database into an isolated domain, or confidential computing unit (for example, SGX, SEV, TDX, Realm, PEF, Nitro, etc.). We name it Type-I. Sadly, Type-I would prevent database admins, or DBAs, from managing the database, right? Note that DBAs can simply log into the DBMS and inspect any user data.
+**Option-1**: To build an encrypted database (EDB), one can put an entire database into an isolated domain, or confidential computing unit (like SGX, SEV, TDX, Realm, PEF, Nitro, HyperEnclave, and whatever you name it). We name it Type-I. Sadly, Type-I would prevent database admins, or DBAs, from managing the database, right? Note that DBAs can simply log into the DBMS and inspect any user data.
 
 **Option-2**: Cloud DBaaS vendors such as Azure, Alibaba provision operator-based EDBs. You can look into `src` to learn how we build one using PostgreSQL' user-defined types (UDTs) and user-defined functions (UDFs). We name it Type-II. This allows a DBA to log into the database, but keeps data always in the ciphertext form to avoid potential leakage. Good idea!
 
