@@ -42,7 +42,10 @@ def PrepBenchmark(propFile = DEFAULT_TPCH_CONFIG):
     cmd = f"PGPASSWORD={pgPW} psql -h {pgIp} -p {pgPort} -U {pgUser} -f {schema}"
     executeCommand(cmd)
     for table in tables:
-        cmd = f"cat {table}.tbl | PGPASSWORD={pgPW} psql -h {pgIp} -p {pgPort} -U {pgUser} -d {pgDB} -c \"SELECT enable_client_mode(); COPY {table} FROM stdin WITH DELIMITER AS '|';\""
+        if secureQuery == "y":
+            cmd = f"cat {table}.tbl | PGPASSWORD={pgPW} psql -h {pgIp} -p {pgPort} -U {pgUser} -d {pgDB} -c \"SELECT enable_client_mode(); COPY {table} FROM stdin WITH DELIMITER AS '|';\""
+        else:
+            cmd = f"cat {table}.tbl | PGPASSWORD={pgPW} psql -h {pgIp} -p {pgPort} -U {pgUser} -d {pgDB} -c \"COPY {table} FROM stdin WITH DELIMITER AS '|';\""
         executeCommand(cmd)
         
     executeCommand("find . -name \"*.tbl\" | xargs rm")
@@ -120,12 +123,12 @@ def RunTest(propFile = DEFAULT_TPCH_CONFIG, query = 0, recordReplay='none', mode
             record = True
         elif recordReplay == 'replay':
             replay = True
+
+        if not replay:
+            PrepProcess()
     else:
         pgDB = 'insecure_test'
         queryDirectory = insecureQueryDir
-
-    if record:
-        PrepProcess()
 
     folder = os.path.exists(outputDir)
     if not folder:
