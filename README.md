@@ -3,7 +3,9 @@
 ![Status](https://img.shields.io/badge/Version-Experimental-green.svg)
 [![License: MIT](https://img.shields.io/badge/License-Mulan-brightgreenn.svg)](http://license.coscl.org.cn/MulanPubL-2.0)
 
-<img src="scripts/figures/hedb.jpg" width = "300" height = "200" align=center />
+<p align="center">
+	<img src="scripts/figures/hedb.jpg" width = "300" height = "200" align=center />
+</p>
 
 HEDB is an extension of PostgreSQL to compute SQL over ciphertexts, in addition to a suite of maintenance tools.
 
@@ -19,7 +21,9 @@ Today's database systems contain much sensitive data, and some are outsourced to
 
 **Option-2**: Cloud DBaaS vendors such as Azure, Alibaba provision operator-based EDBs. You can look into `src` to learn how we build one using PostgreSQL' user-defined types (UDTs) and user-defined functions (UDFs). We name it Type-II. This allows a DBA to log into the database, but keeps data always in the ciphertext form to avoid potential leakage. Good idea!
 
-<img src="scripts/figures/types.jpg" width = "600" height = "160" align=center />
+<p align="center">
+	<img src="scripts/figures/types.jpg" width = "600" height = "160" align=center />
+</p>
 
 Sad again, we've discovered an attack, which we name "smuggle". You can find it in `scripts/smuggle.py`. Why smuggle exists is that Type-II exposes too many expression operators for admins to construct an "oracle".
 
