@@ -3,7 +3,7 @@
 ![Status](https://img.shields.io/badge/Version-Experimental-green.svg)
 [![License: MIT](https://img.shields.io/badge/License-Mulan-brightgreenn.svg)](http://license.coscl.org.cn/MulanPubL-2.0)
 
-<img src="scripts/hedb.jpg" width = "300" height = "200" align=center />
+<img src="scripts/figures/hedb.jpg" width = "300" height = "200" align=center />
 
 HEDB is an extension of PostgreSQL to compute SQL over ciphertexts, in addition to a suite of maintenance tools.
 
@@ -18,6 +18,8 @@ Today's database systems contain much sensitive data, and some are outsourced to
 **Option-1**: To build an encrypted database (EDB), one can put an entire database into an isolated domain, or confidential computing unit (like SGX, SEV, TDX, Realm, PEF, Nitro, HyperEnclave, and whatever you name it). We name it Type-I. Sadly, Type-I would prevent database admins, or DBAs, from managing the database, right? Note that DBAs can simply log into the DBMS and inspect any user data.
 
 **Option-2**: Cloud DBaaS vendors such as Azure, Alibaba provision operator-based EDBs. You can look into `src` to learn how we build one using PostgreSQL' user-defined types (UDTs) and user-defined functions (UDFs). We name it Type-II. This allows a DBA to log into the database, but keeps data always in the ciphertext form to avoid potential leakage. Good idea!
+
+<img src="scripts/figures/types.jpg" width = "600" height = "160" align=center />
 
 Sad again, we've discovered an attack, which we name "smuggle". You can find it in `scripts/smuggle.py`. Why smuggle exists is that Type-II exposes too many expression operators for admins to construct an "oracle".
 
@@ -66,19 +68,19 @@ We recommend you to use 2-VM setup, which is exactly how HEDB works.
 
 ### FAQs
 
-#### Is HEDB limited to ARM?
+#### Q1: Is HEDB limited to ARM?
 
-**Absolutely not!** You can deploy it to any TEE or CC platform you like. For exmaple, confidential VM (CVM) is widely available on today's trusted hardware, such as AMD SEV(-ES,-SNP), Intel TDX, IBM PEF, ARMv9 Realm. You can deploy HEDB's integrity zone (DBMS+extension) using one CVM, and HEDB's privacy zone (operators) in another CVM. That's it!
+***Absolutely not!*** You can deploy it to any TEE or CC platform you like. For exmaple, confidential VM (CVM) is widely available on today's trusted hardware, such as AMD SEV(-ES,-SNP), Intel TDX, IBM PEF, ARMv9 Realm. You can deploy HEDB's integrity zone (DBMS+extension) using one CVM, and HEDB's privacy zone (operators) in another CVM. That's it!
 
 To reproduce the performance evaluation results, you can run HEDB using two CVMs on a CC machine.
 
-#### How to realize two modes?
+#### Q2: How to realize two modes?
 
 For SEV, TDX, PEF, and Realm, your task is to enable support for VM fork or VM migration between trusted domains and untrusted domains. Currently, this task remains unfinished. If VM fork/migration is also needed in other scenarios, it could serve as a potential research area.
 
 In our paper, our prototype relies on an ARM server that supports S-EL2, a hardware virtualization technology present in ARMv8.4. [Twinvisor](https://github.com/TwinVisor/twinvisor-prototype) is an S-EL2 hypervisor developed by IPADS@SJTU. We plan to commit the Twinvisor patch, but no guarantee (for intellectual property reasons).
 
-#### Supporting TPC-C?
+#### Q3: Supporting TPC-C?
 
 The current version of HEDB is based on PostgreSQL and supports the TPC-H benchmark only.
 
