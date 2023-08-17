@@ -1,7 +1,6 @@
 # HEDB
 
-![Status](https://img.shields.io/badge/Version-Experimental-green.svg)
-[![License: MIT](https://img.shields.io/badge/License-Mulan-brightgreenn.svg)](http://license.coscl.org.cn/MulanPubL-2.0)
+![Status](https://img.shields.io/badge/Version-Experimental-green.svg)[![License: MIT](https://img.shields.io/badge/License-Mulan-brightgreenn.svg)](http://license.coscl.org.cn/MulanPubL-2.0)
 
 <p align="center">
 	<img src="scripts/figures/hedb.jpg" width = "300" height = "200" align=center />
@@ -9,7 +8,7 @@
 
 HEDB is an extension of PostgreSQL to compute SQL over ciphertexts, in addition to a suite of maintenance tools.
 
-*HEDB is now under active development and intensive refinement.*
+*HEDB is an open project and highly values your feedback! We would like to hear your thoughts on our project and how we can improve it to better meet your needs.*
 
 Here is a quick overview for any newcomer to understand the purpose of HEDB. It would take 15 minutes for you.
 
