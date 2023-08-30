@@ -8,38 +8,42 @@
 
 HEDB is an extension of PostgreSQL to compute SQL over ciphertexts, in addition to a suite of maintenance tools.
 
-*HEDB is an open project and highly values your feedback! We would like to hear your thoughts on our project and how we can improve it to better meet your needs.*
+*HEDB is an open project and highly values your feedback! We would like to hear your thoughts on our project and how we can improve it.*
 
 Here is a quick overview for any newcomer to understand the purpose of HEDB. It would take 15 minutes for you.
 
 ## What For?
 
-Today's database systems contain much sensitive data, and some are outsourced to third-parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary.
+Database systems may contain sensitive data, and some are outsourced to third-parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary.
 
-**Option-1**: To build an encrypted database (EDB), one can put an entire database into an isolated domain, or confidential computing unit (like SGX, SEV, TDX, Realm, PEF, Nitro, HyperEnclave, and whatever you name it). We name it Type-I. Sadly, Type-I would prevent database admins, or DBAs, from managing the database, right? Note that DBAs can simply log into the DBMS and inspect any user data.
+**Option-1**: To build an encrypted database (EDB), one can place an entire database into an isolated domain, or confidential computing unit (like Intel SGX, AMD SEV, Intel TDX, ARM Realm, IBM PEF, AWS Nitro, Ant HyperEnclave, and whatever you name it). We call it Type-I EDB. Sadly, Type-I would prevent database admins, or DBAs, from managing the database, right? If DBAs were able to log into the DBMS, they would inspect any user data.
 
-**Option-2**: Cloud DBaaS vendors such as Azure, Alibaba provision operator-based EDBs. You can look into `src` to learn how we build one using PostgreSQL' user-defined types (UDTs) and user-defined functions (UDFs). We name it Type-II. This allows a DBA to log into the database, but keeps data always in the ciphertext form to avoid potential leakage. Good idea!
+**Option-2**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into [src](https://github.com/SJTU-IPADS/HEDB/blob/main/src/) to navigate how to build such an EDB using PostgreSQL' user-defined types (UDTs) and user-defined functions (UDFs). We call it Type-II EDB. Type-II EDB allows a DBA to log into the database, but keeps data always in ciphertext to avoid potential leakage. Cool!
 
 <p align="center">
 	<img src="scripts/figures/types.jpg" width = "600" height = "160" align=center />
 </p>
 
-Sad again, we've discovered an attack, which we name "smuggle". You can find it in `scripts/smuggle.py`. Why smuggle exists is that Type-II exposes too many expression operators for admins to construct an "oracle".
+Sad again, we've discovered an attack, which we name "smuggle". You can find it in [scripts/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/scripts/smuggle.py). The reason why smuggle exists is that the Type-II EDB exposes too many expression operators for admins to construct an "oracle".
 
 ## Smuggle Attacks
 
 Here is a minimal working example.
 
-1. **Constructing oracles**: With ÷, DBAs obtain the ciphertext of ‘1’ by dividing a number by itself. With ‘1’, DBAs construct all encrypted integers by iteratively + the cipher ‘1’ to a counter.
+1. **Constructing oracles**:
+   i. With ÷, DBAs obtain the ciphertext of '1' by dividing a number by itself.
+   ii. With '1', DBAs construct all encrypted integers by iteratively + the cipher '1' to a counter.
+
 2. **Recovering secrets**: With =, DBAs recover encrypted values by comparing them with known ciphertexts.
 
 ## HEDB
 
-The idea of HEDB is simple. It splits the running mode of EDB into two: record for users, and replay for DBAs. HEDB is named after Helium, implying its two modes.
+The idea of HEDB is simple. It splits the running mode of EDB into two: *record* for users, and *replay* for DBAs.
 
-Briefly, HEDB is a dual-mode encrypted database that removes the tension between security and maintenance.
+HEDB is named after Helium, implying its two modes. Briefly, HEDB is a dual-mode encrypted database that removes the tension between security and maintenance.
+
 1) Execution Mode achieves interface security by blocking illegal operator invocations,
-2) Maintenance Mode allows DBA common maintenance tasks by replaying legal invocations.
+2) Maintenance Mode allows DBA common maintenance tasks by replaying invocations.
 
 ### Paper
 
@@ -73,35 +77,33 @@ We recommend you to use 2-VM setup, which is exactly how HEDB works.
 
 #### Q1: Is HEDB limited to ARM?
 
-***Absolutely not!*** You can deploy it to any TEE or CC platform you like. For exmaple, confidential VM (CVM) is widely available on today's trusted hardware, such as AMD SEV(-ES,-SNP), Intel TDX, IBM PEF, ARMv9 Realm. You can deploy HEDB's integrity zone (DBMS+extension) using one CVM, and HEDB's privacy zone (operators) in another CVM. That's it!
+***Absolutely not!*** You can deploy it to any TEE or CC platform you like. For exmaple, confidential VM (CVM) is widely supported on modern trusted hardware, such as AMD SEV(-ES,-SNP), Intel TDX, IBM PEF, ARMv9 Realm. You can deploy HEDB's integrity zone (DBMS+extension) using one CVM, and HEDB's privacy zone (operators) in another CVM. That's it!
 
 To reproduce the performance evaluation results, you can run HEDB using two CVMs on a CC machine.
 
 #### Q2: How to realize two modes?
 
-For SEV, TDX, PEF, and Realm, your task is to enable support for VM fork or VM migration between trusted domains and untrusted domains. Currently, this task remains unfinished. If VM fork/migration is also needed in other scenarios, it could serve as a potential research area.
+For AMD SEV, Intel TDX, IBM PEF, and ARM Realm, your task is to enable CVM fork or migration between trusted domains and untrusted domains. This task remains undone. If CVM fork/migration is needed in other scenarios, it could serve as a potential research area.
 
-In our paper, our prototype relies on an ARM server that supports S-EL2, a hardware virtualization technology present in ARMv8.4. [Twinvisor](https://github.com/TwinVisor/twinvisor-prototype) is an S-EL2 hypervisor developed by IPADS@SJTU. We plan to commit the Twinvisor patch, but no guarantee (for intellectual property reasons).
+Our current prototype uses an ARM server that supports S-EL2, a hardware virtualization technology present in ARMv8.4. [Twinvisor](https://github.com/TwinVisor/twinvisor-prototype) is an S-EL2 hypervisor developed by IPADS@SJTU. We plan to commit the Twinvisor patch, but no guarantee (for intellectual property reasons).
 
 #### Q3: Supporting TPC-C?
 
 The current version of HEDB is based on PostgreSQL and supports the TPC-H benchmark only.
 
-We encourage further research to overcome the challenges posed by non-determinism when supporting TPC-C atop HEDB. We believe your excellent work will absolutely be published and known to the industry.
+We encourage further research to overcome the challenges posed by non-determinism when running TPC-C atop HEDB. We believe your excellent work will also be published and known to the industry.
 
 ### Notes
 
-This repository is intended as a research prototype, and is not ready for production use. Its purpose is to serve as an experimental platform for conducting research and exploring new ideas.
-
-In addition, HEDB serves as an educational project focused on enhancing students' understanding of the internal of an EDB.
+This repository is intended as a research prototype, and is not ready for any production use. Its purpose is to serve as an experimental platform for conducting research and exploring new ideas. Additionally, HEDB serves as an educational project to enhance students' understanding of the EDB's internal.
 
 #### Limitations
 
-HEDB's current implementation has several limitations.
+HEDB's current implementation has limitations.
 
 1. HEDB relies on deterministic record-and-replay of operator interfaces to reproduce the DBMS bugs, hence falling short in providing read-write transactional workloads such as TPC-C. To maintain TPC-C, only a subset of HEDB operators (e.g., comparison) need to be exposed to both users and DBAs. See Figure-5 in [Azure AEv2](https://dl.acm.org/doi/abs/10.1145/3318464.3386141).
 2. HEDB depends on KLEE to reproduce the operators bugs. The official version of KLEE cannot support floating-point numbers. HEDB inherits this limitation. You may use [KLEE-Float](https://github.com/srg-imperial/klee-float).
-3. HEDB leverages an ARMv8.4 server with S-EL2 (TrustZone Virtualization) to support its dual-mode design. This design can be ported to other architectures (e.g., Intel SGX, AMD SEV-SNP, Intel TDX and ARMv9 CCA). Please refer to `docs/porting.md` to replicate HEDB's performance results on Intel SGX (using SGX SDK) and ARM TrustZone (using OP-TEE). Note that the mode switch, namely, cross-domain VM fork, on these architectures is not implemented and remains an open question.
+3. HEDB leverages an ARMv8.4 server with S-EL2 (TrustZone Virtualization) to support its dual-mode design. This design can be ported to other platforms. Refer to [porting.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/porting.md) to replicate HEDB's performance results on Intel SGX (using SGX SDK) and ARM TrustZone (using OP-TEE). Note that the mode switch on these platforms is not implemented.
 
 #### Caveats
 
@@ -116,7 +118,7 @@ The proof-of-concept of HEDB has some insecure implementations:
 
 Why name HEDB (Helium Database)?
 
-Helium or He is the lightest neutral gas, known for its lack of reactivity and low density. In the context of HEDB, the analogy to helium highlights its ability to achieve isolation from the rest of the system while maintaining simplicity in usage. Additionally, the reference to helium being the 2nd element alludes to the dual modes supported by HEDB.
+HE, short for Helium, is the lightest neutral gas, known for its lack of reactivity and low density. The analogy to helium highlights HEDB's ability to achieve isolation from the rest while maintaining simplicity in usage. More, the reference to helium being the 2nd element alludes to HEDB's dual modes.
 
 HEDB is pronounced [haɪdiːbiː] or 嗨嘀哔.
 
@@ -128,5 +130,5 @@ HEDB is pronounced [haɪdiːbiː] or 嗨嘀哔.
 
 ## Acknowledgement
 
-- Database and Storage Lab@Alibaba DAMO Academy, who provides insights of real-world DBA tasks. Special thanks to Huorong Li and Sheng Wang!
+- Database and Storage Lab@Alibaba DAMO Academy, who provides insights from real-world DBA tasks.
 - [StealthDB](https://github.com/cryptograph/stealthdb), who provides the initial version of EDB extensions for PostgreSQL.

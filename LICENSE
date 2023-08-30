@@ -1,8 +1,6 @@
 HEDB is licensed under Mulan PSL v2.
 
-Copyright (C) 2021 - 2023 The HEDB Project. All rights reserved.
-
-Mulan Permissive Software License，Version 2
+Copyright (c) 2021 - 2023 The HEDB Project. All rights reserved.
 
 Mulan Permissive Software License，Version 2 (Mulan PSL v2)
 
@@ -47,19 +45,3 @@ THE SOFTWARE AND CONTRIBUTION IN IT ARE PROVIDED WITHOUT WARRANTIES OF ANY KIND,
 THIS LICENSE IS WRITTEN IN BOTH CHINESE AND ENGLISH, AND THE CHINESE VERSION AND ENGLISH VERSION SHALL HAVE THE SAME LEGAL EFFECT. IN THE CASE OF DIVERGENCE BETWEEN THE CHINESE AND ENGLISH VERSIONS, THE CHINESE VERSION SHALL PREVAIL.
 
 END OF THE TERMS AND CONDITIONS
-
-How to Apply the Mulan Permissive Software License，Version 2 (Mulan PSL v2) to Your Software
-
-To apply the Mulan PSL v2 to your work, for easy identification by recipients, you are suggested to complete following three steps:
-
-    Fill in the blanks in following statement, including insert your software name, the year of the first publication of your software, and your name identified as the copyright owner;
-    Create a file named "LICENSE" which contains the whole context of this License in the first directory of your software package;
-    Attach the statement to the appropriate annotated syntax at the beginning of each source file.
-
-You can use this software according to the terms and conditions of the Mulan PSL v2.
-You may obtain a copy of Mulan PSL v2 at:
-         http://license.coscl.org.cn/MulanPSL2
-THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
-EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
-MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
-See the Mulan PSL v2 for more details.
