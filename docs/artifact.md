@@ -1,6 +1,6 @@
 # Artifact summary
 
-Note: this is a archive of artifact evaluation.
+Note: this is an archive of artifact evaluation.
 
 This artifact contains the implementation of HEDB and scripts for reproducing the performance results. The whole evaluation takes about 3 hours on an ARM server and about 4 hours on an x86 machine.
 

@@ -10,21 +10,68 @@ HEDB is an extension of PostgreSQL to compute SQL over ciphertexts, in addition 
 
 *HEDB is an open project and highly values your feedback! We would like to hear your thoughts on our project and how we can improve it.*
 
-Here is a quick overview for any newcomer to understand the purpose of HEDB. It would take 15 minutes for you.
+## Quick Start
 
-## What For?
+Install the dependencies:
+```sh
+$ sudo apt update
+$ sudo apt install -y build-essential cmake libmbedtls-dev
+$ sudo apt install -y postgresql postgresql-contrib postgresql-server-dev-all
+$ sudo service postgresql restart
+```
+
+Pull the HEDB repo, build and install:
+```sh
+$ git clone -b main --depth 1 https://github.com/SJTU-IPADS/HEDB
+$ cd HEDB
+$ make
+$ sudo make install
+$ make run
+
+$ sudo -u postgres psql
+```
+
+Run your 1st SQL:
+```sql
+CREATE EXTENSION hedb;
+
+DROP TABLE IF EXISTS test;
+CREATE TABLE test (a int, b enc_int4);
+
+SELECT enable_client_mode();      --- use client mode to insert user value
+INSERT INTO test VALUES (1, '1'); --- note that encrypted data is inserted as string
+INSERT INTO test VALUES (2, '2'); --- note that encrypted data is inserted as string
+SELECT * FROM test;
+
+SELECT enable_server_mode();      --- use server mode for database admins (DBAs) to maintain the database
+SELECT * FROM test;
+```
+
+There are currently four encrypted datatypes for you to selectively protect your data stored in PostgreSQL.
+| data type | encrypted data type |
+|-----------|---------------------|
+| int       | enc_int4            |
+| float     | enc_float4          |
+| text      | enc_text            |
+| timestamp | enc_timestamp       |
+
+So far so good! **But** it is NOT secure at all!
+
+Here is a quick overview for any newcomers to understand the purpose of HEDB. It would take 15 minutes for you.
+
+## Encrypted Databases
 
 Database systems may contain sensitive data, and some are outsourced to third-parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary.
 
 **Option-1**: To build an encrypted database (EDB), one can place an entire database into an isolated domain, or confidential computing unit (like Intel SGX, AMD SEV, Intel TDX, ARM Realm, IBM PEF, AWS Nitro, Ant HyperEnclave, and whatever you name it). We call it Type-I EDB. Sadly, Type-I would prevent database admins, or DBAs, from managing the database, right? If DBAs were able to log into the DBMS, they would inspect any user data.
 
-**Option-2**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into [src](https://github.com/SJTU-IPADS/HEDB/blob/main/src/) to navigate how to build such an EDB using PostgreSQL' user-defined types (UDTs) and user-defined functions (UDFs). We call it Type-II EDB. Type-II EDB allows a DBA to log into the database, but keeps data always in ciphertext to avoid potential leakage. Cool!
+**Option-2**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into [here](https://github.com/SJTU-IPADS/HEDB/blob/main/src/) to navigate how to build such an EDB using PostgreSQL' user-defined types (UDTs) and user-defined functions (UDFs). We call it Type-II EDB. Type-II EDB allows a DBA to log into the database, but keeps data always in ciphertext to avoid potential leakage. Cool!
 
 <p align="center">
 	<img src="scripts/figures/types.jpg" width = "600" height = "160" align=center />
 </p>
 
-Sad again, we've discovered an attack, which we name "smuggle". You can find it in [scripts/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/scripts/smuggle.py). The reason why smuggle exists is that the Type-II EDB exposes too many expression operators for admins to construct an "oracle".
+Sad again, we've discovered an attack, which we name "smuggle". You can find it in [scripts/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/scripts/smuggle.py). The reason why smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct an "oracle".
 
 ## Smuggle Attacks
 
@@ -36,9 +83,9 @@ Here is a minimal working example.
 
 2. **Recovering secrets**: With =, DBAs recover encrypted values by comparing them with known ciphertexts.
 
-## HEDB
+## HEDB as a Solution
 
-The idea of HEDB is simple. It splits the running mode of EDB into two: *record* for users, and *replay* for DBAs.
+The idea of HEDB is simple. It splits the running mode of an EDB into two: *record* for users, and *replay* for DBAs.
 
 HEDB is named after Helium, implying its two modes. Briefly, HEDB is a dual-mode encrypted database that removes the tension between security and maintenance.
 
@@ -49,7 +96,7 @@ HEDB is named after Helium, implying its two modes. Briefly, HEDB is a dual-mode
 
 * [Encrypted Databases Made Secure Yet Maintainable](https://www.usenix.org/conference/osdi23/presentation/li-mingyu)<br>
 Mingyu Li, Xuyang Zhao, Le Chen, Cheng Tan, Huorong Li, Sheng Wang, Zeyu Mi, Yubin Xia, Feifei Li, Haibo Chen<br>
-The 17th USENIX Symposium on Operating Systems Design and Implementation (OSDI â€˜23)
+The 17th USENIX Symposium on Operating Systems Design and Implementation (OSDI 2023)
 
 ```bibtex
 @inproceedings {li2023hedb,
@@ -66,9 +113,9 @@ The 17th USENIX Symposium on Operating Systems Design and Implementation (OSDI â
 }
 ```
 
-### How to Build?
+### Build
 
-- For non-VM setup, refer to [install.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/install.md). Note that this is for development only.
+- For non-VM setup, refer to [native-setup.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/native-setup.md). Note that this is for development only.
 - For 2-VM setup, please refer to [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md).
 
 We recommend you to use 2-VM setup, which is exactly how HEDB works.
