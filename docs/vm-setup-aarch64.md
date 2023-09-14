@@ -1,4 +1,4 @@
-# How to set up a 2-VM environment for HEDB
+# How to set up a 2-VM environment for HEDB (ARM)
 
 We recommend using Ubuntu cloud images, as they provide ready-to-use images.
 
@@ -148,7 +148,7 @@ CREATE EXTENSION hedb;
 SELECT '1024'::enc_int4 * '4096'::enc_int4;
 ```
 
-# How to do Mode Switch?
+# Mode Switch
 
 Mode switch forks a confidential VM from integrity zone to normal zone.
 The initial prototype of HEDB uses TwinVisor@SOSP'2021 to implement mode switch, which moves VM from Secure to Normal by modifying the TZASC controller.
@@ -178,7 +178,7 @@ In brief, VM snapshots provides temporal fork, rather than spatial fork.
 
 Note that the migration back to CVM phase should check the VM integrity carefully, somehow like runtime attestation.
 
-# How to Apply HotFix?
+# HotFix
 
 Please refer to the README of `tools/hotfix`.
 

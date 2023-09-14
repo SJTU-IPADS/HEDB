@@ -1,4 +1,4 @@
-# HEDB Build Instructions
+# HEDB For Other Platforms
 
 HEDB is an extension turning existing RDBMS systems into an encrypted style. Its current form is based on PostgreSQL as the RDBMS.
 
@@ -7,15 +7,15 @@ Theoretically, HEDB can be ported to any of the following trusted execution envi
 - Intel SGX using SGX SDK
 - Confidential VMs such as AMD SEV, Intel TDX, Hygon HyperEnclave, Amazon Nitro, ARMv9 CCA Realm using VMs
 
-The HEDB official repo does not contain TrustZone and SGX support, you may refer to [here](https://github.com/zhaoxuyang13/hedb).
-
-## How to Port?
+## Port Guidance
 
 HEDB, as a Type-II EDB, relies on the advanced extension capabilities provided by modern RDBMSes. Type-II operators are basically implemented through user-defined datatypes (UDT) and functions (UDFs).
 
-Our UDT and UDFs for PostgreSQL can be found in the `src/integrity_zone` directory. If you plan to port HEDB to different database engine like MySQL and DuckDB, you have the flexibility to modify the UDF construction in `src/integrity_zone` to adhere to MySQL or DuckDB's specifications. Additionally, you can reuse the `src/privacy_zone` directory, which executes the confidential operators within the protected domain, regardless of the database engine being used.
+Our UDT and UDFs for PostgreSQL can be found in the `src/integrity_zone` directory. If you plan to port HEDB to a different database engine like MySQL and DuckDB, you have the flexibility to modify the UDF construction in `src/integrity_zone` to adhere to MySQL or DuckDB's specifications. Additionally, you can reuse the `src/privacy_zone` directory, which executes the confidential operators within the protected domain, regardless of the database engine being used.
 
-## Building
+## Some Prior Efforts
+
+The HEDB official repo does not contain TrustZone and SGX support, you may refer to [here](https://github.com/zhaoxuyang13/hedb).
 
 1. Install PostgreSQL:
 
@@ -106,4 +106,4 @@ or build from source: https://www.postgresql.org/docs/current/install-short.html
 
 ### ARM CCA
 
-   The procedure is exactly the same as how you do in a 2-VM setting.
+   The procedures are exactly the same as how you do in a 2-VM setting, see [here](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md).

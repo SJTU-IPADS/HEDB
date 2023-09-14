@@ -1,4 +1,4 @@
-# Non-VM Install (Development Only)
+# Non-VM Setup (Development Only)
 
 This tutorial gives you a short guidance on how to run HEDB without VM support.
 

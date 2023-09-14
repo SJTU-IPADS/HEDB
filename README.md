@@ -55,7 +55,7 @@ There are currently four encrypted datatypes for you to selectively protect your
 | text      | enc_text            |
 | timestamp | enc_timestamp       |
 
-So far so good! **But** it is NOT secure at all!
+So far so good. But it is **NOT secure** at all!
 
 Here is a quick overview for any newcomers to understand the purpose of HEDB. It would take 15 minutes for you.
 
@@ -92,6 +92,13 @@ HEDB is named after Helium, implying its two modes. Briefly, HEDB is a dual-mode
 1) Execution Mode achieves interface security by blocking illegal operator invocations,
 2) Maintenance Mode allows DBA common maintenance tasks by replaying invocations.
 
+### Build
+
+- For non-VM setup, refer to [native-setup.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/native-setup.md). Note that this is for development only.
+- For 2-VM setup, please refer to [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md).
+
+We recommend you to use 2-VM setup, which is exactly how HEDB works.
+
 ### Paper
 
 * [Encrypted Databases Made Secure Yet Maintainable](https://www.usenix.org/conference/osdi23/presentation/li-mingyu)<br>
@@ -113,13 +120,6 @@ The 17th USENIX Symposium on Operating Systems Design and Implementation (OSDI 2
 }
 ```
 
-### Build
-
-- For non-VM setup, refer to [native-setup.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/native-setup.md). Note that this is for development only.
-- For 2-VM setup, please refer to [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md).
-
-We recommend you to use 2-VM setup, which is exactly how HEDB works.
-
 ### FAQs
 
 #### Q1: Is HEDB limited to ARM?
@@ -140,34 +140,17 @@ The current version of HEDB is based on PostgreSQL and supports the TPC-H benchm
 
 We encourage further research to overcome the challenges posed by non-determinism when running TPC-C atop HEDB. We believe your excellent work will also be published and known to the industry.
 
-### Notes
-
-This repository is intended as a research prototype, and is not ready for any production use. Its purpose is to serve as an experimental platform for conducting research and exploring new ideas. Additionally, HEDB serves as an educational project to enhance students' understanding of the EDB's internal.
-
-#### Limitations
-
-HEDB's current implementation has limitations.
-
-1. HEDB relies on deterministic record-and-replay of operator interfaces to reproduce the DBMS bugs, hence falling short in providing read-write transactional workloads such as TPC-C. To maintain TPC-C, only a subset of HEDB operators (e.g., comparison) need to be exposed to both users and DBAs. See Figure-5 in [Azure AEv2](https://dl.acm.org/doi/abs/10.1145/3318464.3386141).
-2. HEDB depends on KLEE to reproduce the operators bugs. The official version of KLEE cannot support floating-point numbers. HEDB inherits this limitation. You may use [KLEE-Float](https://github.com/srg-imperial/klee-float).
-3. HEDB leverages an ARMv8.4 server with S-EL2 (TrustZone Virtualization) to support its dual-mode design. This design can be ported to other platforms. Refer to [porting.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/porting.md) to replicate HEDB's performance results on Intel SGX (using SGX SDK) and ARM TrustZone (using OP-TEE). Note that the mode switch on these platforms is not implemented.
-
-#### Caveats
-
-The proof-of-concept of HEDB has some insecure implementations:
-
-1. The prototype contains encryption and decryption operators (e.g., `enc_int4_encrypt`) for the purpose of debugging. They should be all eliminated. A DBA should only see ciphertexts in the `base64` form, by turning on `SELECT enable_server_mode()`.
-2. The operators uses a hard-coded key and iv for data en/decryption; see [src/privacy_zone/crypto.cpp](https://github.com/SJTU-IPADS/HEDB/blob/main/src/privacy_zone/crypto.cpp). A good practice would harness cliend-side encryption. See [Acra](https://github.com/cossacklabs/acra).
-3. The anonymized replay does not support troubleshooting cryptographic algorithms (e.g., mbedtls), because concolic executors such as KLEE cannot scale over them. You may be interested in this [research direction](https://ieeexplore.ieee.org/document/8023121).
-4. The authenticated replay does not support query rewriting. Replay should use search instead of match. Improve them in [src/integrity_zone/rr](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/rr).
-
-#### Anecdotes
+### Anecdotes
 
 Why name HEDB (Helium Database)?
 
 HE, short for Helium, is the lightest neutral gas, known for its lack of reactivity and low density. The analogy to helium highlights HEDB's ability to achieve isolation from the rest while maintaining simplicity in usage. More, the reference to helium being the 2nd element alludes to HEDB's dual modes.
 
 HEDB is pronounced [haɪdiːbiː] or 嗨嘀哔.
+
+### Notes
+
+This repository is intended as a research prototype, and is not ready for any production use. Its purpose is to serve as an experimental platform for conducting research and exploring new ideas. Additionally, HEDB serves as an educational project to enhance students' understanding of the EDB's internal.
 
 ## Maintainers
 
