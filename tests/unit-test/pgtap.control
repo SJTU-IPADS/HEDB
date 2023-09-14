@@ -1,7 +1,0 @@
-# pgTAP extension
-comment = 'Unit testing for PostgreSQL'
-default_version = '1.2.0'
-module_pathname = '$libdir/pgtap'
-requires = 'plpgsql'
-relocatable = true
-superuser = false
