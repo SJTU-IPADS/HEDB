@@ -1,10 +1,8 @@
-# HEDB
-
-![Status](https://img.shields.io/badge/Version-Experimental-green.svg)[![License: MIT](https://img.shields.io/badge/License-Mulan-brightgreenn.svg)](http://license.coscl.org.cn/MulanPubL-2.0)
-
 <p align="center">
 	<img src="scripts/figures/hedb.jpg" width = "300" height = "200" align=center />
 </p>
+
+![Status](https://img.shields.io/badge/Version-Experimental-green.svg)[![License](https://img.shields.io/badge/License-Mulan-brightgreenn.svg)](http://license.coscl.org.cn/MulanPubL-2.0)
 
 HEDB is an extension of PostgreSQL to compute SQL over ciphertexts, in addition to a suite of maintenance tools.
 
@@ -101,22 +99,20 @@ We recommend you to use 2-VM setup, which is exactly how HEDB works.
 
 ### Paper
 
-* [Encrypted Databases Made Secure Yet Maintainable](https://www.usenix.org/conference/osdi23/presentation/li-mingyu)<br>
-Mingyu Li, Xuyang Zhao, Le Chen, Cheng Tan, Huorong Li, Sheng Wang, Zeyu Mi, Yubin Xia, Feifei Li, Haibo Chen<br>
-The 17th USENIX Symposium on Operating Systems Design and Implementation (OSDI 2023)
+* [Encrypted Databases Made Secure Yet Maintainable](https://www.usenix.org/conference/osdi23/presentation/li-mingyu), USENIX OSDI 2023 <br>
 
 ```bibtex
-@inproceedings {li2023hedb,
-	author = {Mingyu Li and Xuyang Zhao and Le Chen and Cheng Tan and Huorong Li and Sheng Wang and Zeyu Mi and Yubin Xia and Feifei Li and Haibo Chen},
-	title = {Encrypted Databases Made Secure Yet Maintainable},
-	booktitle = {17th USENIX Symposium on Operating Systems Design and Implementation (OSDI 23)},
-	year = {2023},
-	isbn = {978-1-939133-34-2},
-	address = {Boston, MA},
-	pages = {117--133},
-	url = {https://www.usenix.org/conference/osdi23/presentation/li-mingyu},
-	publisher = {USENIX Association},
-	month = jul,
+@inproceedings{li2023hedb,
+  author       = {Mingyu Li and Xuyang Zhao and Le Chen and Cheng Tan and Huorong Li and Sheng Wang and Zeyu Mi and Yubin Xia and Feifei Li and Haibo Chen},
+  title        = {Encrypted Databases Made Secure Yet Maintainable},
+  booktitle    = {17th USENIX Symposium on Operating Systems Design and Implementation (OSDI 23)},
+  pages        = {117--133},
+  url          = {https://www.usenix.org/conference/osdi23/presentation/li-mingyu},
+  isbn         = {978-1-939133-34-2},
+  publisher    = {{USENIX} Association},
+  address      = {Boston, MA},
+  year         = {2023},
+  month        = jul,
 }
 ```
 
@@ -124,27 +120,27 @@ The 17th USENIX Symposium on Operating Systems Design and Implementation (OSDI 2
 
 #### Q1: Is HEDB limited to ARM?
 
-***Absolutely not!*** You can deploy it to any TEE or CC platform you like. For exmaple, confidential VM (CVM) is widely supported on modern trusted hardware, such as AMD SEV(-ES,-SNP), Intel TDX, IBM PEF, ARMv9 Realm. You can deploy HEDB's integrity zone (DBMS+extension) using one CVM, and HEDB's privacy zone (operators) in another CVM. That's it!
+***Absolutely not!*** You can deploy it to any TEE or CC platform you like. For exmaple, confidential VM (CVM) is widely supported on modern trusted hardware, such as AMD SEV(-ES,-SNP), Intel TDX, IBM PEF, ARMv9 Realm. You can deploy HEDB's integrity zone (DBMS+extension) using one CVM, and HEDB's privacy zone (operators) in another CVM. If you trust the hypervisor, like AWS Nitro Enclave, you can run them in two Nitro VMs. That's it!
 
 To reproduce the performance evaluation results, you can run HEDB using two CVMs on a CC machine.
 
 #### Q2: How to realize two modes?
 
-For AMD SEV, Intel TDX, IBM PEF, and ARM Realm, your task is to enable CVM fork or migration between trusted domains and untrusted domains. This task remains undone. If CVM fork/migration is needed in other scenarios, it could serve as a potential research area.
+Our prototype assumes an ARM server that supports S-EL2, a hardware virtualization technology present in ARMv8.4. [Twinvisor](https://github.com/TwinVisor/twinvisor-prototype) is an S-EL2 hypervisor developed by IPADS@SJTU. We plan to commit the Twinvisor patch, but no guarantee (for intellectual property reasons). You may also run two VMs atop Linux/KVM to implement two modes, as described in the [vm-setup.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md).
 
-Our current prototype uses an ARM server that supports S-EL2, a hardware virtualization technology present in ARMv8.4. [Twinvisor](https://github.com/TwinVisor/twinvisor-prototype) is an S-EL2 hypervisor developed by IPADS@SJTU. We plan to commit the Twinvisor patch, but no guarantee (for intellectual property reasons).
+For other platforms such as AMD SEV, Intel TDX, IBM PEF, and ARM Realm, the task is to enable CVM fork or migration between trusted domains and untrusted domains. This task remains undone. If CVM fork/migration is needed in other scenarios, it could serve as a potential research area.
 
 #### Q3: Supporting TPC-C?
 
-The current version of HEDB is based on PostgreSQL and supports the TPC-H benchmark only.
+The released version of HEDB is built on PostgreSQL. Currently, its record-and-replay only supports the TPC-H benchmark.
 
-We encourage further research to overcome the challenges posed by non-determinism when running TPC-C atop HEDB. We believe your excellent work will also be published and known to the industry.
+We encourage future research to overcome this challenges posed by non-determinism when running TPC-C atop HEDB. We believe your excellent work will also be published and known to the industry.
 
 ### Anecdotes
 
 Why name HEDB (Helium Database)?
 
-HE, short for Helium, is the lightest neutral gas, known for its lack of reactivity and low density. The analogy to helium highlights HEDB's ability to achieve isolation from the rest while maintaining simplicity in usage. More, the reference to helium being the 2nd element alludes to HEDB's dual modes.
+HE, short for [Helium](https://en.wikipedia.org/wiki/Helium), is the lightest neutral gas, known for its lack of reactivity and low density. The analogy to helium highlights HEDB's ability to achieve isolation from the rest while maintaining simplicity in usage. More, the reference to helium being the 2nd element alludes to HEDB's dual modes.
 
 HEDB is pronounced [haɪdiːbiː] or 嗨嘀哔.
 
