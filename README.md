@@ -57,7 +57,7 @@ There are currently four encrypted datatypes for you to selectively protect your
 
 So far so good. But it is **NOT secure** at all!
 
-Here is a quick overview for any newcomers to understand the purpose of HEDB. It would take 15 minutes for you.
+Here is a quick overview for any newcomers to understand the purpose of HEDB.
 
 ## Encrypted Databases
 
@@ -150,7 +150,7 @@ HEDB is pronounced [haɪdiːbiː] or 嗨嘀哔.
 
 ### Notes
 
-This repository is intended as a research prototype, and is not ready for any production use. Its purpose is to serve as an experimental platform for conducting research and exploring new ideas. Additionally, HEDB serves as an educational project to enhance students' understanding of the EDB's internal.
+This repository is a research prototype, not for production use. It is meant for experimenting, researching and educational purposes to enhance students' understanding of the EDB's internals.
 
 ## Maintainers
 
