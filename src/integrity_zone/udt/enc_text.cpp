@@ -37,7 +37,9 @@ static EncText* cstring_to_enctext_with_len(const char* s, uint32_t len)
     memcpy(str.data, s, len);
 
     EncStr* estr = (EncStr*)VARDATA(result);
-    enc_text_encrypt(&str, estr);
+    int error = enc_text_encrypt(&str, estr);
+    if (error) print_error("%s %d", __func__, error);
+
     estr->order = ORDER_NONE;
 
     SET_VARSIZE(result, ENCSTRLEN(len) + VARHDRSZ);
@@ -59,7 +61,9 @@ Datum enc_text_decrypt(PG_FUNCTION_ARGS)
     EncText* s = PG_GETARG_ENCTEXT_P(0);
     EncStr* estr = (EncStr*)VARDATA(s);
     Str str;
-    enc_text_decrypt(estr, &str);
+
+    int error = enc_text_decrypt(estr, &str);
+    if (error) print_error("%s %d", __func__, error);
 
     char* res = (char*)palloc0(str.len + 1);
     memcpy(res, str.data, str.len);
@@ -102,7 +106,8 @@ Datum enc_text_out(PG_FUNCTION_ARGS)
 
     if (clientMode == true) {
         Str str;
-        enc_text_decrypt(estr, &str);
+        int error = enc_text_decrypt(estr, &str);
+        if (error) print_error("%s %d", __func__, error);
         char* res = (char*)palloc0(str.len + 1);
         memcpy(res, str.data, str.len);
         res[str.len] = '\0';
@@ -136,9 +141,8 @@ Datum enc_text_eq(PG_FUNCTION_ARGS)
         }
     }
 
-    if (enc_text_cmp(str1, str2, &ans) < 0) {
-        exit(0);
-    }
+    int error = enc_text_cmp(str1, str2, &ans);
+    if (error) print_error("%s %d", __func__, error);
 
     if (ans == 0)
         cmp = true;
@@ -166,9 +170,8 @@ Datum enc_text_ne(PG_FUNCTION_ARGS)
         }
     }
 
-    if (enc_text_cmp(str1, str2, &ans) < 0) {
-        exit(0);
-    }
+    int error = enc_text_cmp(str1, str2, &ans);
+    if (error) print_error("%s %d", __func__, error);
 
     if (ans != 0)
         cmp = true;
@@ -196,9 +199,8 @@ Datum enc_text_le(PG_FUNCTION_ARGS)
         }
     }
 
-    if (enc_text_cmp(str1, str2, &ans) < 0) {
-        exit(0);
-    }
+    int error = enc_text_cmp(str1, str2, &ans);
+    if (error) print_error("%s %d", __func__, error);
 
     if (ans <= 0)
         cmp = true;
@@ -226,9 +228,8 @@ Datum enc_text_lt(PG_FUNCTION_ARGS)
         }
     }
 
-    if (enc_text_cmp(str1, str2, &ans) < 0) {
-        exit(0);
-    }
+    int error = enc_text_cmp(str1, str2, &ans);
+    if (error) print_error("%s %d", __func__, error);
 
     if (ans < 0)
         cmp = true;
@@ -256,9 +257,8 @@ Datum enc_text_ge(PG_FUNCTION_ARGS)
         }
     }
 
-    if (enc_text_cmp(str1, str2, &ans) < 0) {
-        exit(0);
-    }
+    int error = enc_text_cmp(str1, str2, &ans);
+    if (error) print_error("%s %d", __func__, error);
 
     if (ans >= 0)
         cmp = true;
@@ -286,9 +286,8 @@ Datum enc_text_gt(PG_FUNCTION_ARGS)
         }
     }
 
-    if (enc_text_cmp(str1, str2, &ans) < 0) {
-        exit(0);
-    }
+    int error = enc_text_cmp(str1, str2, &ans);
+    if (error) print_error("%s %d", __func__, error);
 
     if (ans > 0)
         cmp = true;
@@ -317,9 +316,8 @@ Datum enc_text_cmp(PG_FUNCTION_ARGS)
         PG_RETURN_INT32(ans);
     }
 
-    if (enc_text_cmp(str1, str2, &ans) < 0) {
-        exit(0);
-    }
+    int error = enc_text_cmp(str1, str2, &ans);
+    if (error) print_error("%s %d", __func__, error);
 
     PG_RETURN_INT32(ans);
 }
@@ -339,7 +337,8 @@ Datum enc_text_concatenate(PG_FUNCTION_ARGS)
     EncStr* estr = (EncStr*)VARDATA(res);
 
     SET_VARSIZE(res, ENCSTRLEN(len) + VARHDRSZ);
-    enc_text_concatenate(str1, str2, estr);
+    int error = enc_text_concatenate(str1, str2, estr);
+    print_error("%s %d", __func__, error);
 
     PG_RETURN_POINTER(res);
 }
@@ -351,9 +350,8 @@ Datum enc_text_like(PG_FUNCTION_ARGS)
     EncStr* str = (EncStr*)VARDATA(s1);
     EncStr* pattern = (EncStr*)VARDATA(s2);
     int result = 0;
-    if (enc_text_like(str, pattern, &result) < 0) {
-        exit(0);
-    }
+    int error = enc_text_like(str, pattern, &result);
+    if (error) print_error("%s %d", __func__, error);
 
     PG_RETURN_BOOL(result);
 }
@@ -365,9 +363,8 @@ Datum enc_text_notlike(PG_FUNCTION_ARGS)
     EncStr* str = (EncStr*)VARDATA(s1);
     EncStr* pattern = (EncStr*)VARDATA(s2);
     int result = 0;
-    if (enc_text_like(str, pattern, &result) < 0) {
-        exit(0);
-    }
+    int error = enc_text_like(str, pattern, &result);
+    if (error) print_error("%s %d", __func__, error);
 
     PG_RETURN_BOOL(1 ^ result);
 }
@@ -386,7 +383,8 @@ Datum substring(PG_FUNCTION_ARGS)
     EncText* res = (EncText*)palloc0(ENCSTRLEN(len) + VARHDRSZ);
     EncStr* estr = (EncStr*)VARDATA(res);
     SET_VARSIZE(res, ENCSTRLEN(len) + VARHDRSZ);
-    enc_text_substring(str, start, length, estr);
+    int error = enc_text_substring(str, start, length, estr);
+    if (error) print_error("%s %d", __func__, error);
 
     PG_RETURN_CSTRING(res);
 }

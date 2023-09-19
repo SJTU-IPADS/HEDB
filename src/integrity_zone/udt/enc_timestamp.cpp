@@ -90,7 +90,9 @@ Datum enc_timestamp_encrypt(PG_FUNCTION_ARGS)
     EncTimestamp* t = (EncTimestamp*)palloc0(ENC_TIMESTAMP_LENGTH);
 
     time = pg_timestamp_in(arg);
-    enc_timestamp_encrypt(&time, t);
+    int error = enc_timestamp_encrypt(&time, t);
+    if (error) print_error("%s %d", __func__, error);
+
     PG_RETURN_POINTER(t);
 }
 
@@ -108,7 +110,8 @@ Datum enc_timestamp_decrypt(PG_FUNCTION_ARGS)
     fsec_t fsec;
     char buf[MAXDATELEN + 1];
 
-    enc_timestamp_decrypt(t, &timestamp);
+    int error = enc_timestamp_decrypt(t, &timestamp);
+    if (error) print_error("%s %d", __func__, error);
 
     if (timestamp2tm(timestamp, NULL, tm, &fsec, NULL, NULL) == 0)
         EncodeDateTime(tm, fsec, false, 0, NULL, 1, buf);
@@ -133,7 +136,8 @@ Datum enc_timestamp_in(PG_FUNCTION_ARGS)
 
     if (clientMode == true) {
         TIMESTAMP time = pg_timestamp_in(pIn);
-        enc_timestamp_encrypt(&time, result);
+        int error = enc_timestamp_encrypt(&time, result);
+        if (error) print_error("%s %d", __func__, error);
     } else {
         fromBase64(pIn, strlen(pIn), (unsigned char*)result);
     }
@@ -156,7 +160,8 @@ Datum enc_timestamp_out(PG_FUNCTION_ARGS)
         fsec_t fsec;
         char buf[MAXDATELEN + 1];
 
-        enc_timestamp_decrypt(t, &timestamp);
+        int error = enc_timestamp_decrypt(t, &timestamp);
+        if (error) print_error("%s %d", __func__, error);
 
         if (timestamp2tm(timestamp, NULL, tm, &fsec, NULL, NULL) == 0)
             EncodeDateTime(tm, fsec, false, 0, NULL, 1, buf);
@@ -190,7 +195,9 @@ Datum enc_timestamp_eq(PG_FUNCTION_ARGS)
     EncTimestamp* t2 = PG_GETARG_ENCTimestamp(1);
 
     int ans = 0;
-    enc_timestamp_cmp(t1, t2, &ans);
+    int error = enc_timestamp_cmp(t1, t2, &ans);
+    if (error) print_error("%s %d", __func__, error);
+
     PG_RETURN_BOOL((ans == 0) ? true : false);
 }
 
@@ -207,7 +214,9 @@ Datum enc_timestamp_ne(PG_FUNCTION_ARGS)
     EncTimestamp* t2 = PG_GETARG_ENCTimestamp(1);
 
     int ans = 0;
-    enc_timestamp_cmp(t1, t2, &ans);
+    int error = enc_timestamp_cmp(t1, t2, &ans);
+    if (error) print_error("%s %d", __func__, error);
+
     PG_RETURN_BOOL((ans != 0) ? true : false);
 }
 
@@ -224,7 +233,9 @@ Datum enc_timestamp_lt(PG_FUNCTION_ARGS)
     EncTimestamp* t2 = PG_GETARG_ENCTimestamp(1);
 
     int ans = 0;
-    enc_timestamp_cmp(t1, t2, &ans);
+    int error = enc_timestamp_cmp(t1, t2, &ans);
+    if (error) print_error("%s %d", __func__, error);
+
     PG_RETURN_BOOL((ans == -1) ? true : false);
 }
 
@@ -241,7 +252,9 @@ Datum enc_timestamp_le(PG_FUNCTION_ARGS)
     EncTimestamp* t2 = PG_GETARG_ENCTimestamp(1);
 
     int ans = 0;
-    enc_timestamp_cmp(t1, t2, &ans);
+    int error = enc_timestamp_cmp(t1, t2, &ans);
+    if (error) print_error("%s %d", __func__, error);
+
     PG_RETURN_BOOL((ans <= 0) ? true : false);
 }
 
@@ -258,7 +271,9 @@ Datum enc_timestamp_gt(PG_FUNCTION_ARGS)
     EncTimestamp* t2 = PG_GETARG_ENCTimestamp(1);
 
     int ans = 0;
-    enc_timestamp_cmp(t1, t2, &ans);
+    int error = enc_timestamp_cmp(t1, t2, &ans);
+    if (error) print_error("%s %d", __func__, error);
+
     PG_RETURN_BOOL((ans > 0) ? true : false);
 }
 
@@ -275,7 +290,9 @@ Datum enc_timestamp_ge(PG_FUNCTION_ARGS)
     EncTimestamp* t2 = PG_GETARG_ENCTimestamp(1);
 
     int ans = 0;
-    enc_timestamp_cmp(t1, t2, &ans);
+    int error = enc_timestamp_cmp(t1, t2, &ans);
+    if (error) print_error("%s %d", __func__, error);
+
     PG_RETURN_BOOL((ans >= 0) ? true : false);
 }
 
@@ -291,7 +308,9 @@ Datum enc_timestamp_cmp(PG_FUNCTION_ARGS)
     EncTimestamp* t2 = PG_GETARG_ENCTimestamp(1);
 
     int ans = 0;
-    enc_timestamp_cmp(t1, t2, &ans);
+    int error = enc_timestamp_cmp(t1, t2, &ans);
+    if (error) print_error("%s %d", __func__, error);
+
     PG_RETURN_INT32(ans);
 }
 
@@ -304,6 +323,8 @@ Datum date_part(PG_FUNCTION_ARGS)
     EncTimestamp* timestamp = PG_GETARG_ENCTimestamp(1);
     EncInt* result = (EncInt*)palloc(sizeof(EncInt));
 
-    enc_timestamp_extract_year(timestamp, result);
+    int error = enc_timestamp_extract_year(timestamp, result);
+    if (error) print_error("%s %d", __func__, error);
+
     PG_RETURN_POINTER(result);
 }

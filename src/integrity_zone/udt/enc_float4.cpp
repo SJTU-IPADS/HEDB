@@ -38,7 +38,8 @@ Datum enc_float4_encrypt(PG_FUNCTION_ARGS)
 {
     float src = PG_GETARG_FLOAT4(0);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
-    enc_float_encrypt(src, f);
+    int error = enc_float_encrypt(src, f);
+    if (error) print_error("%s %d", __func__, error);
     PG_RETURN_CSTRING(f);
 }
 
@@ -46,7 +47,8 @@ Datum enc_float4_decrypt(PG_FUNCTION_ARGS)
 {
     EncFloat* s = PG_GETARG_ENCFlOAT(0);
     float ans;
-    enc_float_decrypt(s, &ans);
+    int error = enc_float_decrypt(s, &ans);
+    if (error) print_error("%s %d", __func__, error);
     PG_RETURN_FLOAT4(ans);
 }
 
@@ -100,7 +102,8 @@ Datum enc_float4_in(PG_FUNCTION_ARGS)
 
     if (clientMode == true) {
         float val = pg_float4_in(pIn);
-        enc_float_encrypt(val, result);
+        int error = enc_float_encrypt(val, result);
+        if (error) print_error("%s %d", __func__, error);
     } else {
         fromBase64(pIn, strlen(pIn), (unsigned char*)result);
     }
@@ -119,7 +122,8 @@ Datum enc_float4_out(PG_FUNCTION_ARGS)
     if (clientMode == true) {
         char* str = (char*)palloc0(sizeof(EncFloat));
         float out;
-        enc_float_decrypt(in, &out);
+        int error = enc_float_decrypt(in, &out);
+        if (error) print_error("%s %d", __func__, error);
         sprintf(str, "%f", out);
         PG_RETURN_POINTER(str);
     } else {
@@ -140,6 +144,7 @@ Datum enc_float4_sum_bulk(PG_FUNCTION_ARGS)
     EncFloat* sum = (EncFloat*)palloc0(sizeof(EncFloat));
     EncFloat sum_array[BULK_SIZE];
     int counter = 1; // sum will be at array[0]
+    int error;
 
     ArrayMetaState* my_extra = (ArrayMetaState*)fcinfo->flinfo->fn_extra;
     ArrayIterator array_iterator = array_create_iterator(v, 0, my_extra);
@@ -151,13 +156,15 @@ Datum enc_float4_sum_bulk(PG_FUNCTION_ARGS)
         sum_array[counter] = *DatumGetEncFloat(value);
         counter++;
         if (counter == BULK_SIZE) {
-            enc_float_sum_bulk(BULK_SIZE, sum_array, sum);
+            error = enc_float_sum_bulk(BULK_SIZE, sum_array, sum);
+            if (error) print_error("%s %d", __func__, error);
             sum_array[0] = *sum;
             counter = 1;
         }
     }
     if (counter > 1) {
-        enc_float_sum_bulk(counter, sum_array, sum);
+        error = enc_float_sum_bulk(counter, sum_array, sum);
+        if (error) print_error("%s %d", __func__, error);
     }
 
     PG_RETURN_POINTER(sum);
@@ -184,7 +191,10 @@ Datum enc_float4_avg_bulk(PG_FUNCTION_ARGS)
     sum = *DatumGetEncFloat(value);
     sum_array[0] = sum;
     counter = 1;
-    enc_float_div(&sum_array[0], &sum_array[0], &unit); // get the cipher of '1'
+
+    int error = enc_float_div(&sum_array[0], &sum_array[0], &unit); // get the cipher of '1'
+    if (error) print_error("%s %d", __func__, error);
+
     for (int i = 0; i < BULK_SIZE; ++i) { // get nitems of '1'
         num_array[i] = unit;
     }
@@ -193,18 +203,23 @@ Datum enc_float4_avg_bulk(PG_FUNCTION_ARGS)
         num_array[counter] = unit;
         counter++;
         if (counter == BULK_SIZE) {
-            enc_float_sum_bulk(BULK_SIZE, sum_array, &sum);
-            enc_float_sum_bulk(BULK_SIZE, num_array, &num);
+            error = enc_float_sum_bulk(BULK_SIZE, sum_array, &sum);
+            if (error) print_error("%s %d", __func__, error);
+            error = enc_float_sum_bulk(BULK_SIZE, num_array, &num);
+            if (error) print_error("%s %d", __func__, error);
             sum_array[0] = sum;
             num_array[0] = num;
             counter = 1;
         }
     }
     if (counter > 1) {
-        enc_float_sum_bulk(counter, sum_array, &sum);
-        enc_float_sum_bulk(counter, num_array, &num);
+        error = enc_float_sum_bulk(counter, sum_array, &sum);
+        if (error) print_error("%s %d", __func__, error);
+        error = enc_float_sum_bulk(counter, num_array, &num);
+        if (error) print_error("%s %d", __func__, error);
     }
-    enc_float_div(&sum, &num, res);
+    error = enc_float_div(&sum, &num, res);
+    if (error) print_error("%s %d", __func__, error);
 
     PG_RETURN_POINTER(res);
 }
@@ -346,7 +361,8 @@ Datum enc_float4_eval_expr(PG_FUNCTION_ARGS)
     str->len = strlen(s_postfix);
     memcpy(str->data, s_postfix, str->len);
 
-    enc_float_eval_expr(nargs - 1, *str, arr, res);
+    int error = enc_float_eval_expr(nargs - 1, *str, arr, res);
+    if (error) print_error("%s %d", __func__, error);
     pfree(str);
     PG_RETURN_POINTER(res);
 }
@@ -360,7 +376,9 @@ Datum enc_float4_max(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp;
 
-    enc_float_cmp(f1, f2, &cmp);
+    int error = enc_float_cmp(f1, f2, &cmp);
+    if (error) print_error("%s %d", __func__, error);
+
     if (cmp == 1)
         PG_RETURN_POINTER(f1);
     else
@@ -375,7 +393,9 @@ Datum enc_float4_min(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp;
 
-    enc_float_cmp(f1, f2, &cmp);
+    int error = enc_float_cmp(f1, f2, &cmp);
+    if (error) print_error("%s %d", __func__, error);
+
     if (cmp == 0)
         PG_RETURN_POINTER(f1);
     else
@@ -388,7 +408,8 @@ Datum enc_float4_add(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
 
-    enc_float_add(f1, f2, f);
+    int error = enc_float_add(f1, f2, f);
+    if (error) print_error("%s %d", __func__, error);
 
     PG_RETURN_POINTER(f);
 }
@@ -404,7 +425,8 @@ Datum enc_float4_subs(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
 
-    enc_float_sub(f1, f2, f);
+    int error = enc_float_sub(f1, f2, f);
+    if (error) print_error("%s %d", __func__, error);
 
     PG_RETURN_POINTER(f);
 }
@@ -420,7 +442,8 @@ Datum enc_float4_mult(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
 
-    enc_float_mult(f1, f2, f);
+    int error = enc_float_mult(f1, f2, f);
+    if (error) print_error("%s %d", __func__, error);
 
     PG_RETURN_POINTER(f);
 }
@@ -437,7 +460,8 @@ Datum enc_float4_div(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
 
-    enc_float_div(f1, f2, f);
+    int error = enc_float_div(f1, f2, f);
+    if (error) print_error("%s %d", __func__, error);
 
     PG_RETURN_POINTER(f);
 }
@@ -454,7 +478,8 @@ Datum enc_float4_exp(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
 
-    enc_float_pow(f1, f2, f);
+    int error = enc_float_pow(f1, f2, f);
+    if (error) print_error("%s %d", __func__, error);
 
     PG_RETURN_POINTER(f);
 }
@@ -471,7 +496,8 @@ Datum enc_float4_mod(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
 
-    enc_float_mod(f1, f2, f);
+    int error = enc_float_mod(f1, f2, f);
+    if (error) print_error("%s %d", __func__, error);
 
     PG_RETURN_POINTER(f);
 }
@@ -488,7 +514,8 @@ Datum enc_float4_eq(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp, ret;
 
-    enc_float_cmp(f1, f2, &cmp);
+    int error = enc_float_cmp(f1, f2, &cmp);
+    if (error) print_error("%s %d", __func__, error);
 
     ret = cmp == 0;
 
@@ -508,7 +535,8 @@ Datum enc_float4_ne(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp, ret;
 
-    enc_float_cmp(f1, f2, &cmp);
+    int error = enc_float_cmp(f1, f2, &cmp);
+    if (error) print_error("%s %d", __func__, error);
 
     ret = cmp != 0;
 
@@ -528,7 +556,8 @@ Datum enc_float4_lt(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp, ret;
 
-    enc_float_cmp(f1, f2, &cmp);
+    int error = enc_float_cmp(f1, f2, &cmp);
+    if (error) print_error("%s %d", __func__, error);
 
     ret = cmp == -1;
 
@@ -548,7 +577,8 @@ Datum enc_float4_le(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp, ret;
 
-    enc_float_cmp(f1, f2, &cmp);
+    int error = enc_float_cmp(f1, f2, &cmp);
+    if (error) print_error("%s %d", __func__, error);
 
     ret = cmp <= 0;
 
@@ -568,7 +598,8 @@ Datum enc_float4_gt(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp, ret;
 
-    enc_float_cmp(f1, f2, &cmp);
+    int error = enc_float_cmp(f1, f2, &cmp);
+    if (error) print_error("%s %d", __func__, error);
 
     ret = cmp == 1;
 
@@ -588,7 +619,8 @@ Datum enc_float4_ge(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp, ret;
 
-    enc_float_cmp(f1, f2, &cmp);
+    int error = enc_float_cmp(f1, f2, &cmp);
+    if (error) print_error("%s %d", __func__, error);
 
     ret = cmp >= 0;
 
@@ -606,7 +638,8 @@ Datum enc_float4_cmp(PG_FUNCTION_ARGS)
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
     int cmp;
 
-    enc_float_cmp(f1, f2, &cmp);
+    int error = enc_float_cmp(f1, f2, &cmp);
+    if (error) print_error("%s %d", __func__, error);
 
     PG_RETURN_INT32(cmp);
 }
