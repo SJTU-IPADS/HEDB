@@ -1,5 +1,9 @@
 # Change Log
 
+## 2023.9
+
+- Fix: base64 decode bug.
+
 ## 2023.7
 
 - Docs: QEMU-based mode switch.
