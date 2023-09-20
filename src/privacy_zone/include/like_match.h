@@ -1,4 +1,5 @@
 #pragma once
+
 #define GETCHAR(t) (t)
 #define LIKE_TRUE 1
 #define LIKE_FALSE 0
@@ -13,7 +14,7 @@
 extern "C" {
 #endif
 
-int MatchText(char*, int, char*, int);
+static int MatchText(char*, int, char*, int);
 
 #ifdef __cplusplus
 }

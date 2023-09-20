@@ -4,8 +4,7 @@
 
 int plain_timestamp_cmp(TIMESTAMP left, TIMESTAMP right)
 {
-    return (left == right) ? 0 : (left < right) ? -1
-                                                : 1;
+    return (left == right) ? 0 : (left < right) ? -1 : 1;
 }
 
 #define TMODULO(t, q, u)        \

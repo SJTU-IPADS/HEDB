@@ -36,12 +36,12 @@ CREATE EXTENSION hedb;
 DROP TABLE IF EXISTS test;
 CREATE TABLE test (a int, b enc_int4);
 
-SELECT enable_client_mode();      --- use client mode to insert user value
-INSERT INTO test VALUES (1, '1'); --- note that encrypted data is inserted as string
-INSERT INTO test VALUES (2, '2'); --- note that encrypted data is inserted as string
+SELECT enable_client_mode();                --- use client mode to insert user value
+INSERT INTO test VALUES (1, '1'::enc_int4); --- note that encrypted data is inserted as string
+INSERT INTO test VALUES (2, '2'::enc_int4); --- note that encrypted data is inserted as string
 SELECT * FROM test;
 
-SELECT enable_server_mode();      --- use server mode for database admins (DBAs) to maintain the database
+SELECT enable_server_mode();                --- use server mode for database admins (DBAs) to maintain the database
 SELECT * FROM test;
 ```
 
@@ -136,7 +136,7 @@ The released version of HEDB is built on PostgreSQL. Currently, its record-and-r
 
 We encourage future research to overcome this challenges posed by non-determinism when running TPC-C atop HEDB. We believe your excellent work will also be published and known to the industry.
 
-### Anecdotes
+### Anecdote
 
 Why name HEDB (Helium Database)?
 
@@ -144,7 +144,7 @@ HE, short for [Helium](https://en.wikipedia.org/wiki/Helium), is the lightest ne
 
 HEDB is pronounced [haɪdiːbiː] or 嗨嘀哔.
 
-### Notes
+### Note
 
 This repository is a research prototype, not for production use. It is meant for experimenting, researching and educational purposes to enhance students' understanding of the EDB's internals.
 

@@ -1,6 +1,5 @@
 # find_package(PostgreSQL REQUIRED)
 
-set(CMAKE_CXX_STANDARD 14)
 include_directories(
                     ${PostgreSQL_INCLUDE_DIRS}
                     ${PostgreSQL_SERVER_INCLUDE_DIRS}
@@ -9,7 +8,7 @@ include_directories(
                     )
 # include(CTest)
 
-if ( ${TEE_TYPE} STREQUAL "CVM" )
+if (${TEE_TYPE} STREQUAL "CVM")
   set(interface CVMInterface)
 endif()
 
@@ -18,7 +17,7 @@ file(GLOB SRC
   "udt/*.cpp"
   "interface/*.cpp"
   "ops_client/*.cpp"
-  "rr/*.cpp"
+  "record_replay/*.cpp"
   "../utils/*.cpp"
   )
 

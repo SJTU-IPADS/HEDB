@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.9)
+
 project(extension)
 
 set(TEE_TYPE "" CACHE STRING "Type of TEE (CVM, TZ, SGX, etc)")
 # set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
 # set(CMAKE_C_COMPILER "/usr/bin/clang")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wunused-variable -Wunused-but-set-variable")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunused-variable -Wunused-but-set-variable")
+set(CMAKE_CXX_STANDARD 14)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
