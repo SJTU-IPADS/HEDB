@@ -131,19 +131,19 @@ SELECT '1024'::enc_int4 * '4096'::enc_int4;
 
 # Mode Switch
 
-Mode switch forks a confidential VM from integrity zone to management zone, so that DBAs can re-execute SQLs using [HEDB replay mode](https://github.com/SJTU-IPADS/HEDB/blob/main/tests/tpch/README.md).
+Mode switch forks a confidential VM from Integrity Zone to Management Zone, so that DBAs can re-execute SQLs using [HEDB replay mode](https://github.com/SJTU-IPADS/HEDB/blob/main/tests/tpch/README.md).
 
 The initial prototype of HEDB uses [TwinVisor@SOSP2021](https://github.com/TwinVisor/twinvisor-prototype) to implement mode switch, which moves the VM from Secure World to Normal World by modifying the TZASC controller.
 This repo does not provide this migration code.
 Implementing migration between CVM to VM atop SEV and TDX is future work, and you may even publish your own work!
 For plain VM fork, one approach is to leverage the QEMU feature: VM snapshot.
 
-First, append this line to qemu command line of integrity zone (you need restart the VM):
+First, append this line to qemu command line of Integrity Zone (you need restart the VM):
 ```sh
     -monitor stdio -serial telnet:localhost:4321,server,nowait
 ```
 
-Second, log into the integrity zone VM via telnet:
+Second, log into the Integrity Zone VM via telnet:
 ```sh
 $ telnet localhost 4321
 ```

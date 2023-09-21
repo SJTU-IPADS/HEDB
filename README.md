@@ -8,6 +8,12 @@ HEDB is an extension of PostgreSQL to compute SQL over ciphertexts, in addition 
 
 *HEDB is an open project and highly values your feedback! We would like to hear your thoughts on our project and how we can improve it.*
 
+## Prerequisite
+
+- OS Version: Ubuntu 20.04
+- Linux kernel version: >= 5.4
+- Python version: >= 3.6
+
 ## Quick Start
 
 Install the dependencies:
@@ -95,7 +101,9 @@ The idea of HEDB is simple. It splits the running mode of an EDB into two: *Exec
 
 ### Defense
 
-To launch HEDB, you need to use two confidential VMs (CVMs) as the setting, one as integrity zone and the other as privacy zone. For those who do not have CVMs machines (e.g., ARM CCA, AMD SEV, Intel TDX, etc.), you can use 2 QEMU-KVM VMs to simulate CVMs. Depending on your computer architecture, either choose [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md). These tutorials will guide you on how to create 2 VMs that host DBMS and operators, separately, and how to perform a mode switch using QEMU-based VM snapshotting.
+To launch HEDB, you need to use two confidential VMs (CVMs) as the setting, one as Integrity Zone and the other as Privacy Zone. For those who do not have CVMs machines (e.g., ARM CCA, AMD SEV, Intel TDX, etc.), you can use 2 QEMU-KVM VMs to simulate CVMs. Depending on your computer architecture, either choose [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md). These tutorials will guide you on how to create 2 VMs that host DBMS and operators, separately, and how to perform a mode switch using QEMU-based VM snapshotting.
+
+**What is mode switch?** It forks a CVM, creates a snapshot and places it in the Management Zone. An assumption is that DBAs cannot log into the CVMs, including Integrity Zone and Privacy Zone. HEDB records operator invocations in the Integrity Zone (*Execution Mode*) and replays it in the Management Zone (*Maintenance Mode*).
 
 ### Record/Replay
 
