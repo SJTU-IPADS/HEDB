@@ -30,11 +30,6 @@ $ sudo -u postgres psql
 Run your 1st SQL:
 ```sql
 CREATE EXTENSION hedb;
-SELECT '1024'::enc_int4 * '4096'::enc_int4;
-```
-
-To peek into the secret values, try out the client mode:
-```sql
 SELECT enable_client_mode();
 SELECT '1024'::enc_int4 * '4096'::enc_int4;
 ```
