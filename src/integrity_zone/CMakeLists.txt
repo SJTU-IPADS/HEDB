@@ -14,7 +14,7 @@ endif()
 
 file(GLOB SRC
   "*.cpp"
-  "udt/*.cpp"
+  "udf/*.cpp"
   "interface/*.cpp"
   "ops_client/*.cpp"
   "record_replay/*.cpp"

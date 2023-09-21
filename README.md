@@ -36,24 +36,23 @@ CREATE EXTENSION hedb;
 DROP TABLE IF EXISTS test;
 CREATE TABLE test (a int, b enc_int4);
 
-SELECT enable_client_mode();                --- use client mode to insert user value
+SELECT enable_client_mode();            --- use client mode to insert user value
 INSERT INTO test VALUES (1, '1'::enc_int4); --- note that encrypted data is inserted as string
 INSERT INTO test VALUES (2, '2'::enc_int4); --- note that encrypted data is inserted as string
 SELECT * FROM test;
 
-SELECT enable_server_mode();                --- use server mode for database admins (DBAs) to maintain the database
+SELECT enable_server_mode();            --- use server mode for database admins (DBAs) to maintain the database
 SELECT * FROM test;
 ```
 
-There are currently four encrypted datatypes for you to selectively protect your data stored in PostgreSQL.
+There are currently four encrypted datatypes for you to selectively protect your data stored in PostgreSQL. To learn more about their usage, see [tests/unit-test](https://github.com/SJTU-IPADS/HEDB/blob/main/tests/unit-test/unit-test.sql).
+
 | data type | encrypted data type |
 |-----------|---------------------|
-| int       | enc_int4            |
-| float     | enc_float4          |
-| text      | enc_text            |
-| timestamp | enc_timestamp       |
-
-To learn more about the usage, see [unit-test](https://github.com/SJTU-IPADS/HEDB/blob/main/tests/unit-test/unit-test.sql).
+| int     | enc_int4        |
+| float     | enc_float4        |
+| text    | enc_text        |
+| timestamp | enc_timestamp     |
 
 So far so good. But it is **NOT secure** at all!
 
@@ -69,7 +68,7 @@ Database systems may contain sensitive data, and some are outsourced to third-pa
 
 **Option-1**: To build an encrypted database (EDB), one can place an entire database into an isolated domain, or confidential computing unit (like Intel SGX, AMD SEV, Intel TDX, ARM Realm, IBM PEF, AWS Nitro, Ant HyperEnclave, and whatever you name it). We call it Type-I EDB. Sadly, Type-I would prevent database admins, or DBAs, from managing the database, right? If DBAs were able to log into the DBMS, they would inspect any user data.
 
-**Option-2**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into [here](https://github.com/SJTU-IPADS/HEDB/blob/main/src/) to navigate how to build such an EDB using PostgreSQL' user-defined types (UDTs) and user-defined functions (UDFs). We call it Type-II EDB. Type-II EDB allows a DBA to log into the database, but keeps data always in ciphertext to avoid potential leakage. Cool!
+**Option-2**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into the source code to navigate how to build such an EDB using PostgreSQL' [user-defined types (UDTs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/hedb--1.0.sql) and [user-defined functions (UDFs)]((https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/udf)). We call it Type-II EDB. Type-II EDB allows a DBA to log into the database, but keeps data always in ciphertext to avoid potential leakage. Cool!
 
 Sad again, we have discovered an attack named "Smuggle". You can find how it works in [tools/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/tools/smuggle.py), which reveals an integer column in TPC-H. The reason why smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct an oracle.
 
@@ -135,22 +134,47 @@ If you shut down the operators VM, you can still replay the SQLs. This is exactl
 HEDB translates common DBA actions into hotfix templates.
 HEDB runs a hotfix server inside the DBMS CVM, and allows a skillful DBA to instruct the server as a maintenance agent. Please read details in [tools/hotfix](https://github.com/SJTU-IPADS/HEDB/tree/main/tools/hotfix).
 
+### Code Structure
+
+```
+├── docs                     # Info you want to know
+├── src
+│    ├── integrity_zone      # VM-#1
+│    │    ├── interface      # 2-VM shared memory based communication
+│    │    ├── ops_client     # Ops producer
+│    │    ├── record_replay  # Ops invocation record-replay
+│    │    └── udf            # PostgreSQL user-defined functions
+│    ├── privacy_zone        # VM-#2
+│    │    ├── enc_ops        # Ops consumer
+│    │    ├── klee_wrapper   # For KLEE trace generator using real data as seed
+│    │    └── plain_ops      # Ops that compute secret data, decoupled for KLEE
+│    └── utils               # utility libraries
+├── tests
+│    ├── tpch                # Macro: TPCH tests
+│    └── unit-test           # Micro: operator tests
+└── tools
+     ├── drivers
+     │    ├── arm-pmu-driver # For AARCH64 CPU timestamp
+     │    └── ivshmem-driver # For 2-VM shared memory
+     └── hotfix
+```
+
 ### Paper
 
 * [Encrypted Databases Made Secure Yet Maintainable](https://www.usenix.org/conference/osdi23/presentation/li-mingyu), USENIX OSDI 2023 <br>
 
 ```bibtex
 @inproceedings{li2023hedb,
-  author       = {Mingyu Li and Xuyang Zhao and Le Chen and Cheng Tan and Huorong Li and Sheng Wang and Zeyu Mi and Yubin Xia and Feifei Li and Haibo Chen},
-  title        = {Encrypted Databases Made Secure Yet Maintainable},
+  author     = {Mingyu Li and Xuyang Zhao and Le Chen and Cheng Tan and Huorong Li and Sheng Wang and Zeyu Mi and Yubin Xia and Feifei Li and Haibo Chen},
+  title      = {Encrypted Databases Made Secure Yet Maintainable},
   booktitle    = {17th USENIX Symposium on Operating Systems Design and Implementation (OSDI 23)},
-  pages        = {117--133},
-  url          = {https://www.usenix.org/conference/osdi23/presentation/li-mingyu},
-  isbn         = {978-1-939133-34-2},
+  pages      = {117--133},
+  url        = {https://www.usenix.org/conference/osdi23/presentation/li-mingyu},
+  isbn       = {978-1-939133-34-2},
   publisher    = {{USENIX} Association},
-  address      = {Boston, MA},
-  year         = {2023},
-  month        = jul,
+  address    = {Boston, MA},
+  year       = {2023},
+  month      = jul,
 }
 ```
 
