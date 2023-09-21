@@ -18,7 +18,7 @@ $ sudo service postgresql restart
 
 Pull the HEDB repo, build and install:
 ```sh
-$ git clone https://github.com/SJTU-IPADS/HEDB
+$ git clone -b main --depth 1 https://github.com/SJTU-IPADS/HEDB
 $ cd HEDB
 $ make
 $ sudo make install
@@ -101,9 +101,9 @@ ALTER USER postgres WITH PASSWORD 'postgres';
 ### Notes
 
 TPC-H may not be a suitable benchmark for evaluating EDB's performance.
-
 Since we were not able to obtain the real-world traces, we resort to using TPC-H to simulate the realistic financial workloads.
-Note that our tests involved encrypting all data types. However, in real-world scenarios, it is common practice for customers to selectively encrypt only the data that is crucial for security reasons, in order to maintain optimal performance.
+
+Our tests involved encrypting all data types. In real-world scenarios, it is a common practice to selectively encrypt only the data that is crucial for security reasons, in order to maintain optimal performance.
 
 # Security Concerns
 
@@ -119,4 +119,4 @@ Likewise, you should use the random value as the encryption key, not hard-coded 
 
 3. Prevent Admin login
 
-Replace admin's password with a random long key.
+Replace admin's password with a long random key.

@@ -53,6 +53,8 @@ There are currently four encrypted datatypes for you to selectively protect your
 | text      | enc_text            |
 | timestamp | enc_timestamp       |
 
+To learn more about the usage, see [unit-test](https://github.com/SJTU-IPADS/HEDB/blob/main/tests/unit-test/unit-test.sql).
+
 So far so good. But it is **NOT secure** at all!
 
 Here is a quick overview for any newcomers to understand the purpose of HEDB.
@@ -69,7 +71,7 @@ Database systems may contain sensitive data, and some are outsourced to third-pa
 	<img src="scripts/figures/types.jpg" width = "600" height = "160" align=center />
 </p>
 
-Sad again, we've discovered an attack, which we name "smuggle". You can find it in [scripts/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/scripts/smuggle.py). The reason why smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct an "oracle".
+Sad again, we've discovered an attack named "Smuggle". You can find how it works in [tools/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/tools/smuggle.py), which reveals an integer column in TPC-H. The reason why smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct an "oracle".
 
 ## Smuggle Attacks
 
@@ -90,12 +92,47 @@ HEDB is named after Helium, implying its two modes. Briefly, HEDB is a dual-mode
 1) Execution Mode achieves interface security by blocking illegal operator invocations,
 2) Maintenance Mode allows DBA common maintenance tasks by replaying invocations.
 
-### Build
+### Defense
 
-- For non-VM setup, refer to [native-setup.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/native-setup.md). Note that this is for development only.
-- For 2-VM setup, please refer to [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md).
+HEDB requires using two confidential VMs (CVMs) as the basic setting. For those who do not have CVMs machines (e.g., ARM CCA, AMD SEV, Intel TDX, etc.), we recommend you to use 2 QEMU-KVM VMs, depending on your computer architecture, either choose [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md). These tutorials will guide you on how to create 2 VMs that host DBMS and operators, separately, and how to perform a mode switch using QEMU VM snapshots.
 
-We recommend you to use 2-VM setup, which is exactly how HEDB works.
+### Record/Replay
+
+HEDB record/replay is for bug reproducing. It logs all ops invocations, including parameters and results, for future replays. We use TPC-H as the demonstrative benchmark.
+
+For security reasons, constants in the SQLs should be encrypted in advance.
+As the current implementation lacks client-side encryption, we should transform the constants into encrypted values using operators in the client mode. A future work is to seek and implement a simple client-side encryption or proxy-side encryption.
+
+```sh
+## make dependencies installed
+$ pip3 install psycopg2 tqdm
+
+# go to TPC-H test dir
+$ cd tests/tpch
+
+# update the password of the postgres user
+$ sudo -u postgres psql
+postgres=# ALTER USER postgres WITH PASSWORD 'postgres';
+
+## generate and load data
+$ python3 run.py --load
+
+## transform TPC-H queries into secure SQLs, which generates `cipher-query`
+$ python3 run.py --transform
+
+## record TPC-H
+$ python3 run.py --skip-generate --record-replay record
+
+## replay TPC-H
+$ python3 run.py --skip-generate --record-replay replay
+```
+
+If you shut down the operators VM, you can still replay the SQLs. This is exactly how HEDB prevents Smuggle but can reproduce bugs for DBAs.
+
+### HotFix
+
+HEDB translates common DBA actions into hotfix templates.
+HEDB runs a hotfix server inside the DBMS CVM, and allows a skillful DBA to instruct the server as a maintenance agent. See more details in [tools/hotfix](https://github.com/SJTU-IPADS/HEDB/tree/main/tools/hotfix).
 
 ### Paper
 

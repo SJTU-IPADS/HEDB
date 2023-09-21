@@ -1,4 +1,4 @@
-# Template Hotfixes
+# Template-based Hotfixes
 
 According to the insights, we find that DBAs has a finite whitelist of DBA actions.
 

@@ -54,7 +54,7 @@ $ sudo apt-get install -y build-essential cmake libmbedtls-dev
 
 Then pull the HEDB repo:
 ```sh
-$ git clone https://github.com/SJTU-IPADS/HEDB
+$ git clone -b main --depth 1 https://github.com/SJTU-IPADS/HEDB
 $ cd HEDB
 $ make
 ```
@@ -102,7 +102,7 @@ $ sudo apt-get install -y build-essential cmake libmbedtls-dev \
 
 Then pull the HEDB repo, build and install:
 ```sh
-$ git clone https://github.com/SJTU-IPADS/HEDB
+$ git clone -b main --depth 1 https://github.com/SJTU-IPADS/HEDB
 $ cd HEDB
 $ make
 $ sudo make install
@@ -158,10 +158,6 @@ To navigate the snapshot list, use `info snapshots`. `delvm <checkpoint name>` d
 In brief, VM snapshots provides temporal fork, rather than spatial fork.
 
 Note that the migration back to CVM phase should check the VM integrity carefully, somehow like runtime attestation.
-
-# HotFix
-
-Please refer to the README of `tools/hotfix`.
 
 # Misc
 
