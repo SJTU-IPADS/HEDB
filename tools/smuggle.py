@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# This is a demo Smuggle attacks that breach a particular TPC-H column
-# Run this with a DBA account
 # $ python3 -m pip install psycopg2
+#
+# This is a demo for Smuggle attacks that breach a particular TPC-H column
+# Run this after users have executed `python3 run.py -l` in `tests/tpch` with a DBA account
+
 
 import psycopg2
 
