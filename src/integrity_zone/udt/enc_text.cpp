@@ -338,7 +338,7 @@ Datum enc_text_concatenate(PG_FUNCTION_ARGS)
 
     SET_VARSIZE(res, ENCSTRLEN(len) + VARHDRSZ);
     int error = enc_text_concatenate(str1, str2, estr);
-    print_error("%s %d", __func__, error);
+    if (error) print_error("%s %d", __func__, error);
 
     PG_RETURN_POINTER(res);
 }

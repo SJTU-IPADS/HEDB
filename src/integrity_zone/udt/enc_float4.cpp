@@ -396,10 +396,10 @@ Datum enc_float4_min(PG_FUNCTION_ARGS)
     int error = enc_float_cmp(f1, f2, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    if (cmp == 0)
-        PG_RETURN_POINTER(f1);
-    else
+    if (cmp == 1)
         PG_RETURN_POINTER(f2);
+    else
+        PG_RETURN_POINTER(f1);
 }
 
 Datum enc_float4_add(PG_FUNCTION_ARGS)
