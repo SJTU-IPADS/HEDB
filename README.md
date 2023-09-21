@@ -63,13 +63,13 @@ Here is a quick overview for any newcomers to understand the purpose of HEDB.
 
 Database systems may contain sensitive data, and some are outsourced to third-parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary.
 
+<p align="center">
+  <img src="scripts/figures/types.jpg" width = "760" height = "180" align=center />
+</p>
+
 **Option-1**: To build an encrypted database (EDB), one can place an entire database into an isolated domain, or confidential computing unit (like Intel SGX, AMD SEV, Intel TDX, ARM Realm, IBM PEF, AWS Nitro, Ant HyperEnclave, and whatever you name it). We call it Type-I EDB. Sadly, Type-I would prevent database admins, or DBAs, from managing the database, right? If DBAs were able to log into the DBMS, they would inspect any user data.
 
 **Option-2**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into [here](https://github.com/SJTU-IPADS/HEDB/blob/main/src/) to navigate how to build such an EDB using PostgreSQL' user-defined types (UDTs) and user-defined functions (UDFs). We call it Type-II EDB. Type-II EDB allows a DBA to log into the database, but keeps data always in ciphertext to avoid potential leakage. Cool!
-
-<p align="center">
-	<img src="scripts/figures/types.jpg" width = "600" height = "160" align=center />
-</p>
 
 Sad again, we've discovered an attack named "Smuggle". You can find how it works in [tools/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/tools/smuggle.py), which reveals an integer column in TPC-H. The reason why smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct an "oracle".
 
@@ -85,23 +85,24 @@ Here is a minimal working example.
 
 ## HEDB as a Solution
 
-The idea of HEDB is simple. It splits the running mode of an EDB into two: *record* for users, and *replay* for DBAs.
+<p align="center">
+  <img src="scripts/figures/arch.jpg" width = "500" height = "260" align=center />
+</p>
 
-HEDB is named after Helium, implying its two modes. Briefly, HEDB is a dual-mode encrypted database that removes the tension between security and maintenance.
+The idea of HEDB is simple. It splits the running mode of an EDB into two: *Execution Mode* for users, and *Maintenance Mode* for DBAs. HEDB is named after Helium, implying its two modes. HEDB removes the tension between security and maintenance.
 
-1) Execution Mode achieves interface security by blocking illegal operator invocations,
-2) Maintenance Mode allows DBA common maintenance tasks by replaying invocations.
+1) *Execution Mode* prevents Smuggle attacks by blocking non-user operator invocations,
+2) *Maintenance Mode* allows DBAs to perform maintenance tasks by replaying invocations.
 
 ### Defense
 
-HEDB requires using two confidential VMs (CVMs) as the basic setting. For those who do not have CVMs machines (e.g., ARM CCA, AMD SEV, Intel TDX, etc.), we recommend you to use 2 QEMU-KVM VMs, depending on your computer architecture, either choose [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md). These tutorials will guide you on how to create 2 VMs that host DBMS and operators, separately, and how to perform a mode switch using QEMU VM snapshots.
+To launch HEDB, you need to use two confidential VMs (CVMs) as the setting. For those who do not have CVMs machines (e.g., ARM CCA, AMD SEV, Intel TDX, etc.), you can use 2 QEMU-KVM VMs to simulate CVMs. Depending on your computer architecture, either choose [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md). These tutorials will guide you on how to create 2 VMs that host DBMS and operators, separately, and how to perform a mode switch using QEMU-based VM snapshotting.
 
 ### Record/Replay
 
-HEDB record/replay is for bug reproducing. It logs all ops invocations, including parameters and results, for future replays. We use TPC-H as the demonstrative benchmark.
+HEDB [record/replay](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/record_replay) is meant for reproducing bugs. It logs all ops invocations, including parameters and results, for later replays. We use TPC-H as the demonstrative benchmark.
 
-For security reasons, constants in the SQLs should be encrypted in advance.
-As the current implementation lacks client-side encryption, we should transform the constants into encrypted values using operators in the client mode. A future work is to seek and implement a simple client-side encryption or proxy-side encryption.
+For privacy reasons, SQL constants should be encrypted in advance. Because the current implementation lacks client-side encryption, we should transform the constants into encrypted values using operators in the client mode. A future work is to seek and implement a simple client-side encryption or proxy-side encryption.
 
 ```sh
 ## make dependencies installed
@@ -129,10 +130,10 @@ $ python3 run.py --skip-generate --record-replay replay
 
 If you shut down the operators VM, you can still replay the SQLs. This is exactly how HEDB prevents Smuggle but can reproduce bugs for DBAs.
 
-### HotFix
+### Hotfix
 
 HEDB translates common DBA actions into hotfix templates.
-HEDB runs a hotfix server inside the DBMS CVM, and allows a skillful DBA to instruct the server as a maintenance agent. See more details in [tools/hotfix](https://github.com/SJTU-IPADS/HEDB/tree/main/tools/hotfix).
+HEDB runs a hotfix server inside the DBMS CVM, and allows a skillful DBA to instruct the server as a maintenance agent. Please read details in [tools/hotfix](https://github.com/SJTU-IPADS/HEDB/tree/main/tools/hotfix).
 
 ### Paper
 
