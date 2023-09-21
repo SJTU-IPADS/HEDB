@@ -1,6 +1,16 @@
 #include "enc_text_ops.h"
 #include "plain_text_ops.h"
 #include <like_match.h>
+#include "base64.h"
+#include <string>
+using namespace std;
+
+static string b64_text(EncStr* in)
+{
+    char b64_text[ENC_STRING_B64_LENGTH + 1] = { 0 };
+    toBase64((const unsigned char*)in, sizeof(EncStr), b64_text);
+    return b64_text;
+}
 
 int enc_text_cmp(EncStrCmpRequestData* req)
 {
@@ -22,6 +32,8 @@ int enc_text_cmp(EncStrCmpRequestData* req)
     right.data[right.len] = '\0';
 
     req->cmp = plain_text_cmp((char*)left.data, left.len, (char*)right.data, right.len);
+    printf("[LOG Client] <%d> %s %s => %d\n", req->common.reqType, left.data, right.data, req->cmp);
+
     return resp;
 }
 
@@ -44,6 +56,7 @@ int enc_text_like(EncStrLikeRequestData* req)
     decrypt_wait(NULL, 0);
 
     req->cmp = plain_text_like((char*)left.data, left.len, (char*)right.data, right.len);
+
     return resp;
 }
 
@@ -65,10 +78,12 @@ int enc_text_concatenate(EncStrCalcRequestData* req)
     right.data[right.len] = '\0';
 
     plain_text_concat((char*)left.data, &left.len, (char*)right.data, right.len);
+
     req->res.len = left.len + IV_SIZE + TAG_SIZE;
     resp = encrypt_bytes((uint8_t*)&left.data, left.len, (uint8_t*)&req->res.enc_cstr, req->res.len);
     return resp;
 }
+
 int enc_text_substring(SubstringRequestData* req)
 {
     int resp = 0;

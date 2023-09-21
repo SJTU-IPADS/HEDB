@@ -145,7 +145,7 @@ HEDB runs a hotfix server inside the DBMS CVM, and allows a skillful DBA to inst
 ### Code Structure
 
 ```
-├── docs                     # Info you want to know
+├── docs                     # Most info you may want to know
 ├── src
 │    ├── integrity_zone      # VM-#1
 │    │    ├── interface      # 2-VM shared memory based communication

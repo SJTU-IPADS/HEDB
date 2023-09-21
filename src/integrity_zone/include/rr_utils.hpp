@@ -8,14 +8,10 @@ inline uint64_t get_timestamp(void)
 {
     uint64_t tsc;
 #if defined(__aarch64__)
-    asm volatile("mrs %0, pmccntr_el0"
-                 : "=r"(tsc));
+    asm volatile("mrs %0, pmccntr_el0" : "=r"(tsc));
 #elif defined(__x86_64__)
     unsigned int a, d;
-    asm volatile("rdtscp"
-                 : "=a"(a), "=d"(d)
-                 :
-                 : "%rbx", "%rcx");
+    asm volatile("rdtscp" : "=a"(a), "=d"(d) : : "%rbx", "%rcx");
     tsc = ((unsigned long)a) | (((unsigned long)d) << 32);
 #else
     tsc = 0;

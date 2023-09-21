@@ -67,7 +67,7 @@ double plain_float_bulk(int reqType, int size, float* array)
  * @param expr
  * @return float
  */
-float plain_float_eval_expr(char* expr, float* arr)
+float plain_float_eval_expr(unsigned char* expr, float* arr)
 {
     float stack[EXPR_STACK_MAX_SIZE];
     size_t i;

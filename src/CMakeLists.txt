@@ -33,12 +33,12 @@ target_link_libraries(desenitizer mbedcrypto pthread)
 if ( ${TEE_TYPE} STREQUAL "CVM" )
     add_compile_definitions(TEE_CVM)
     file(GLOB SRCS
-        utils/debug.cpp
         privacy_zone/crypto.cpp
         privacy_zone/ops_server.cpp
-        privacy_zone/handle_ops.c
-        privacy_zone/enc_ops/*.c
+        privacy_zone/handle_ops.cpp
+        privacy_zone/enc_ops/*.cpp
         privacy_zone/plain_ops/*.c
+        utils/*.cpp
     )
     add_executable(ops_server ${SRCS})
     target_include_directories(ops_server

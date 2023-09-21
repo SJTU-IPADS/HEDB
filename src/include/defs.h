@@ -30,6 +30,11 @@ typedef unsigned long DWORD; // 4bytes
 #define EXPR_MAX_SIZE (8) // 32
 #define EXPR_STACK_MAX_SIZE (16) // 256
 
+#define ENC_INT_B64_LENGTH 45 // ((4 * n / 3) + 3) & ~3
+#define ENC_FLOAT_B64_LENGTH 45 // ((4 * n / 3) + 3) & ~3
+#define ENC_STRING_B64_LENGTH 345 // ((4 * n / 3) + 3) & ~3
+#define ENC_TIMESTAMP_B64_LENGTH 49 // ((4 * n / 3) + 3) & ~3
+
 /* for ops opcode */
 #define CMD_INT_PLUS 1
 #define CMD_INT_MINUS 2

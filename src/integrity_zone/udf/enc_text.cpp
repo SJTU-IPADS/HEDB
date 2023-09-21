@@ -82,7 +82,6 @@ Datum enc_text_in(PG_FUNCTION_ARGS)
     if (clientMode == true) {
         result = (EncText*)cstring_to_enctext_with_len(pIn, strlen(pIn));
     } else {
-#define ENC_STRING_B64_LENGTH 345 // ((4 * n / 3) + 3) & ~3
         EncStr* estr = (EncStr*)palloc0(ENC_STRING_B64_LENGTH);
         memset(estr, 0, ENC_STRING_B64_LENGTH);
         fromBase64(pIn, strlen(pIn), (unsigned char*)estr);

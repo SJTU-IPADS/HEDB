@@ -127,9 +127,7 @@ Datum enc_float4_out(PG_FUNCTION_ARGS)
         sprintf(str, "%f", out);
         PG_RETURN_POINTER(str);
     } else {
-#define ENC_FLOAT_B64_LENGTH 45 // ((4 * n / 3) + 3) & ~3
         char base64_float4[ENC_FLOAT_B64_LENGTH + 1] = { 0 };
-
         toBase64((const unsigned char*)in, sizeof(EncFloat), base64_float4);
         // ereport(INFO, (errmsg("base64('%p') = %s", in, base64_float4)));
         PG_RETURN_CSTRING(base64_float4);
