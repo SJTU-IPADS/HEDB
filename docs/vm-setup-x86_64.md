@@ -39,7 +39,7 @@ $ cp ubuntu-23.04-server-cloudimg-amd64.img ops.img
 $ qemu-system-x86_64 \
     -cpu host -enable-kvm -m 1G -nographic \
     -drive if=virtio,format=qcow2,file=ops.img \
-    -drive if=virtio,format=raw,file=cloud.img \
+    -drive if=virtio,format=qcow2,file=cloud.img \
     -device ivshmem-plain,memdev=hostmem \
     -object memory-backend-file,size=16M,share=on,mem-path=/dev/shm/ivshmem,id=hostmem \
     -device virtio-net-pci,netdev=net0 -netdev user,id=net0
@@ -85,7 +85,7 @@ $ cloud-localds --disk-format qcow2 cloud2.img cloud.yaml
 $ qemu-system-x86_64 \
     -cpu host -smp 2 -enable-kvm -m 4G -nographic \
     -drive if=virtio,format=qcow2,file=dbms.img \
-    -drive if=virtio,format=raw,file=cloud2.img \
+    -drive if=virtio,format=qcow2,file=cloud2.img \
     -device ivshmem-plain,memdev=hostmem,master=on \
     -object memory-backend-file,size=16M,share=on,mem-path=/dev/shm/ivshmem,id=hostmem \
     -device virtio-net-pci,netdev=net0 -netdev user,id=net0,hostfwd=tcp::8000-:8000
