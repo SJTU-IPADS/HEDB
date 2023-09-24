@@ -39,7 +39,7 @@ $ cp ubuntu-23.04-server-cloudimg-amd64.img ops.img
 $ qemu-system-x86_64 \
     -cpu host -enable-kvm -m 1G -nographic \
     -drive if=virtio,format=qcow2,file=ops.img \
-    -drive if=virtio,format=raw,file=cloud.img \
+    -drive if=virtio,format=qcow2,file=cloud.img \
     -device ivshmem-plain,memdev=hostmem \
     -object memory-backend-file,size=16M,share=on,mem-path=/dev/shm/ivshmem,id=hostmem \
     -device virtio-net-pci,netdev=net0 -netdev user,id=net0
@@ -85,7 +85,7 @@ $ cloud-localds --disk-format qcow2 cloud2.img cloud.yaml
 $ qemu-system-x86_64 \
     -cpu host -smp 2 -enable-kvm -m 4G -nographic \
     -drive if=virtio,format=qcow2,file=dbms.img \
-    -drive if=virtio,format=raw,file=cloud2.img \
+    -drive if=virtio,format=qcow2,file=cloud2.img \
     -device ivshmem-plain,memdev=hostmem,master=on \
     -object memory-backend-file,size=16M,share=on,mem-path=/dev/shm/ivshmem,id=hostmem \
     -device virtio-net-pci,netdev=net0 -netdev user,id=net0,hostfwd=tcp::8000-:8000
@@ -125,35 +125,35 @@ $ sudo -u postgres psql
 # psql
 DROP EXTENSION IF EXISTS hedb CASCADE;
 CREATE EXTENSION hedb;
-
+SELECT enable_client_mode();
 SELECT '1024'::enc_int4 * '4096'::enc_int4;
 ```
 
 # Mode Switch
 
-Mode switch forks a confidential VM from integrity zone to normal zone.
-The initial prototype of HEDB uses TwinVisor@SOSP'2021 to implement mode switch, which moves VM from Secure to Normal by modifying the TZASC controller.
-This repo does not provide this migration code (maybe in the future).
-Implementing migration between CVM to VM atop SEV and TDX is future work, and you may even publish your own work for these!
+Mode switch forks a confidential VM from Integrity Zone to Management Zone, so that DBAs can re-execute SQLs using [HEDB replay mode](https://github.com/SJTU-IPADS/HEDB/blob/main/tests/tpch/README.md).
 
-Let's assume you have such migration code already.
-One way to implement CVM fork is to leverage the mature QEMU feature: VM snapshots.
+The initial prototype of HEDB uses [TwinVisor@SOSP2021](https://github.com/TwinVisor/twinvisor-prototype) to implement mode switch, which moves the VM from Secure World to Normal World by modifying the TZASC controller.
+This repo does not provide this migration code.
+Implementing migration between CVM to VM atop SEV and TDX is future work, and you may even publish your own work!
+For plain VM fork, one approach is to leverage the QEMU feature: VM snapshot.
 
-First, append this line to qemu command line of integrity zone:
-```
+First, append this line to qemu command line of Integrity Zone (you need restart the VM):
+```sh
     -monitor stdio -serial telnet:localhost:4321,server,nowait
 ```
 
-Second, log into the integrity zone VM via telnet:
+Second, log into the Integrity Zone VM via telnet:
 ```sh
 $ telnet localhost 4321
 ```
 
-Third, you can issue commands to the qemu monitor.
-For example, `savevm <checkpoint name>` creates a VM snapshot. Acting as a DBA, you can try as many times as you wish.
-To re-execute SQLs, simply try HEDB replay mode.
+Third, issue VM-snapshot commands to the qemu monitor.
+
+For example, `savevm <checkpoint name>` creates a VM snapshot. Acting as a DBA, you can try it as many times as you wish.
 After whatever inspections and fixes, issue `loadvm <checkpoint name>` to unwind, which discards the side effects.
-To navigate the snapshot list, use `info snapshots`. `delvm <checkpoint name>` deletes unwanted ones.
+`delvm <checkpoint name>` deletes unwanted ones.
+To navigate the snapshot list, use `info snapshots`.
 
 In brief, VM snapshots provides temporal fork, rather than spatial fork.
 
@@ -162,6 +162,6 @@ Note that the migration back to CVM phase should check the VM integrity carefull
 # Misc
 
 To shrink the VM image size, you can use:
-```
+```sh
 $ qemu-img convert -c -O qcow2 dbms.img dbms-new.img
 ```

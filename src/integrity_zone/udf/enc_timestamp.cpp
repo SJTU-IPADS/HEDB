@@ -173,9 +173,7 @@ Datum enc_timestamp_out(PG_FUNCTION_ARGS)
         result = pstrdup(buf);
         PG_RETURN_CSTRING(result);
     } else {
-#define ENC_TIMESTAMP_B64_LENGTH 49 // ((4 * n / 3) + 3) & ~3
         char base64_timestamp[ENC_TIMESTAMP_B64_LENGTH + 1] = { 0 };
-
         toBase64((const unsigned char*)t, ENC_TIMESTAMP_LENGTH, base64_timestamp);
         // ereport(INFO, (errmsg("base64('%p') = %s", t, base64_timestamp)));
         PG_RETURN_CSTRING(base64_timestamp);

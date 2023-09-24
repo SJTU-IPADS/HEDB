@@ -1,5 +1,15 @@
 #include "enc_timestamp_ops.h"
 #include "plain_timestamp_ops.h"
+#include "base64.h"
+#include <string>
+using namespace std;
+
+static string b64_timestamp(EncTimestamp* in)
+{
+    char b64_timestamp[ENC_TIMESTAMP_B64_LENGTH + 1] = { 0 };
+    toBase64((const unsigned char*)in, sizeof(EncTimestamp), b64_timestamp);
+    return b64_timestamp;
+}
 
 int enc_timestamp_cmp(EncTimestampCmpRequestData* req)
 {
@@ -16,8 +26,10 @@ int enc_timestamp_cmp(EncTimestampCmpRequestData* req)
         return resp;
 
     req->cmp = plain_timestamp_cmp(left, right);
+    printf("[LOG Admin] <%d> %s %s => %d\n", req->common.reqType,
+        b64_timestamp(&req->left).c_str(), b64_timestamp(&req->right).c_str(), req->cmp);
+    printf("[LOG Client] <%d> %ld %ld => %d\n", req->common.reqType, left, right, req->cmp);
 
-    // printf("%d, %d, %d, %d\n",req->common.reqType, left,right,req->cmp);
     return resp;
 }
 
