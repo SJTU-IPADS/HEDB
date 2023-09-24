@@ -60,7 +60,7 @@ Here is a quick overview for any newcomers to understand the purpose of HEDB.
 
 ## Encrypted Databases
 
-Database systems may contain sensitive data, and some are outsourced to third-parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary.
+Database systems may contain sensitive data, and some are outsourced to third parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary.
 
 <p align="center">
   <img src="scripts/figures/types.jpg" width = "760" height = "180" align=center />
@@ -68,17 +68,17 @@ Database systems may contain sensitive data, and some are outsourced to third-pa
 
 **Option-1**: To build an encrypted database (EDB), one can place an entire database into an isolated domain, or confidential computing unit (like Intel SGX, AMD SEV, Intel TDX, ARM Realm, IBM PEF, AWS Nitro, Ant HyperEnclave, and whatever you name it). We call it Type-I EDB. Sadly, Type-I would prevent database admins, or DBAs, from managing the database, right? If DBAs were able to log into the DBMS, they would inspect any user data.
 
-**Option-2**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into the source code to navigate how to build such an EDB using PostgreSQL' [user-defined types (UDTs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/hedb--1.0.sql) and [user-defined functions (UDFs)]((https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/udf)). We call it Type-II EDB. Type-II EDB allows a DBA to log into the database, but keeps data always in ciphertext to avoid potential leakage. Cool!
+**Option-2**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into the source code to navigate how to build such an EDB using PostgreSQL's [user-defined types (UDTs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/hedb--1.0.sql) and [user-defined functions (UDFs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/udf). We call it Type-II EDB. Type-II EDB allows a DBA to log into the database, but keeps data always in ciphertext to avoid potential leakage. Cool!
 
-Sad again, we have discovered an attack named "Smuggle". You can find how it works in [tools/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/tools/smuggle.py), which reveals an integer column in TPC-H. The reason why smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct an oracle.
+However, for Type-II, we have discovered an attack named "Smuggle". You can find how it works in [tools/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/tools/smuggle.py), which reveals an integer column in TPC-H. The reason why smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct oracles.
 
 ## Smuggle Attacks
 
 Here is a minimal working example.
 
 1. **Constructing oracles**:
-   i. With ÷, DBAs obtain the ciphertext of '1' by dividing a number by itself.
-   ii. With '1', DBAs construct all encrypted integers by iteratively + the cipher '1' to a counter.
+   1. With ÷, DBAs obtain the ciphertext of '1' by dividing a number by itself.
+   2. With '1', DBAs construct all encrypted integers by iteratively + the cipher '1' to a counter.
 
 2. **Recovering secrets**: With =, DBAs recover encrypted values by comparing them with known ciphertexts.
 
@@ -167,11 +167,11 @@ HEDB runs a hotfix server inside the DBMS CVM, and allows a skillful DBA to inst
 @inproceedings{li2023hedb,
   author     = {Mingyu Li and Xuyang Zhao and Le Chen and Cheng Tan and Huorong Li and Sheng Wang and Zeyu Mi and Yubin Xia and Feifei Li and Haibo Chen},
   title      = {Encrypted Databases Made Secure Yet Maintainable},
-  booktitle    = {17th USENIX Symposium on Operating Systems Design and Implementation (OSDI 23)},
+  booktitle  = {17th USENIX Symposium on Operating Systems Design and Implementation (OSDI 23)},
   pages      = {117--133},
   url        = {https://www.usenix.org/conference/osdi23/presentation/li-mingyu},
   isbn       = {978-1-939133-34-2},
-  publisher    = {{USENIX} Association},
+  publisher  = {{USENIX} Association},
   address    = {Boston, MA},
   year       = {2023},
   month      = jul,

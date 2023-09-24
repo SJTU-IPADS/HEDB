@@ -1,22 +1,22 @@
 # Template-based Hotfixes
 
-According to the insights, we find that DBAs has a finite whitelist of DBA actions.
+According to the paper's insights, DBAs has a finite allow list of DBA actions.
 
-HEDB provides a hotfix server running inside the integrity zone, and allow DBAs in the normal zone to interact with it.
+HEDB provides a hotfix server running inside the integrity zone, and allow DBAs in Management Zone to interact with it.
 
 ## How to Build & Run
 
-In the integrity zone, run `make all`, then `python3 hotfix-server.py &`.
+In Integrity Zone, run `make all`, then `python3 hotfix-server.py &`.
 
-In the normal zone, run `python3 hotfix-client.py`.
+In Management Zone, run `python3 hotfix-client.py`.
 
 ## Security Caution
 
-To avoid using sudo when executing DBA's fixes, we use the sticky bit, i.e., SUID.
+To avoid using `sudo` when executing DBA's hotfixes, the sticky bit (SUID) is used.
 
 ## DBA Guidance
 
-To learn more about DBA skills, you can refer to `https://roadmap.sh/postgresql-dba`.
+To learn more about DBA skills, we recommend you to refer to https://roadmap.sh/postgresql-dba.
 
 For sure, you can add your own templates.
 
