@@ -55,18 +55,18 @@ There are currently four encrypted datatypes for you to selectively protect your
 
 | data type | encrypted data type |
 |-----------|---------------------|
-| int     | enc_int4        |
-| float     | enc_float4        |
-| text    | enc_text        |
-| timestamp | enc_timestamp     |
+| int       | enc_int4            |
+| float     | enc_float4          |
+| text      | enc_text            |
+| timestamp | enc_timestamp       |
 
 So far so good. But it is **NOT secure** at all!
 
-Here is a quick overview for any newcomers to understand the purpose of HEDB.
+Here is a quick overview for any newcomers to understand the purpose of HEDB (10-min read).
 
 ## Encrypted Databases
 
-Database systems may contain sensitive data, and some are outsourced to third parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary.
+Database systems may contain sensitive data, and some are outsourced to third parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary. This also helps enterprises obey data protection laws such as EU GDPR, US HIPAA, US PCI/DSS, PRC DSL, PRC PIPL, etc.
 
 <p align="center">
   <img src="scripts/figures/types.jpg" width = "760" height = "180" align=center />
@@ -74,7 +74,7 @@ Database systems may contain sensitive data, and some are outsourced to third pa
 
 **Option-1**: To build an encrypted database (EDB), one can place an entire database into an isolated domain, or confidential computing unit (like Intel SGX, AMD SEV, Intel TDX, ARM Realm, IBM PEF, AWS Nitro, Ant HyperEnclave, and whatever you name it). We call it Type-I EDB. Sadly, Type-I would prevent database admins, or DBAs, from managing the database, right? If DBAs were able to log into the DBMS, they would inspect any user data.
 
-**Option-2**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into the source code to navigate how to build such an EDB using PostgreSQL's [user-defined types (UDTs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/hedb--1.0.sql) and [user-defined functions (UDFs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/udf). We call it Type-II EDB. Type-II EDB allows a DBA to log into the database, but keeps data always in ciphertext to avoid potential leakage. Cool!
+**Option-2**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into the source code to navigate how to build such an EDB using PostgreSQL's [user-defined types (UDTs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/hedb--1.0.sql) and [user-defined functions (UDFs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/udf). We call it Type-II EDB. Type-II EDB allows a DBA to log into the database, but keeps data always in ciphertext (at rest on disk, in transit over network, and in use in memory) to avoid potential leakage. Cool!
 
 However, for Type-II, we have discovered an attack named "Smuggle". You can find how it works in [tools/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/tools/smuggle.py), which reveals an integer column in TPC-H. The reason why smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct oracles.
 
@@ -101,15 +101,17 @@ The idea of HEDB is simple. It splits the running mode of an EDB into two: *Exec
 
 ### Defense
 
-To launch HEDB, you need to use two confidential VMs (CVMs) as the setting, one as Integrity Zone and the other as Privacy Zone. For those who do not have CVMs machines (e.g., ARM CCA, AMD SEV, Intel TDX, etc.), you can use 2 QEMU-KVM VMs to simulate CVMs. Depending on your computer architecture, either choose [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md). These tutorials will guide you on how to create 2 VMs that host DBMS and operators, separately, and how to perform a mode switch using QEMU-based VM snapshotting.
+To launch HEDB, you need to use two confidential units (e.g., secure enclaves, confidential processes or virtual machines) as the setting, one as [Integrity Zone](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone) and the other as [Privacy Zone](https://github.com/SJTU-IPADS/HEDB/tree/main/src/privacy_zone). In fact, HEDB executes these two zones using two OS processes, and leverages [inter-zone shared memory](https://github.com/SJTU-IPADS/HEDB/tree/main/tools/drivers/ivshmem-driver) for fast communication.
 
-**What is mode switch?** It forks a CVM, creates a snapshot and places it in the Management Zone. An assumption is that DBAs cannot log into the CVMs, including Integrity Zone and Privacy Zone. HEDB records operator invocations in the Integrity Zone (*Execution Mode*) and replays it in the Management Zone (*Maintenance Mode*).
+We recommend you to use two confidential VMs (CVMs), as evaluated in the paper. For those who do not have CVMs computers (e.g., ARM CCA, AMD SEV, Intel TDX), you can use 2 QEMU-KVM VMs to simulate CVMs. Depending on your computer architecture, either choose [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md). These tutorials will guide you on how to create 2 VMs that host DBMS and operators, separately, and how to perform a mode switch using QEMU-based VM snapshotting.
+
+What is the mode switch? It forks a CVM, creates a snapshot and places it in the Management Zone that admins are able to access. A guarantee is that DBAs cannot log into the CVMs, including Integrity Zone and Privacy Zone. HEDB records operator invocations in the Integrity Zone (*Execution Mode*) and replays it in the Management Zone (*Maintenance Mode*).
 
 ### Record/Replay
 
 HEDB [record/replay](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/record_replay) is meant for reproducing bugs. It logs all ops invocations, including parameters and results, for later replays. We use TPC-H as the demonstrative benchmark.
 
-For privacy reasons, SQL constants should be encrypted in advance. Because the current implementation lacks client-side encryption, we should transform the constants into encrypted values using operators in the client mode. A future work is to seek and implement a simple client-side encryption or proxy-side encryption.
+For privacy reasons, SQL constants should be encrypted in advance. Because the current implementations lack client-side encryption, we should transform the constants into encrypted values using operators in the client mode. A future work is to seek and implement a simple client-side encryption or proxy-side encryption.
 
 ```sh
 ## make dependencies installed
@@ -224,7 +226,7 @@ This repository is a research prototype, not for production use. It is meant for
 - Le Chen: https://github.com/Casieee
 - Mingyu Li: https://github.com/Maxul
 
-## Acknowledgement
+## Acknowledgements
 
 - Database and Storage Lab@Alibaba DAMO Academy, who provides insights from real-world DBA tasks.
 - [StealthDB](https://github.com/cryptograph/stealthdb), who provides the initial version of EDB extensions for PostgreSQL.
