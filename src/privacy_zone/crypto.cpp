@@ -1,6 +1,8 @@
 #include "crypto.h"
 #include "debug.h"
-#include <stdio.h>
+#include <cstdio>
+#include <ctime>
+#include <cstdlib>
 
 /* FIXME: remember to replace this with your real key */
 const uint8_t hard_coded_enc_key[32] = {
@@ -11,6 +13,14 @@ const uint8_t hard_coded_enc_key[32] = {
 }; // TA_DERIVED_KEY_MAX_SIZE
 
 // #define DEBUG_OUTPUT
+
+static void randombytes_buf(uint8_t *iv, size_t sz)
+{
+    srand(time(NULL));
+    for (int i = 0; i < sz; i++) {
+        iv[i] = rand() % 255;
+    }
+}
 
 static __thread bool inited = false;
 static __thread mbedtls_gcm_context aes;
@@ -34,7 +44,7 @@ int gcm_encrypt(uint8_t* in, uint64_t in_sz, uint8_t* out, uint64_t* out_sz)
     uint8_t* data_pos = out + IV_SIZE + TAG_SIZE;
 
     uint8_t iv[IV_SIZE] = { 0 };
-    // randombytes_buf(iv, sizeof iv); TODO: ADD a way to get entropy
+    randombytes_buf(iv, sizeof iv); // add entropy
     memcpy(iv_pos, iv, IV_SIZE);
 
     // Initialise the GCM cipher...
