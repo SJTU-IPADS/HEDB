@@ -32,7 +32,7 @@ int enc_text_cmp(EncStrCmpRequestData* req)
     right.data[right.len] = '\0';
 
     req->cmp = plain_text_cmp((char*)left.data, left.len, (char*)right.data, right.len);
-    printf("[LOG Client] <%d> %s %s => %d\n", req->common.reqType, left.data, right.data, req->cmp);
+    // printf("[LOG Client] <%d> %s %s => %d\n", req->common.reqType, left.data, right.data, req->cmp);
 
     return resp;
 }

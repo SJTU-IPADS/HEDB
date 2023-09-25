@@ -10,6 +10,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #include <postgres.h>
 #include <fmgr.h>
 #include <funcapi.h>
@@ -21,6 +22,7 @@ extern "C" {
 #include <utils/datetime.h>
 #include <utils/timestamp.h>
 #include <c.h>
+
 #ifdef __cplusplus
 }
 
@@ -28,11 +30,13 @@ extern "C" {
             ereport(INFO, (errmsg(__VA_ARGS__)))
 #define print_error(...) \
             ereport(ERROR, (errmsg(__VA_ARGS__)))
-#else   
+#else
+
 #define print_info(...) \
             printf(__VA_ARGS__)
 #define print_error(...) \
             printf(__VA_ARGS__)
+
 #endif
 
 #include "defs.h"

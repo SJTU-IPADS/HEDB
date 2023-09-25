@@ -120,7 +120,6 @@ CREATE OPERATOR >= (
 
 CREATE FUNCTION enc_int4_cmp(enc_int4, enc_int4)
 RETURNS integer AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
-
 CREATE OPERATOR CLASS btree_enc_int4_ops
 DEFAULT FOR TYPE enc_int4 USING btree
 AS
@@ -199,7 +198,7 @@ CREATE AGGREGATE avg (enc_int4)
    finalfunc = enc_int4_avg_bulk
 );
 
-CREATE FUNCTION enc_int4_min(enc_int4,enc_int4)
+CREATE FUNCTION enc_int4_min(enc_int4, enc_int4)
 RETURNS enc_int4 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
 CREATE AGGREGATE min (enc_int4)
 (  
@@ -319,7 +318,6 @@ CREATE OPERATOR >= (
 
 CREATE FUNCTION enc_text_cmp(enc_text, enc_text)
 RETURNS integer AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
-
 CREATE OPERATOR CLASS btree_enc_text_ops
 DEFAULT FOR TYPE enc_text USING btree
 AS
@@ -461,7 +459,6 @@ CREATE OPERATOR >= (
 
 CREATE FUNCTION enc_float4_cmp(enc_float4, enc_float4)
 RETURNS integer AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
-
 CREATE OPERATOR CLASS btree_enc_float4_ops
 DEFAULT FOR TYPE enc_float4 USING btree
 AS
@@ -669,7 +666,6 @@ CREATE OPERATOR >= (
 
 CREATE FUNCTION enc_timestamp_cmp(enc_timestamp, enc_timestamp)
 RETURNS integer AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
-
 CREATE OPERATOR CLASS btree_enc_timestamp_ops
 DEFAULT FOR TYPE enc_timestamp USING btree
 AS

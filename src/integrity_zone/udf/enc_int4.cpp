@@ -2,8 +2,20 @@
 #include <enc_float_ops.hpp>
 #include <enc_int_ops.hpp>
 #include <extension.hpp>
+#include <string>
+#include <fstream>
+#include <iostream>
+using namespace std;
 
 extern bool clientMode;
+extern ofstream outfile;
+
+static string b64_int(EncInt* in)
+{
+    char b64_int4[ENC_INT_B64_LENGTH + 1] = { 0 };
+    toBase64((const unsigned char*)in, sizeof(EncInt), b64_int4);
+    return b64_int4;
+}
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,8 +41,8 @@ PG_FUNCTION_INFO_V1(enc_int4_max);
 PG_FUNCTION_INFO_V1(enc_int4_min);
 PG_FUNCTION_INFO_V1(enc_int4_sum_bulk);
 PG_FUNCTION_INFO_V1(enc_int4_avg_bulk);
-PG_FUNCTION_INFO_V1(enc_int4_min_bulk);
-PG_FUNCTION_INFO_V1(enc_int4_max_bulk);
+// PG_FUNCTION_INFO_V1(enc_int4_min_bulk);
+// PG_FUNCTION_INFO_V1(enc_int4_max_bulk);
 #ifdef __cplusplus
 }
 #endif
@@ -98,6 +110,7 @@ Datum enc_int4_add(PG_FUNCTION_ARGS)
     int error = enc_int_add(left, right, result);
     if (error) print_error("%s %d", __func__, error);
 
+    outfile << "+ " << b64_int(left) << " " << b64_int(right) << " " << b64_int(result) << endl;
     PG_RETURN_CSTRING(result);
 }
 
@@ -110,6 +123,7 @@ Datum enc_int4_sub(PG_FUNCTION_ARGS)
     int error = enc_int_sub(left, right, result);
     if (error) print_error("%s %d", __func__, error);
 
+    outfile << "- " << b64_int(left) << " " << b64_int(right) << " " << b64_int(result) << endl;
     PG_RETURN_CSTRING(result);
 }
 
@@ -122,6 +136,7 @@ Datum enc_int4_mult(PG_FUNCTION_ARGS)
     int error = enc_int_mult(left, right, result);
     if (error) print_error("%s %d", __func__, error);
 
+    outfile << "* " << b64_int(left) << " " << b64_int(right) << " " << b64_int(result) << endl;
     PG_RETURN_CSTRING(result);
 }
 
@@ -134,6 +149,7 @@ Datum enc_int4_div(PG_FUNCTION_ARGS)
     int error = enc_int_div(left, right, result);
     if (error) print_error("%s %d", __func__, error);
 
+    outfile << "/ " << b64_int(left) << " " << b64_int(right) << " " << b64_int(result) << endl;
     PG_RETURN_CSTRING(result);
 }
 
@@ -146,6 +162,7 @@ Datum enc_int4_pow(PG_FUNCTION_ARGS)
     int error = enc_int_pow(left, right, result);
     if (error) print_error("%s %d", __func__, error);
 
+    outfile << "^ " << b64_int(left) << " " << b64_int(right) << " " << b64_int(result) << endl;
     PG_RETURN_CSTRING(result);
 }
 
@@ -158,6 +175,7 @@ Datum enc_int4_mod(PG_FUNCTION_ARGS)
     int error = enc_int_mod(left, right, result);
     if (error) print_error("%s %d", __func__, error);
 
+    outfile << "% " << b64_int(left) << " " << b64_int(right) << " " << b64_int(result) << endl;
     PG_RETURN_CSTRING(result);
 }
 
@@ -170,6 +188,7 @@ Datum enc_int4_cmp(PG_FUNCTION_ARGS)
     int error = enc_int_cmp(left, right, &res);
     if (error) print_error("%s %d", __func__, error);
 
+    outfile << "cmp " << b64_int(left) << " " << b64_int(right) << " " << res << endl;
     PG_RETURN_INT32(res);
 }
 
@@ -188,6 +207,7 @@ Datum enc_int4_eq(PG_FUNCTION_ARGS)
     else
         cmp = false;
 
+    outfile << "== " << b64_int(left) << " " << b64_int(right) << " " << (cmp == true ? "True" : "False") << endl;
     PG_RETURN_BOOL(cmp);
 }
 
@@ -206,6 +226,7 @@ Datum enc_int4_ne(PG_FUNCTION_ARGS)
     else
         cmp = true;
 
+    outfile << "!= " << b64_int(left) << " " << b64_int(right) << " " << (cmp == true ? "True" : "False") << endl;
     PG_RETURN_BOOL(cmp);
 }
 
@@ -224,6 +245,7 @@ Datum enc_int4_lt(PG_FUNCTION_ARGS)
     else
         cmp = false;
 
+    outfile << "< " << b64_int(left) << " " << b64_int(right) << " " << (cmp == true ? "True" : "False") << endl;
     PG_RETURN_BOOL(cmp);
 }
 
@@ -242,6 +264,7 @@ Datum enc_int4_le(PG_FUNCTION_ARGS)
     else
         cmp = false;
 
+    outfile << "<= " << b64_int(left) << " " << b64_int(right) << " " << (cmp == true ? "True" : "False") << endl;
     PG_RETURN_BOOL(cmp);
 }
 
@@ -260,6 +283,7 @@ Datum enc_int4_gt(PG_FUNCTION_ARGS)
     else
         cmp = false;
 
+    outfile << "> " << b64_int(left) << " " << b64_int(right) << " " << (cmp == true ? "True" : "False") << endl;
     PG_RETURN_BOOL(cmp);
 }
 
@@ -277,6 +301,8 @@ Datum enc_int4_ge(PG_FUNCTION_ARGS)
         cmp = true;
     else
         cmp = false;
+
+    outfile << ">= " << b64_int(left) << " " << b64_int(right) << " " << (cmp == true ? "True" : "False") << endl;
     PG_RETURN_BOOL(cmp);
 }
 
@@ -294,11 +320,8 @@ Datum enc_int4_max(PG_FUNCTION_ARGS)
     int error = enc_int_cmp(left, right, &res);
     if (error) print_error("%s %d", __func__, error);
 
-    if (res == 1) {
-        PG_RETURN_POINTER(left);
-    } else {
-        PG_RETURN_POINTER(right);
-    }
+    outfile << "MAX " << b64_int(left) << " " << b64_int(right) << " " << b64_int(res == 1 ? left : right) << endl;
+    PG_RETURN_POINTER(res == 1 ? left : right);
 }
 
 /*
@@ -315,11 +338,8 @@ Datum enc_int4_min(PG_FUNCTION_ARGS)
     int error = enc_int_cmp(left, right, &res);
     if (error) print_error("%s %d", __func__, error);
 
-    if (res == 1) {
-        PG_RETURN_POINTER(right);
-    } else {
-        PG_RETURN_POINTER(left);
-    }
+    outfile << "MAX " << b64_int(left) << " " << b64_int(right) << " " << b64_int(res == 1 ? right : left) << endl;
+    PG_RETURN_POINTER(res == 1 ? right : left);
 }
 
 Datum enc_int4_sum_bulk(PG_FUNCTION_ARGS)
@@ -333,15 +353,19 @@ Datum enc_int4_sum_bulk(PG_FUNCTION_ARGS)
     int counter = 1;
     int error;
 
+    outfile << "SUM "; /// logging
+
     // TODO: two copies happens here, for array of encint.
     ArrayMetaState* my_extra = (ArrayMetaState*)fcinfo->flinfo->fn_extra;
     ArrayIterator array_iterator = array_create_iterator(v, 0, my_extra);
 
     array_iterate(array_iterator, &value, &isnull);
     *sum = *DatumGetEncInt(value);
+    outfile << b64_int(sum) << " "; /// logging
     sum_array[0] = *sum;
     while (array_iterate(array_iterator, &value, &isnull)) {
         sum_array[counter] = *DatumGetEncInt(value);
+        outfile << b64_int(&sum_array[counter]) << " "; /// logging
         counter++;
         if (counter == BULK_SIZE) {
             error = enc_int_sum_bulk(BULK_SIZE, sum_array, sum);
@@ -355,6 +379,7 @@ Datum enc_int4_sum_bulk(PG_FUNCTION_ARGS)
         if (error) print_error("%s %d", __func__, error);
     }
 
+    outfile << b64_int(sum) << endl; /// logging
     PG_RETURN_CSTRING(sum);
 }
 
@@ -372,11 +397,14 @@ Datum enc_int4_avg_bulk(PG_FUNCTION_ARGS)
     EncInt num_array[BULK_SIZE]; // nitems of '1'
     int counter; // sum will be at array[0]
 
+    outfile << "AVG "; /// logging
+
     ArrayMetaState* my_extra = (ArrayMetaState*)fcinfo->flinfo->fn_extra;
     ArrayIterator array_iterator = array_create_iterator(v, 0, my_extra);
 
     array_iterate(array_iterator, &value, &isnull);
     sum = *DatumGetEncInt(value);
+    outfile << b64_int(&sum) << " "; /// logging
     sum_array[0] = sum;
     counter = 1;
 
@@ -388,6 +416,7 @@ Datum enc_int4_avg_bulk(PG_FUNCTION_ARGS)
     }
     while (array_iterate(array_iterator, &value, &isnull)) {
         sum_array[counter] = *DatumGetEncInt(value);
+        outfile << b64_int(&sum_array[counter]) << " "; /// logging
         num_array[counter] = unit;
         counter++;
         if (counter == BULK_SIZE) {
@@ -410,9 +439,11 @@ Datum enc_int4_avg_bulk(PG_FUNCTION_ARGS)
     error = enc_int_div(&sum, &num, res);
     if (error) print_error("%s %d", __func__, error);
 
+    outfile << b64_int(res) << endl; /// logging
     PG_RETURN_CSTRING(res);
 }
 
+#if 0
 Datum enc_int4_min_bulk(PG_FUNCTION_ARGS)
 {
     ArrayType* v = PG_GETARG_ARRAYTYPE_P(0);
@@ -475,3 +506,4 @@ Datum enc_int4_max_bulk(PG_FUNCTION_ARGS)
 
     PG_RETURN_CSTRING(pMax);
 }
+#endif

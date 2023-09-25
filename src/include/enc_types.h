@@ -32,7 +32,7 @@ typedef struct
     uint8_t data[STRING_LENGTH];
 } Str;
 
-//                      uint32_t order       uint32_t len     enc_cstr
+/*                       uint32_t order       uint32_t len     enc_cstr              */
 #define ENCSTRLEN(len) (sizeof(uint32_t) + sizeof(uint32_t) + IV_SIZE + TAG_SIZE + len)
 static int inline encstr_size(EncStr estr)
 {

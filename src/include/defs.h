@@ -71,6 +71,46 @@ typedef unsigned long DWORD; // 4bytes
 #define CMD_TIMESTAMP_DEC 52
 #define CMD_TIMESTAMP_EXTRACT_YEAR 53
 
+#if 0
+enum {
+    CMD_INT_ENC = 1,
+    CMD_INT_DEC,
+    CMD_FLOAT_ENC,
+    CMD_FLOAT_DEC,
+    CMD_STRING_ENC,
+    CMD_STRING_DEC,
+    CMD_TIMESTAMP_ENC,
+    CMD_TIMESTAMP_DEC,
+
+    CMD_INT_PLUS,
+    CMD_INT_MINUS,
+    CMD_INT_MULT,
+    CMD_INT_DIV,
+    CMD_INT_MOD,
+    CMD_INT_EXP,
+    CMD_INT_CMP,
+    CMD_INT_SUM_BULK,
+
+    CMD_FLOAT_PLUS, 
+    CMD_FLOAT_MINUS,
+    CMD_FLOAT_MULT,
+    CMD_FLOAT_DIV,
+    CMD_FLOAT_MOD,
+    CMD_FLOAT_EXP,
+    CMD_FLOAT_CMP,
+    CMD_FLOAT_SUM_BULK,
+    CMD_FLOAT_EVAL_EXPR,
+
+    CMD_STRING_CMP,
+    CMD_STRING_SUBSTRING,
+    CMD_STRING_CONCAT,
+    CMD_STRING_LIKE,
+
+    CMD_TIMESTAMP_CMP,
+    CMD_TIMESTAMP_EXTRACT_YEAR
+};
+#endif
+
 /* for record-and-replay */
 #define MAX_NAME_LENGTH 256
 #define MAX_PARALLEL_WORKER_SIZE 16 // TODO: the database can only see one buffer allocated to it.

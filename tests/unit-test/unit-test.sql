@@ -60,11 +60,11 @@ CREATE TABLE test_table (id int, num_i enc_int4, num_f enc_float4, str enc_text,
 INSERT INTO test_table VALUES (1, '1', '1.1', 'hello', '2020-01-01');
 INSERT INTO test_table VALUES (2, '2', '2.1', 'world', '2021-01-01');
 INSERT INTO test_table VALUES (3, '3', '3.1', 'from', '2022-01-01');
-INSERT INTO test_table VALUES (3, '3', '3.1', 'hedb', '2023-01-01');
+INSERT INTO test_table VALUES (3, '4', '3.1', 'hedb', '2023-01-01');
 
 SELECT results_eq(
    'SELECT SUM(num_i) FROM test_table',
-    $$VALUES ('9'::enc_int4)$$,
+    $$VALUES ('10'::enc_int4)$$,
     'enc_int4: SUM function '
 );
 SELECT results_eq(
@@ -74,7 +74,7 @@ SELECT results_eq(
 );
 SELECT results_eq(
    'SELECT MAX(num_i) FROM test_table',
-    $$VALUES ('3'::enc_int4)$$,
+    $$VALUES ('4'::enc_int4)$$,
     'enc_int4: MAX function '
 );
 SELECT results_eq(

@@ -1,15 +1,11 @@
 #include "enc_int_ops.h"
 #include "plain_int_ops.h"
-#include "base64.h"
 #include <string>
+#include <fstream>
+#include <iostream>
 using namespace std;
 
-static string b64_int(EncInt* in)
-{
-    char b64_int4[ENC_INT_B64_LENGTH + 1] = { 0 };
-    toBase64((const unsigned char*)in, sizeof(EncInt), b64_int4);
-    return b64_int4;
-}
+extern ofstream outfile;
 
 int enc_int32_cmp(EncIntCmpRequestData* req)
 {
@@ -27,9 +23,7 @@ int enc_int32_cmp(EncIntCmpRequestData* req)
 
     req->cmp = plain_int32_cmp(left, right);
 
-    printf("[LOG Admin] <%d> %s %s => %d\n", req->common.reqType,
-        b64_int(&req->left).c_str(), b64_int(&req->right).c_str(), req->cmp);
-    printf("[LOG Client] <%d> %d %d => %d\n", req->common.reqType, left, right, req->cmp);
+    outfile << "CMP " << left << " " << right << " " << req->cmp << endl;
 
     return resp;
 }
@@ -53,9 +47,7 @@ int enc_int32_calc(EncIntCalcRequestData* req)
 
     resp = encrypt_bytes((uint8_t*)&res, sizeof(res), (uint8_t*)&req->res, sizeof(req->res));
 
-    printf("[LOG Admin] <%d> %s %s => %s\n", req->common.reqType,
-        b64_int(&req->left).c_str(), b64_int(&req->right).c_str(), b64_int(&req->res).c_str());
-    printf("[LOG Client] <%d> %d %d => %d\n", req->common.reqType, left, right, res);
+    outfile << "CAL " << left << " " << right << " " << res << endl;
 
     return resp;
 }
@@ -78,14 +70,10 @@ int enc_int32_bulk(EncIntBulkRequestData* req)
 
     resp = encrypt_bytes((uint8_t*)&res, sizeof(res), (uint8_t*)&req->res, sizeof(req->res));
 
-    printf("[LOG Admin] <%d> ", req->common.reqType);
+    outfile << "BATCH ";
     for (int id = 0; id < req->bulk_size; id++)
-        printf("%s ", b64_int(&array[id]).c_str());
-    printf("=> %s\n", b64_int(&req->res).c_str());
-    printf("[LOG Client] <%d> ", req->common.reqType);
-    for (int id = 0; id < req->bulk_size; id++)
-        printf("%d ", plain_array[id]);
-    printf("=> %d\n", res);
+         outfile << plain_array[id] << " ";
+    outfile << res << endl;
 
     return resp;
 }

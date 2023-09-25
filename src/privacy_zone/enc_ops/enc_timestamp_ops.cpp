@@ -26,9 +26,9 @@ int enc_timestamp_cmp(EncTimestampCmpRequestData* req)
         return resp;
 
     req->cmp = plain_timestamp_cmp(left, right);
-    printf("[LOG Admin] <%d> %s %s => %d\n", req->common.reqType,
-        b64_timestamp(&req->left).c_str(), b64_timestamp(&req->right).c_str(), req->cmp);
-    printf("[LOG Client] <%d> %ld %ld => %d\n", req->common.reqType, left, right, req->cmp);
+    // printf("[LOG Admin] <%d> %s %s => %d\n", req->common.reqType,
+    //     b64_timestamp(&req->left).c_str(), b64_timestamp(&req->right).c_str(), req->cmp);
+    // printf("[LOG Client] <%d> %ld %ld => %d\n", req->common.reqType, left, right, req->cmp);
 
     return resp;
 }

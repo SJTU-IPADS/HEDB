@@ -16,9 +16,13 @@ const uint8_t hard_coded_enc_key[32] = {
 
 static void randombytes_buf(uint8_t *iv, size_t sz)
 {
-    srand(time(NULL));
+    static bool _init = false;
+    if (!_init) {
+        srand(time(NULL));
+        _init = true;
+    }
     for (int i = 0; i < sz; i++) {
-        iv[i] = rand() % 255;
+        iv[i] = rand() % 256;
     }
 }
 
@@ -44,7 +48,7 @@ int gcm_encrypt(uint8_t* in, uint64_t in_sz, uint8_t* out, uint64_t* out_sz)
     uint8_t* data_pos = out + IV_SIZE + TAG_SIZE;
 
     uint8_t iv[IV_SIZE] = { 0 };
-    randombytes_buf(iv, sizeof iv); // add entropy
+    randombytes_buf(iv, IV_SIZE); // add entropy
     memcpy(iv_pos, iv, IV_SIZE);
 
     // Initialise the GCM cipher...

@@ -29,9 +29,9 @@ int enc_float32_cmp(EncFloatCmpRequestData* req)
     decrypt_wait((uint8_t*)&left, sizeof(left));
 
     req->cmp = plain_float_cmp(left, right);
-    printf("[LOG Admin] <%d> %s %s => %d\n", req->common.reqType,
-        b64_float(&req->left).c_str(), b64_float(&req->right).c_str(), req->cmp);
-    printf("[LOG Client] <%d> %f %f => %d\n", req->common.reqType, left, right, req->cmp);
+    // printf("[LOG Admin] <%d> %s %s => %d\n", req->common.reqType,
+    //     b64_float(&req->left).c_str(), b64_float(&req->right).c_str(), req->cmp);
+    // printf("[LOG Client] <%d> %f %f => %d\n", req->common.reqType, left, right, req->cmp);
 
     return resp;
 }
@@ -67,9 +67,9 @@ int enc_float32_calc(EncFloatCalcRequestData* req)
 
     resp = encrypt_bytes((uint8_t*)&res, sizeof(res), (uint8_t*)&req->res, sizeof(req->res));
 
-    printf("[LOG Admin] <%d> %s %s => %s\n", req->common.reqType,
-        b64_float(&req->left).c_str(), b64_float(&req->right).c_str(), b64_float(&req->res).c_str());
-    printf("[LOG Client] <%d> %f %f => %f\n", req->common.reqType, left, right, res);
+    // printf("[LOG Admin] <%d> %s %s => %s\n", req->common.reqType,
+    //     b64_float(&req->left).c_str(), b64_float(&req->right).c_str(), b64_float(&req->res).c_str());
+    // printf("[LOG Client] <%d> %f %f => %f\n", req->common.reqType, left, right, res);
 
     return resp;
 }
@@ -104,14 +104,14 @@ int enc_float32_bulk(EncFloatBulkRequestData* req)
 
     resp = encrypt_bytes((uint8_t*)&res, sizeof(float), (uint8_t*)&req->res, sizeof(req->res));
 
-    printf("[LOG Admin] <%d> ", req->common.reqType);
-    for (int id = 0; id < req->bulk_size; id++)
-        printf("%s ", b64_float(&array[id]).c_str());
-    printf("=> %s\n", b64_float(&req->res).c_str());
-    printf("[LOG Client] <%d> ", req->common.reqType);
-    for (int id = 0; id < req->bulk_size; id++)
-        printf("%f ", values[id]);
-    printf("=> %f\n", res);
+    // printf("[LOG Admin] <%d> ", req->common.reqType);
+    // for (int id = 0; id < req->bulk_size; id++)
+    //     printf("%s ", b64_float(&array[id]).c_str());
+    // printf("=> %s\n", b64_float(&req->res).c_str());
+    // printf("[LOG Client] <%d> ", req->common.reqType);
+    // for (int id = 0; id < req->bulk_size; id++)
+    //     printf("%f ", values[id]);
+    // printf("=> %f\n", res);
 
     return resp;
 }

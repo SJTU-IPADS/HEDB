@@ -96,9 +96,6 @@ public:
         TYPESIZE(left, size);
         return sizeof(BaseRequest) + 2 * size + sizeof(int);
     };
-    // void genLog(void *buffer) const override{
-
-    // }
 };
 
 template <typename EncType>

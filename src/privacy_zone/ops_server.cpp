@@ -26,8 +26,12 @@
 
 #include "ops_server.hpp"
 
-#include <iostream>
 #include <map> // for profile
+#include <fstream>
+#include <iostream>
+using namespace std;
+
+ofstream outfile("/tmp/privacy_zone.log", ios::app);
 
 struct alignas(128) Decrypt_args {
     bool inited;
@@ -168,6 +172,7 @@ int ivshm_fd;
 void ivshm_exit_handler()
 {
     close(ivshm_fd);
+    outfile.close();
 }
 void* get_shmem_ivshm(size_t size)
 {
