@@ -188,7 +188,12 @@ Datum enc_int4_cmp(PG_FUNCTION_ARGS)
     int error = enc_int_cmp(left, right, &res);
     if (error) print_error("%s %d", __func__, error);
 
-    outfile << "cmp " << b64_int(left) << " " << b64_int(right) << " " << res << endl;
+    {
+        if (0 == res) outfile << "== ";
+        else if (-1 == res) outfile << "< ";
+        else if (1 == res) outfile << "> ";
+        outfile << b64_int(left) << " " << b64_int(right) << " True" << endl;
+    }
     PG_RETURN_INT32(res);
 }
 
@@ -338,7 +343,7 @@ Datum enc_int4_min(PG_FUNCTION_ARGS)
     int error = enc_int_cmp(left, right, &res);
     if (error) print_error("%s %d", __func__, error);
 
-    outfile << "MAX " << b64_int(left) << " " << b64_int(right) << " " << b64_int(res == 1 ? right : left) << endl;
+    outfile << "MIN " << b64_int(left) << " " << b64_int(right) << " " << b64_int(res == 1 ? right : left) << endl;
     PG_RETURN_POINTER(res == 1 ? right : left);
 }
 

@@ -54,6 +54,7 @@ int plain_int32_cmp(int left, int right)
 {
     return (left == right) ? 0 : (left < right) ? -1 : 1;
 }
+
 int plain_int32_bulk(int reqType, int size, int* array)
 {
     int res = 0;

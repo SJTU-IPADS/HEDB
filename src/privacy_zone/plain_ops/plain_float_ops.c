@@ -42,8 +42,7 @@ float plain_float_calc(int reqType, float left, float right)
 
 float plain_float_cmp(float left, float right)
 {
-    return (left == right) ? 0 : (left < right) ? -1
-                                                : 1;
+    return (left == right) ? 0 : (left < right) ? -1 : 1;
 }
 
 double plain_float_bulk(int reqType, int size, float* array)
