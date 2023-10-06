@@ -2,22 +2,22 @@
 	<img src="scripts/figures/hedb.jpg" width = "300" height = "200" align=center />
 </p>
 
-![Status](https://img.shields.io/badge/Version-Experimental-green.svg)[![License](https://img.shields.io/badge/License-Mulan-brightgreenn.svg)](http://license.coscl.org.cn/MulanPubL-2.0)
+![Status](https://img.shields.io/badge/Version-Experimental-green.svg) [![License](https://img.shields.io/badge/License-Mulan-brightgreenn.svg)](http://license.coscl.org.cn/MulanPubL-2.0)
 
-HEDB is an extension of PostgreSQL to compute SQL over ciphertexts, in addition to a suite of maintenance tools.
+HEDB is a PostgreSQL extension to compute SQL over ciphertexts, in addition to a suite of maintenance tools.
 
-*HEDB is an open project and highly values your feedback! We would like to hear your thoughts on our project and how we can improve it.*
+*HEDB is a long-term open project and highly values your feedback.*
 
 ## Prerequisite
 
-- OS Version: Ubuntu 20.04
+- OS Version: Ubuntu >= 20.04
 - Linux kernel version: >= 5.4
 - Python version: >= 3.6
 
 ## Quick Start
 
 Install the dependencies:
-```sh
+```bash
 $ sudo apt update
 $ sudo apt install -y build-essential cmake libmbedtls-dev
 $ sudo apt install -y postgresql postgresql-contrib postgresql-server-dev-all
@@ -25,7 +25,7 @@ $ sudo service postgresql restart
 ```
 
 Pull the HEDB repo, build and install:
-```sh
+```bash
 $ git clone -b main --depth 1 https://github.com/SJTU-IPADS/HEDB
 $ cd HEDB
 $ make
@@ -51,7 +51,7 @@ SELECT enable_server_mode();            --- use server mode for database admins 
 SELECT * FROM test;
 ```
 
-There are currently four encrypted datatypes for you to selectively protect your data stored in PostgreSQL. To learn more about their usage, see [tests/unit-test](https://github.com/SJTU-IPADS/HEDB/blob/main/tests/unit-test/unit-test.sql).
+There are currently four encrypted datatypes to protect your data selectively in PostgreSQL. To learn more about their usage, see [tests/unit-test](https://github.com/SJTU-IPADS/HEDB/blob/main/tests/unit-test/unit-test.sql).
 
 | data type | encrypted data type |
 |-----------|---------------------|
@@ -60,21 +60,21 @@ There are currently four encrypted datatypes for you to selectively protect your
 | text      | enc_text            |
 | timestamp | enc_timestamp       |
 
-So far so good. But it is **NOT secure** at all!
+Note that the above setting is ***NOT secure*** at all!
 
-Here is a quick overview for any newcomers to understand the purpose of HEDB (10-min read).
+Here is a quick overview for any newcomers to understand the purpose of HEDB (10-minute reading).
 
 ## Encrypted Databases
 
-Database systems may contain sensitive data, and some are outsourced to third parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary. This also helps enterprises obey data protection laws such as EU GDPR, US HIPAA, US PCI/DSS, PRC DSL, PRC PIPL, etc.
+Databases may contain sensitive data, and some are outsourced to third parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary, resulting in an encrypted databases (EDB). An EDB also helps enterprises obey the data protection laws such as EU GDPR, US HIPAA, US PCI/DSS, PRC DSL, PRC PIPL, etc.
 
 <p align="center">
   <img src="scripts/figures/types.jpg" width = "760" height = "180" align=center />
 </p>
 
-**Option-1**: To build an encrypted database (EDB), one can place an entire database into an isolated domain, or confidential computing unit (like Intel SGX, AMD SEV, Intel TDX, ARM Realm, IBM PEF, AWS Nitro, Ant HyperEnclave, and whatever you name it). We call it Type-I EDB. Sadly, Type-I would prevent database admins, or DBAs, from managing the database, right? If DBAs were able to log into the DBMS, they would inspect any user data.
+**Type-I EDB**: To build an EDB, one can place an entire database into an isolated domain, or confidential computing unit (as in Intel SGX, AMD SEV, Intel TDX, ARM Realm, IBM PEF, AWS Nitro, Ant HyperEnclave, or whatever you name it). However, Type-I EDB should prevent database admins (or DBAs in short) from managing the database. If DBAs were able to log into the DBMS, they would inspect any user data.
 
-**Option-2**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into the source code to navigate how to build such an EDB using PostgreSQL's [user-defined types (UDTs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/hedb--1.0.sql) and [user-defined functions (UDFs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/udf). We call it Type-II EDB. Type-II EDB allows a DBA to log into the database, but keeps data always in ciphertext (at rest on disk, in transit over network, and in use in memory) to avoid potential leakage. Cool!
+**Type-II EDB**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into the source code to navigate how to build such an EDB using PostgreSQL's [user-defined types (UDTs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/hedb--1.0.sql) and [user-defined functions (UDFs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/udf). Type-II EDB allows DBAs to log into the database, but keeps data always in ciphertext (at rest on disk, in transit over network, and in use in memory) to avoid potential leakage.
 
 However, for Type-II, we have discovered an attack named "Smuggle". You can find how it works in [tools/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/tools/smuggle.py), which reveals an integer column in TPC-H. The reason why smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct oracles.
 
@@ -94,10 +94,10 @@ Here is a minimal working example.
   <img src="scripts/figures/arch.jpg" width = "500" height = "260" align=center />
 </p>
 
-The idea of HEDB is simple. It splits the running mode of an EDB into two: *Execution Mode* for users, and *Maintenance Mode* for DBAs. HEDB is named after Helium, implying its two modes. HEDB removes the tension between security and maintenance.
+The idea of HEDB is simple. It splits the running mode of an EDB into two: *Execution Mode* for users, and *Maintenance Mode* for admins. HEDB is named after Helium, implying its two modes. HEDB removes the tension between security and maintenance.
 
 1) *Execution Mode* prevents Smuggle attacks by blocking non-user operator invocations,
-2) *Maintenance Mode* allows DBAs to perform maintenance tasks by replaying invocations.
+2) *Maintenance Mode* allows admins to perform maintenance tasks by replaying invocations.
 
 ### Defense
 
@@ -105,7 +105,7 @@ To launch HEDB, you need to use two confidential units (e.g., secure enclaves, c
 
 We recommend you to use two confidential VMs (CVMs), as evaluated in the paper. For those who do not have CVMs computers (e.g., ARM CCA, AMD SEV, Intel TDX), you can use 2 QEMU-KVM VMs to simulate CVMs. Depending on your computer architecture, either choose [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md). These tutorials will guide you on how to create 2 VMs that host DBMS and operators, separately, and how to perform a mode switch using QEMU-based VM snapshotting.
 
-What is the mode switch? It forks a CVM, creates a snapshot and places it in the Management Zone that admins are able to access. A guarantee is that DBAs cannot log into the CVMs, including Integrity Zone and Privacy Zone. HEDB records operator invocations in the Integrity Zone (*Execution Mode*) and replays it in the Management Zone (*Maintenance Mode*).
+The mode switch forks a CVM, creates a snapshot and places it in the Management Zone that admins are able to access. A security guarantee is that DBAs cannot log into the CVMs, including Integrity Zone and Privacy Zone. HEDB records operator invocations in the Integrity Zone (*Execution Mode*) and replays it in the Management Zone (*Maintenance Mode*).
 
 ### Record/Replay
 
@@ -113,7 +113,7 @@ HEDB [record/replay](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_
 
 For privacy reasons, SQL constants should be encrypted in advance. Because the current implementations lack client-side encryption, we should transform the constants into encrypted values using operators in the client mode. A future work is to seek and implement a simple client-side encryption or proxy-side encryption.
 
-```sh
+```bash
 ## make dependencies installed
 $ pip3 install psycopg2 tqdm
 
@@ -192,7 +192,7 @@ HEDB runs a hotfix server inside the DBMS CVM, and allows a skillful DBA to inst
 
 #### Q1: Is HEDB limited to ARM?
 
-***Absolutely not!*** You can deploy it to any TEE or CC platform you like. For exmaple, confidential VM (CVM) is widely supported on modern trusted hardware, such as AMD SEV(-ES,-SNP), Intel TDX, IBM PEF, ARMv9 Realm. You can deploy HEDB's integrity zone (DBMS+extension) using one CVM, and HEDB's privacy zone (operators) in another CVM. If you trust the hypervisor, like AWS Nitro Enclave, you can run them in two Nitro VMs. That's it!
+***Absolutely not!*** You can deploy it to whatever trusted execution environment (TEE) or confidential computing (CC) platform you like. For instance, confidential VM (CVM) is widely supported on modern trusted hardware, such as AMD SEV(-ES,-SNP), Intel TDX, IBM PEF, ARMv9 Realm. You can deploy HEDB's integrity zone (DBMS + extensions) using one CVM, and HEDB's privacy zone (operators) in another CVM. If you trust the hypervisor, like AWS Nitro Enclave, you can run them in two Nitro VMs. That's it!
 
 To reproduce the performance evaluation results, you can run HEDB using two CVMs on a CC machine.
 
@@ -204,15 +204,13 @@ For other platforms such as AMD SEV, Intel TDX, IBM PEF, and ARM Realm, the task
 
 #### Q3: Supporting TPC-C?
 
-The released version of HEDB is built on PostgreSQL. Currently, its record-and-replay only supports the TPC-H benchmark.
-
-We encourage future research to overcome this challenges posed by non-determinism when running TPC-C atop HEDB. We believe your excellent work will also be published and known to the industry.
+The released code of HEDB is built on PostgreSQL. Its current record/replay supports the TPC-H benchmark only. We encourage future research to overcome this challenge posed by non-determinism when running TPC-C atop HEDB. We believe your excellent work will also be published and known to the industry.
 
 ### Anecdote
 
 Why name HEDB (Helium Database)?
 
-HE, short for [Helium](https://en.wikipedia.org/wiki/Helium), is the lightest neutral gas, known for its lack of reactivity and low density. The analogy to helium highlights HEDB's ability to achieve isolation from the rest while maintaining simplicity in usage. More, the reference to helium being the 2nd element alludes to HEDB's dual modes.
+HE, short for [Helium](https://en.wikipedia.org/wiki/Helium), is the lightest neutral gas, known for its lacking reactivity and low density. The analogy to Helium highlights HEDB's ability to achieve isolation from the rest while maintaining simplicity in usage. The reference to Helium being the 2nd element also alludes to HEDB's dual modes.
 
 HEDB is pronounced [haɪdiːbiː] or 嗨嘀哔.
 
