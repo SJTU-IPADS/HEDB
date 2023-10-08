@@ -188,6 +188,15 @@ CREATE AGGREGATE sum (enc_int4)
    COMBINEFUNC = array_cat,
    finalfunc = enc_int4_sum_bulk  
 );
+-- CREATE FUNCTION enc_int4_sum(enc_int4, enc_int4)
+-- RETURNS enc_int4 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+-- CREATE AGGREGATE sum (enc_int4)
+-- (
+--    sfunc = enc_int4_sum,
+--    stype = enc_int4,
+--    PARALLEL = safe,
+--    combinefunc = enc_int4_sum
+-- );
 
 CREATE FUNCTION enc_int4_avg_bulk(enc_int4[])
 RETURNS enc_int4 AS 'MODULE_PATHNAME' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;

@@ -85,10 +85,12 @@ Datum enc_text_in(PG_FUNCTION_ARGS)
         EncStr* estr = (EncStr*)palloc0(ENC_STRING_B64_LENGTH);
         memset(estr, 0, ENC_STRING_B64_LENGTH);
         fromBase64(pIn, strlen(pIn), (unsigned char*)estr);
-        result = (EncText*)palloc0(estr->len + VARHDRSZ);
+
         size_t new_sz = estr->len + 12; // TODO: figure out where 12 is from
+        result = (EncText*)palloc0(new_sz + VARHDRSZ);
         memcpy(VARDATA(result), estr, new_sz);
         SET_VARSIZE(result, new_sz + VARHDRSZ);
+
         pfree(estr);
     }
     PG_RETURN_POINTER(result);
@@ -112,7 +114,6 @@ Datum enc_text_out(PG_FUNCTION_ARGS)
         res[str.len] = '\0';
         PG_RETURN_CSTRING(res);
     } else {
-#define ENC_STRING_B64_LENGTH 345 // ((4 * n / 3) + 3) & ~3
         char base64_text[ENC_STRING_B64_LENGTH + 1] = { 0 };
         toBase64((const unsigned char*)&VARDATA(s), VARSIZE(s), base64_text);
         // ereport(INFO, (errmsg("base64('%p') = %s", &estr->enc_cstr, base64_text)));

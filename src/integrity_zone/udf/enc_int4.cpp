@@ -39,6 +39,7 @@ PG_FUNCTION_INFO_V1(enc_int4_gt);
 PG_FUNCTION_INFO_V1(enc_int4_ge);
 PG_FUNCTION_INFO_V1(enc_int4_max);
 PG_FUNCTION_INFO_V1(enc_int4_min);
+PG_FUNCTION_INFO_V1(enc_int4_sum);
 PG_FUNCTION_INFO_V1(enc_int4_sum_bulk);
 PG_FUNCTION_INFO_V1(enc_int4_avg_bulk);
 // PG_FUNCTION_INFO_V1(enc_int4_min_bulk);
@@ -311,40 +312,17 @@ Datum enc_int4_ge(PG_FUNCTION_ARGS)
     PG_RETURN_BOOL(cmp);
 }
 
-/*
- * The function
- * @input: two enc_int4 values
- * @return: the larger enc_int4 value.
- */
-Datum enc_int4_max(PG_FUNCTION_ARGS)
+Datum enc_int4_sum(PG_FUNCTION_ARGS)
 {
     EncInt* left = PG_GETARG_ENCINT(0);
     EncInt* right = PG_GETARG_ENCINT(1);
-    int res;
+    EncInt* sum = (EncInt*)palloc0(sizeof(EncInt));
 
-    int error = enc_int_cmp(left, right, &res);
+    int error = enc_int_add(left, right, sum);
     if (error) print_error("%s %d", __func__, error);
 
-    outfile << "MAX " << b64_int(left) << " " << b64_int(right) << " " << b64_int(res == 1 ? left : right) << endl;
-    PG_RETURN_POINTER(res == 1 ? left : right);
-}
-
-/*
- * The function
- * @input: two enc_int4 values
- * @return: the smaller enc_int4 value.
- */
-Datum enc_int4_min(PG_FUNCTION_ARGS)
-{
-    EncInt* left = PG_GETARG_ENCINT(0);
-    EncInt* right = PG_GETARG_ENCINT(1);
-    int res;
-
-    int error = enc_int_cmp(left, right, &res);
-    if (error) print_error("%s %d", __func__, error);
-
-    outfile << "MIN " << b64_int(left) << " " << b64_int(right) << " " << b64_int(res == 1 ? right : left) << endl;
-    PG_RETURN_POINTER(res == 1 ? right : left);
+    outfile << "SUM " << b64_int(left) << " " << b64_int(right) << " " << b64_int(sum) << endl;
+    PG_RETURN_CSTRING(sum);
 }
 
 Datum enc_int4_sum_bulk(PG_FUNCTION_ARGS)
@@ -448,38 +426,33 @@ Datum enc_int4_avg_bulk(PG_FUNCTION_ARGS)
     PG_RETURN_CSTRING(res);
 }
 
-#if 0
-Datum enc_int4_min_bulk(PG_FUNCTION_ARGS)
+Datum enc_int4_max(PG_FUNCTION_ARGS)
 {
-    ArrayType* v = PG_GETARG_ARRAYTYPE_P(0);
-    int ans = 0;
-    ArrayIterator array_iterator;
-    ArrayMetaState* my_extra = (ArrayMetaState*)fcinfo->flinfo->fn_extra;
-    bool isnull;
-    Datum value;
+    EncInt* left = PG_GETARG_ENCINT(0);
+    EncInt* right = PG_GETARG_ENCINT(1);
+    int res;
 
-    EncInt* pMin = (EncInt*)palloc0(sizeof(EncInt));
-    EncInt pTemp;
-    array_iterator = array_create_iterator(v, 0, my_extra);
-    array_iterate(array_iterator, &value, &isnull);
+    int error = enc_int_cmp(left, right, &res);
+    if (error) print_error("%s %d", __func__, error);
 
-    memcpy(pMin, DatumGetCString(value), sizeof(EncInt));
-
-    while (array_iterate(array_iterator, &value, &isnull)) {
-        memcpy(&pTemp, DatumGetCString(value), sizeof(EncInt));
-
-        int error = enc_int_cmp(pMin, &pTemp, &ans);
-        if (error) print_error("%s %d", __func__, error);
-
-        if (ans == 1)
-            memcpy(pMin, &pTemp, sizeof(EncInt));
-    }
-
-    // pfree(pTemp);
-
-    PG_RETURN_CSTRING(pMin);
+    outfile << "MAX " << b64_int(left) << " " << b64_int(right) << " " << b64_int(res == 1 ? left : right) << endl;
+    PG_RETURN_POINTER(res == 1 ? left : right);
 }
 
+Datum enc_int4_min(PG_FUNCTION_ARGS)
+{
+    EncInt* left = PG_GETARG_ENCINT(0);
+    EncInt* right = PG_GETARG_ENCINT(1);
+    int res;
+
+    int error = enc_int_cmp(left, right, &res);
+    if (error) print_error("%s %d", __func__, error);
+
+    outfile << "MIN " << b64_int(left) << " " << b64_int(right) << " " << b64_int(res == 1 ? right : left) << endl;
+    PG_RETURN_POINTER(res == 1 ? right : left);
+}
+
+#if 0
 Datum enc_int4_max_bulk(PG_FUNCTION_ARGS)
 {
     ArrayType* v = PG_GETARG_ARRAYTYPE_P(0);
@@ -510,5 +483,36 @@ Datum enc_int4_max_bulk(PG_FUNCTION_ARGS)
     // pfree(pTemp);
 
     PG_RETURN_CSTRING(pMax);
+}
+
+Datum enc_int4_min_bulk(PG_FUNCTION_ARGS)
+{
+    ArrayType* v = PG_GETARG_ARRAYTYPE_P(0);
+    int ans = 0;
+    ArrayIterator array_iterator;
+    ArrayMetaState* my_extra = (ArrayMetaState*)fcinfo->flinfo->fn_extra;
+    bool isnull;
+    Datum value;
+
+    EncInt* pMin = (EncInt*)palloc0(sizeof(EncInt));
+    EncInt pTemp;
+    array_iterator = array_create_iterator(v, 0, my_extra);
+    array_iterate(array_iterator, &value, &isnull);
+
+    memcpy(pMin, DatumGetCString(value), sizeof(EncInt));
+
+    while (array_iterate(array_iterator, &value, &isnull)) {
+        memcpy(&pTemp, DatumGetCString(value), sizeof(EncInt));
+
+        int error = enc_int_cmp(pMin, &pTemp, &ans);
+        if (error) print_error("%s %d", __func__, error);
+
+        if (ans == 1)
+            memcpy(pMin, &pTemp, sizeof(EncInt));
+    }
+
+    // pfree(pTemp);
+
+    PG_RETURN_CSTRING(pMin);
 }
 #endif

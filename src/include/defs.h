@@ -2,9 +2,9 @@
 
 #include <stdint.h>
 
-typedef unsigned char BYTE; // 1byte
-typedef unsigned short WORD; // 2bytes
-typedef unsigned long DWORD; // 4bytes
+typedef unsigned char BYTE;  // 1 byte(s)
+typedef unsigned short WORD; // 2 byte(s)
+typedef unsigned long DWORD; // 4 byte(s)
 
 #define IV_SIZE 12
 #define TAG_SIZE 16
