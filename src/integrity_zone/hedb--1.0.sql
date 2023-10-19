@@ -711,3 +711,40 @@ p_column, p_table);
 END;
 $$
 LANGUAGE plpgsql;
+
+--- TPC-C Casting ---
+
+CREATE OR REPLACE FUNCTION enc_int4(int4)
+RETURNS enc_int4 AS 'MODULE_PATHNAME', 'int4_to_enc_int4' LANGUAGE C STRICT IMMUTABLE;
+CREATE OR REPLACE FUNCTION enc_int4(int8)
+RETURNS enc_int4 AS 'MODULE_PATHNAME', 'int8_to_enc_int4' LANGUAGE C STRICT IMMUTABLE;
+
+CREATE CAST (int4 AS enc_int4) WITH FUNCTION enc_int4(int4) AS ASSIGNMENT;
+CREATE CAST (int8 AS enc_int4) WITH FUNCTION enc_int4(int8) AS ASSIGNMENT;
+
+CREATE OR REPLACE FUNCTION enc_float4(float4)
+RETURNS enc_float4 AS 'MODULE_PATHNAME', 'float4_to_enc_float4' LANGUAGE C STRICT IMMUTABLE ;
+CREATE OR REPLACE FUNCTION enc_float4(double precision)
+RETURNS enc_float4 AS 'MODULE_PATHNAME', 'double_to_enc_float4' LANGUAGE C STRICT IMMUTABLE ;
+CREATE OR REPLACE FUNCTION enc_float4(numeric)
+RETURNS enc_float4 AS 'MODULE_PATHNAME', 'numeric_to_enc_float4' LANGUAGE C STRICT IMMUTABLE ;
+CREATE OR REPLACE FUNCTION enc_float4(int8)
+RETURNS enc_float4 AS 'MODULE_PATHNAME', 'int8_to_enc_float4' LANGUAGE C STRICT IMMUTABLE ;
+CREATE OR REPLACE FUNCTION enc_float4(int4)
+RETURNS enc_float4 AS 'MODULE_PATHNAME', 'int4_to_enc_float4' LANGUAGE C STRICT IMMUTABLE ;
+
+CREATE CAST (float4 AS enc_float4) WITH FUNCTION enc_float4(float4) AS ASSIGNMENT;
+CREATE CAST (double precision AS enc_float4) WITH FUNCTION enc_float4(double precision) AS ASSIGNMENT;
+CREATE CAST (numeric AS enc_float4) WITH FUNCTION enc_float4(numeric) AS ASSIGNMENT;
+CREATE CAST (int8 AS enc_float4) WITH FUNCTION enc_float4(int8) AS ASSIGNMENT;
+CREATE CAST (int4 AS enc_float4) WITH FUNCTION enc_float4(int4) AS ASSIGNMENT;
+
+CREATE OR REPLACE FUNCTION enc_timestamp(timestamp)
+RETURNS enc_timestamp AS 'MODULE_PATHNAME', 'enc_timestamp_encrypt' LANGUAGE C STRICT IMMUTABLE ;
+
+CREATE CAST (timestamp AS enc_timestamp) WITH FUNCTION enc_timestamp(timestamp) AS ASSIGNMENT;
+
+CREATE OR REPLACE FUNCTION enc_text(varchar)
+RETURNS enc_text AS 'MODULE_PATHNAME', 'varchar_to_enc_text' LANGUAGE C STRICT IMMUTABLE ;
+
+CREATE CAST (varchar AS enc_text) WITH FUNCTION enc_text(varchar) AS IMPLICIT;

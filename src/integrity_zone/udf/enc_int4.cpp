@@ -22,8 +22,10 @@ extern "C" {
 #endif
 PG_FUNCTION_INFO_V1(enc_int4_encrypt);
 PG_FUNCTION_INFO_V1(enc_int4_decrypt);
+
 PG_FUNCTION_INFO_V1(enc_int4_in);
 PG_FUNCTION_INFO_V1(enc_int4_out);
+
 PG_FUNCTION_INFO_V1(enc_int4_add);
 PG_FUNCTION_INFO_V1(enc_int4_sub);
 PG_FUNCTION_INFO_V1(enc_int4_mult);
@@ -44,6 +46,9 @@ PG_FUNCTION_INFO_V1(enc_int4_sum_bulk);
 PG_FUNCTION_INFO_V1(enc_int4_avg_bulk);
 // PG_FUNCTION_INFO_V1(enc_int4_min_bulk);
 // PG_FUNCTION_INFO_V1(enc_int4_max_bulk);
+
+PG_FUNCTION_INFO_V1(int4_to_enc_int4);
+PG_FUNCTION_INFO_V1(int8_to_enc_int4);
 #ifdef __cplusplus
 }
 #endif
@@ -516,3 +521,20 @@ Datum enc_int4_min_bulk(PG_FUNCTION_ARGS)
     PG_RETURN_CSTRING(pMin);
 }
 #endif
+
+Datum int4_to_enc_int4(PG_FUNCTION_ARGS)
+{
+    int in = PG_GETARG_INT32(0);
+    EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
+    enc_int_encrypt(in, out);
+    PG_RETURN_CSTRING(out);
+}
+
+Datum int8_to_enc_int4(PG_FUNCTION_ARGS)
+{
+
+    int in = PG_GETARG_INT64(0);
+    EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
+    enc_int_encrypt(in, out);
+    PG_RETURN_CSTRING(out);
+}

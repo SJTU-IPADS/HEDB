@@ -10,8 +10,10 @@ extern "C" {
 #endif
 PG_FUNCTION_INFO_V1(enc_text_encrypt);
 PG_FUNCTION_INFO_V1(enc_text_decrypt);
+
 PG_FUNCTION_INFO_V1(enc_text_in);
 PG_FUNCTION_INFO_V1(enc_text_out);
+
 PG_FUNCTION_INFO_V1(enc_text_eq);
 PG_FUNCTION_INFO_V1(enc_text_ne);
 PG_FUNCTION_INFO_V1(enc_text_le);
@@ -24,6 +26,8 @@ PG_FUNCTION_INFO_V1(enc_text_like);
 PG_FUNCTION_INFO_V1(enc_text_notlike);
 PG_FUNCTION_INFO_V1(enc_text_set_order);
 PG_FUNCTION_INFO_V1(substring);
+
+PG_FUNCTION_INFO_V1(varchar_to_enc_text);
 #ifdef __cplusplus
 }
 #endif
@@ -402,5 +406,17 @@ Datum enc_text_set_order(PG_FUNCTION_ARGS)
     s_out_str->order = order;
     SET_VARSIZE(result, ENCSTRLEN(s_in_str->len) + VARHDRSZ);
 
+    PG_RETURN_POINTER(result);
+}
+
+// The input function converts a string to an enc_text element.
+// @input: varying char
+// @return: pointer to a structure describing enc_text element.
+Datum varchar_to_enc_text(PG_FUNCTION_ARGS)
+{
+    Datum txt = PG_GETARG_DATUM(0);
+    char* s = TextDatumGetCString(txt);
+    EncText* result;
+    result = (EncText*)cstring_to_enctext_with_len(s, strlen(s));
     PG_RETURN_POINTER(result);
 }
