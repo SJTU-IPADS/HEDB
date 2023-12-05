@@ -7,6 +7,8 @@
 using namespace std;
 
 extern ofstream outfile;
+// #define LOG_MODE
+
 
 static string b64_int(EncInt* in)
 {
@@ -31,13 +33,14 @@ int enc_int32_cmp(EncIntCmpRequestData* req)
 
     req->cmp = plain_int32_cmp(left, right);
 
+#ifdef LOG_MODE
     {
         if (0 == req->cmp) outfile << "== ";
         else if (-1 == req->cmp) outfile << "< ";
         else if (1 == req->cmp) outfile << "> ";
         outfile << b64_int(&req->left) << " " << b64_int(&req->right) << " True" << endl;
     }
-
+#endif
     return resp;
 }
 
@@ -60,6 +63,7 @@ int enc_int32_calc(EncIntCalcRequestData* req)
 
     resp = encrypt_bytes((uint8_t*)&res, sizeof(res), (uint8_t*)&req->res, sizeof(req->res));
 
+#ifdef LOG_MODE
     {
         switch (req->common.reqType)
         {
@@ -73,7 +77,7 @@ int enc_int32_calc(EncIntCalcRequestData* req)
         }
         outfile << b64_int(&req->left) << " " << b64_int(&req->right) << " " << b64_int(&req->res) << endl;
     }
-
+#endif
     return resp;
 }
 
@@ -94,6 +98,7 @@ int enc_int32_bulk(EncIntBulkRequestData* req)
     int res = plain_int32_bulk(req->common.reqType, req->bulk_size, plain_array);
 
     resp = encrypt_bytes((uint8_t*)&res, sizeof(res), (uint8_t*)&req->res, sizeof(req->res));
+#ifdef LOG_MODE
 
     {
         outfile << "SUM ";
@@ -101,6 +106,6 @@ int enc_int32_bulk(EncIntBulkRequestData* req)
             outfile << b64_int(&array[id]) << " ";
         outfile << b64_int(&req->res) << endl;
     }
-
+#endif
     return resp;
 }

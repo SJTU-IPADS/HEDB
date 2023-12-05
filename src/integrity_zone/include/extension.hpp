@@ -23,3 +23,5 @@ typedef struct varlena EncText;
 #ifndef PG_FUNCTION_ARGS
 #define PG_FUNCTION_ARGS FunctionCallInfo fcinfo
 #endif
+
+// #define LOG_MODE

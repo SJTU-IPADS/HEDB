@@ -10,3 +10,7 @@ cmake-build-debug/
 */ramdisk
 __pycache__
 *.eps
+.cache
+*.log
+*.pkl
+*.tr

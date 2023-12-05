@@ -31,7 +31,10 @@
 #include <iostream>
 using namespace std;
 
-ofstream outfile("/tmp/privacy_zone.log", ios::app);
+// #define LOG_MODE
+#ifdef LOG_MODE
+    ofstream outfile("/dev/shm/ivshmem", ios::app);
+#endif
 
 struct alignas(128) Decrypt_args {
     bool inited;
@@ -172,7 +175,9 @@ int ivshm_fd;
 void ivshm_exit_handler()
 {
     close(ivshm_fd);
+#ifdef LOG_MODE
     outfile.close();
+#endif
 }
 void* get_shmem_ivshm(size_t size)
 {
