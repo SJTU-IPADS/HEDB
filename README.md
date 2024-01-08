@@ -4,13 +4,13 @@
 
 ![Status](https://img.shields.io/badge/Version-Experimental-green.svg) [![License](https://img.shields.io/badge/License-Mulan-brightgreenn.svg)](http://license.coscl.org.cn/MulanPubL-2.0)
 
-HEDB is a PostgreSQL extension to compute SQL over ciphertexts, in addition to a suite of maintenance tools.
+Olá! HEDB is a PostgreSQL extension to compute SQL over ciphertexts, with a suite of maintenance tools.
 
-*HEDB is a long-term open project and highly values your feedback.*
+As a long-term open project, HEDB highly values your feedback.
 
 ## Prerequisite
 
-- OS Version: Ubuntu >= 20.04
+- OS version: Ubuntu >= 20.04
 - Linux kernel version: >= 5.4
 - Python version: >= 3.6
 
@@ -62,21 +62,21 @@ There are currently four encrypted datatypes to protect your data selectively in
 
 Note that the above setting is ***NOT secure*** at all!
 
-Here is a quick overview for any newcomers to understand the purpose of HEDB (10-minute reading).
+Here is a quick overview for newcomers to understand the purpose of HEDB (**10-minute reading**).
 
 ## Encrypted Databases
 
-Databases may contain sensitive data, and some are outsourced to third parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary, resulting in an encrypted databases (EDB). An EDB also helps enterprises obey the data protection laws such as EU GDPR, US HIPAA, US PCI/DSS, PRC DSL, PRC PIPL, etc.
+Databases may contain sensitive data, and can be outsourced to third parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary, resulting in an encrypted databases (EDB). EDB systems help enterprises obey data protection laws such as EU GDPR, US HIPAA, US PCI/DSS, PRC DSL, PRC PIPL, etc. Two types of EDBs are established so far.
 
 <p align="center">
   <img src="scripts/figures/types.jpg" width = "760" height = "180" align=center />
 </p>
 
-**Type-I EDB**: To build an EDB, one can place an entire database into an isolated domain, or confidential computing unit (as in Intel SGX, AMD SEV, Intel TDX, ARM Realm, IBM PEF, AWS Nitro, Ant HyperEnclave, or whatever you name it). However, Type-I EDB should prevent database admins (or DBAs in short) from managing the database. If DBAs were able to log into the DBMS, they would inspect any user data.
+**Type-I EDB**: To build an EDB, one can [place an entire database inside an isolated domain](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/type-1.md), or confidential computing unit (as in Intel SGX, AMD SEV, Intel TDX, ARM Realm, IBM PEF, AWS Nitro, Ant HyperEnclave, or whatever you name it). However, Type-I EDB should prevent database admins (or DBAs in short) from managing the database. If DBAs were able to log into the DBMS, they would inspect user data.
 
 **Type-II EDB**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into the source code to navigate how to build such an EDB using PostgreSQL's [user-defined types (UDTs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/hedb--1.0.sql) and [user-defined functions (UDFs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/udf). Type-II EDB allows DBAs to log into the database, but keeps data always in ciphertext (at rest on disk, in transit over network, and in use in memory) to avoid potential leakage.
 
-However, for Type-II, we have discovered an attack named "Smuggle". You can find how it works in [tools/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/tools/smuggle.py), which reveals an integer column in TPC-H. The reason why smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct oracles.
+However, for Type-II, we have discovered an attack named "Smuggle". You can learn how it works in [tools/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/tools/smuggle.py), which recovers an integer column in TPC-H. The reason why smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct oracles.
 
 ## Smuggle Attacks
 
@@ -94,7 +94,7 @@ Here is a minimal working example.
   <img src="scripts/figures/arch.jpg" width = "500" height = "260" align=center />
 </p>
 
-The idea of HEDB is simple. It splits the running mode of an EDB into two: *Execution Mode* for users, and *Maintenance Mode* for admins. HEDB is named after Helium, implying its two modes. HEDB removes the tension between security and maintenance.
+HEDB splits the running mode of an EDB into two: *Execution Mode* for users, and *Maintenance Mode* for admins. HEDB is named after Helium, implying its two modes. HEDB removes the tension between security and maintenance.
 
 1) *Execution Mode* prevents Smuggle attacks by blocking non-user operator invocations,
 2) *Maintenance Mode* allows admins to perform maintenance tasks by replaying invocations.
@@ -216,7 +216,7 @@ HEDB is pronounced [haɪdiːbiː] or 嗨嘀哔.
 
 ### Note
 
-This repository is a research prototype, not for production use. It is meant for experimenting, researching and educational purposes to enhance students' understanding of the EDB's internals.
+This repository is a research prototype, not for production use. It is intended for experimentation, research, and education to enhance understanding of EDB internals.
 
 ## Maintainers
 
