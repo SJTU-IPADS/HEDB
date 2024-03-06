@@ -1,7 +1,10 @@
-//
+// SPDX-License-Identifier: Mulan PSL v2
+/*
+ * Copyright (c) 2021 - 2023 The HEDB Project.
+ */
+
 // copied from
 // https://github.com/sqlite/sqlite/blob/master/ext/misc/base64.c
-//
 
 #ifndef deliberate_fall_through
 /* Quiet some compilers about some of our intentional code. */

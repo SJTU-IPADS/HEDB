@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: Mulan PSL v2
+/*
+ * Copyright (c) 2021 - 2023 The HEDB Project.
+ */
+
 #include "base64.h"
 #include <enc_int_ops.hpp>
 #include <enc_text_ops.hpp>

@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: Mulan PSL v2
+/*
+ * Copyright (c) 2021 - 2023 The HEDB Project.
+ */
+
 #include "enc_int_ops.h"
 #include "plain_int_ops.h"
 #include "base64.h"
@@ -6,9 +11,9 @@
 #include <iostream>
 using namespace std;
 
-extern ofstream outfile;
 // #define LOG_MODE
 
+extern ofstream outfile;
 
 static string b64_int(EncInt* in)
 {

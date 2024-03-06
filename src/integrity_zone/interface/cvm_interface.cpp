@@ -1,9 +1,14 @@
-// #include <thread>
+// SPDX-License-Identifier: Mulan PSL v2
+/*
+ * Copyright (c) 2021 - 2023 The HEDB Project.
+ */
+
 #include "cvm_interface.hpp"
 #include "barrier.h"
 #include "extension.hpp"
 #include "ops_server.h"
 #include "request_types.h"
+
 #include <cassert>
 #include <cstring>
 #include <defs.h>

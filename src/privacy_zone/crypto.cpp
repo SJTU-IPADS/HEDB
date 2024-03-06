@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: Mulan PSL v2
+/*
+ * Copyright (c) 2021 - 2023 The HEDB Project.
+ */
+
 #include "crypto.h"
 #include "debug.h"
 #include <cstdio>
@@ -11,8 +16,6 @@ const uint8_t hard_coded_enc_key[32] = {
     0x34, 0x34, 0x34, 0x34, 0x34, 0x34, 0x34, 0x34,
     0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12
 }; // TA_DERIVED_KEY_MAX_SIZE
-
-// #define DEBUG_OUTPUT
 
 static void randombytes_buf(uint8_t *iv, size_t sz)
 {
@@ -55,14 +58,6 @@ int gcm_encrypt(uint8_t* in, uint64_t in_sz, uint8_t* out, uint64_t* out_sz)
     res = mbedtls_gcm_crypt_and_tag(&aes, MBEDTLS_GCM_ENCRYPT, in_sz, iv_pos, IV_SIZE, NULL, 0, in, data_pos, TAG_SIZE, tag_pos);
     *out_sz = in_sz + IV_SIZE + TAG_SIZE;
 
-#ifdef DEBUG_OUTPUT
-    printf("huk-key length %d\n", sizeof(huk_key));
-    _print_hex("huk-key: ", huk_key, sizeof(huk_key));
-    _print_hex("enc-txt-plain: ", (void*)in, INT32_LENGTH);
-    _print_hex("enc-iv: ", (void*)hdr->iv, IV_SIZE);
-    _print_hex("enc-tag: ", (void*)hdr->tag, TAG_SIZE);
-    _print_hex("enc-txt: ", (void*)hdr->hard_coded_enc_key, INT32_LENGTH);
-#endif
     return res;
 }
 

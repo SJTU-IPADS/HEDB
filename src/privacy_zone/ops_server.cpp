@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: Mulan PSL v2
+/*
+ * Copyright (c) 2021 - 2023 The HEDB Project.
+ */
+
 #include <fcntl.h>
 #include <mutex>
 #include <pthread.h>
@@ -70,13 +75,12 @@ void* decrypt_thread(void* arg)
     return 0;
 }
 
-// static unsigned long decrypt_para_counter = 0;
 int decrypt_bytes_para(uint8_t* pSrc, size_t src_len, uint8_t* pDst, size_t exp_dst_len)
 {
 #ifdef ENABLE_PARA
-    // decrypt_para_counter++;
 
     int i;
+
 find_thread:
     for (i = 0; i < MAX_DECRYPT_THREAD; i++) {
         if (args_array[i].inited && args_array[i].decrypt_status == DONE) {
@@ -93,7 +97,6 @@ find_thread:
     }
 
     if (i == MAX_DECRYPT_THREAD) {
-        printf("try another round\n");
         goto find_thread;
     }
 

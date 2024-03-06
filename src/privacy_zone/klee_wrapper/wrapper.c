@@ -1,8 +1,18 @@
+// SPDX-License-Identifier: Mulan PSL v2
+/*
+ * Copyright (c) 2021 - 2023 The HEDB Project.
+ */
+
 #include "plain_int_ops.h"
 #include "plain_text_ops.h"
 #include "plain_timestamp_ops.h"
 #include "prefix_udf.h"
 #include <defs.h>
+// SPDX-License-Identifier: Mulan PSL v2
+/*
+ * Copyright (c) 2021 - 2023 The HEDB Project.
+ */
+
 #include <klee/klee.h>
 #include <stdbool.h>
 #include <stdio.h>

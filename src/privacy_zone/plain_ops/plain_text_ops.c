@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: Mulan PSL v2
+/*
+ * Copyright (c) 2021 - 2023 The HEDB Project.
+ */
+
 #include <defs.h>
 #include <like_match.h>
 #include <plain_text_ops.h>
@@ -17,7 +22,7 @@ static int MatchText(char* t, int tlen, char* p, int plen)
         return LIKE_TRUE;
 
     /* Since this function recurses, it could be driven to stack overflow */
-    /*check_stack_depth();*/
+    /* check_stack_depth(); */
 
     /*
      * In this loop, we advance by char when matching wildcards (and thus on

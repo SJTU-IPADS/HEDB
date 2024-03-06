@@ -1,7 +1,13 @@
+// SPDX-License-Identifier: Mulan PSL v2
+/*
+ * Copyright (c) 2021 - 2023 The HEDB Project.
+ */
+
 #include "prefix_udf.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+
 /**
  * Helper function which builds a prefix_range from a prefix, a first
  * and a last component, making a copy of the prefix string.
