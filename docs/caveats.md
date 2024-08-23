@@ -1,6 +1,6 @@
 # Caveats
 
-The proof-of-concept of HEDB has some insecure implementations:
+This proof-of-concept has some insecure implementations:
 
 1. The prototype contains encryption and decryption operators (e.g., `enc_int4_encrypt`) for the purpose of development and debugging. They should be all eliminated when released. A DBA should only see ciphertexts in the `base64` form, by turning on `SELECT enable_server_mode()`.
 2. The operators uses a hard-coded key and iv for data en/decryption; see [src/privacy_zone/crypto.cpp](https://github.com/SJTU-IPADS/HEDB/blob/main/src/privacy_zone/crypto.cpp). A good practice would harness cliend-side encryption. See [Acra](https://github.com/cossacklabs/acra).

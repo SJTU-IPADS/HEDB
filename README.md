@@ -4,7 +4,7 @@
 
 ![Status](https://img.shields.io/badge/Version-Experimental-green.svg) [![License](https://img.shields.io/badge/License-Mulan-brightgreenn.svg)](http://license.coscl.org.cn/MulanPubL-2.0)
 
-Olá! HEDB is a PostgreSQL extension to compute SQL over ciphertexts, with a suite of maintenance tools.
+HEDB is a PostgreSQL extension to compute queries over ciphertexts, with a suite of maintenance tools.
 
 As a long-term open project, HEDB highly values your feedback.
 
@@ -12,6 +12,7 @@ As a long-term open project, HEDB highly values your feedback.
 
 - OS version: Ubuntu >= 20.04
 - Linux kernel version: >= 5.4
+- Postgres version: 14.12
 - Python version: >= 3.6
 
 ## Quick Start
@@ -71,12 +72,11 @@ Databases may contain sensitive data, and can be outsourced to third parties to 
 <p align="center">
   <img src="scripts/figures/types.jpg" width = "760" height = "180" align=center />
 </p>
-
 **Type-I EDB**: To build an EDB, one can [place an entire database inside an isolated domain](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/type-1.md), or confidential computing unit (as in Intel SGX, AMD SEV, Intel TDX, ARM Realm, IBM PEF, AWS Nitro, Ant HyperEnclave, or whatever you name it). However, Type-I EDB should prevent database admins (or DBAs in short) from managing the database. If DBAs were able to log into the DBMS, they would inspect user data.
 
 **Type-II EDB**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into the source code to navigate how to build such an EDB using PostgreSQL's [user-defined types (UDTs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/hedb--1.0.sql) and [user-defined functions (UDFs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/udf). Type-II EDB allows DBAs to log into the database, but keeps data always in ciphertext (at rest on disk, in transit over network, and in use in memory) to avoid potential leakage.
 
-However, for Type-II, we have discovered an attack named "Smuggle". You can learn how it works in [tools/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/tools/smuggle.py), which recovers an integer column in TPC-H. The reason why smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct oracles.
+However, for Type-II, we have discovered a type of attack named "Smuggle". You can learn how it works in [tools/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/tools/smuggle.py), which recovers an integer column in TPC-H. The reason why Smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct oracles.
 
 ## Smuggle Attacks
 
@@ -111,7 +111,7 @@ The mode switch forks a CVM, creates a snapshot and places it in the Management 
 
 HEDB [record/replay](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/record_replay) is meant for reproducing bugs. It logs all ops invocations, including parameters and results, for later replays. We use TPC-H as the demonstrative benchmark.
 
-For privacy reasons, SQL constants should be encrypted in advance. Because the current implementations lack client-side encryption, we should transform the constants into encrypted values using operators in the client mode. A future work is to seek and implement a simple client-side encryption or proxy-side encryption.
+For privacy reasons, SQL constants should be encrypted in advance. Since the current implementations lack client-side encryption, we should transform the constants into encrypted values using operators in the client mode. A future work is to seek and implement a simple client-side encryption or proxy-side encryption.
 
 ```bash
 ## make dependencies installed
@@ -137,7 +137,7 @@ $ python3 run.py --skip-generate --record-replay record
 $ python3 run.py --skip-generate --record-replay replay
 ```
 
-If you shut down the operators VM, you can still replay the SQLs. This is exactly how HEDB prevents Smuggle but can reproduce bugs for DBAs.
+If you shut down the operators VM, you can still replay the queries. This is exactly how HEDB prevents Smuggle but is still able to reproduce bugs for DBAs.
 
 ### Hotfix
 

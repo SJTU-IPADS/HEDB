@@ -1,10 +1,10 @@
-# Anonymized log generation guide
+# A Guide to Anonymized Log Generation
 
 > Art is to make the invisible visible.
 
-For the maintenance of HEDB Ops that computes over user secrets, concolic execution and constraint solving are combined to synthesize the anonymized logs that can reproduce the control flow, and masking rules are involved to guarantee user secrets are not leaked.
+To maintain Operators that compute over user secrets, concolic execution and constraint solving are combined to synthesize the anonymized logs which can reproduce the buggy control flow, and masking rules are used to guarantee that user secrets should not be leaked.
 
-To demonstrate how the tool works, let us use a real bug on the [prefix extension](https://github.com/dimitri/prefix/issues/13) of PostgreSQL as an example.
+Let us use a real-world bug regarding the [prefix extension](https://github.com/dimitri/prefix/issues/13) of PostgreSQL as an example.
 
 ## 1. A buggy use case
 ```cpp
@@ -25,13 +25,13 @@ The bug is caused by line (1), which should be changed to line (2).
 
 Assume we have a user's inputs (`1398570201`[2-7], `1398570201`[4-5]) which are two private phone number ranges, which can not be exposed to DBAs.
 
-## 2. Recording encrypted logs
+## 2. Record encrypted logs
 
-The first thing is to record the encrypted inputs and their operations. To do so, you need to execute `select enable_record_mode('$log_name')` before issuing each queries, then the executed Ops will be logged down in `$log_name` file.
+The first thing to do is record the encrypted inputs and their operations. Just execute `select enable_record_mode('$log_name')` before issuing each queries, so that the executed Ops will be logged down in `$log_name` file.
 
-## 3. Synthesizing anonymized logs
+## 3. Synthesize anonymized logs
 
-This consists of 3 steps, which are combined in scripts `scripts/klee_scripts/desenitize.sh`
+This consists of three steps, as combined in scripts `scripts/klee_scripts/desenitize.sh`
 
 **Step-1: Decrypt inputs and convert them to KLEE inputs**
 
