@@ -314,7 +314,7 @@ Datum enc_text_cmp(PG_FUNCTION_ARGS)
 
     if (str1->order != ORDER_NONE && str2->order != ORDER_NONE) {
         if (str1->order < str2->order) {
-            ans = ORDER_NONE;
+            ans = -1;
         }
         if (str1->order == str2->order) {
             ans = 0;
