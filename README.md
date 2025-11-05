@@ -95,24 +95,24 @@ Here is a minimal working example.
   <img src="scripts/figures/arch.jpg" width = "500" height = "260" align=center />
 </p>
 
-HEDB splits the running mode of an EDB into two: *Execution Mode* for users, and *Maintenance Mode* for admins. HEDB is named after Helium, implying its two modes. HEDB removes the tension between security and maintenance.
+HEDB splits the running mode of an EDB into two: ***Execution Mode*** for users, and ***Maintenance Mode*** for admins. HEDB is named after Helium, implying its two modes. HEDB removes the tension between security and maintenance.
 
-1) *Execution Mode* prevents Smuggle attacks by blocking non-user operator invocations,
-2) *Maintenance Mode* allows admins to perform maintenance tasks by replaying invocations.
+1) ***Execution Mode*** prevents Smuggle attacks by blocking non-user operator invocations,
+2) ***Maintenance Mode*** allows admins to perform maintenance tasks by replaying invocations.
 
 ### Defense
 
-To launch HEDB, you need to use two confidential units (e.g., secure enclaves, confidential processes or virtual machines) as the setting, one as [Integrity Zone](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone) and the other as [Privacy Zone](https://github.com/SJTU-IPADS/HEDB/tree/main/src/privacy_zone). In fact, HEDB executes these two zones using two OS processes, and leverages [inter-zone shared memory](https://github.com/SJTU-IPADS/HEDB/tree/main/tools/drivers/ivshmem-driver) for fast communication.
+To launch HEDB, you need to use two confidential address spaces (e.g., secure enclaves, confidential processes or virtual machines) as the setting, one as [Integrity Zone](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone) and the other as [Privacy Zone](https://github.com/SJTU-IPADS/HEDB/tree/main/src/privacy_zone). In fact, HEDB executes these two zones using two cross-VM OS processes, and leverages [inter-zone shared memory](https://github.com/SJTU-IPADS/HEDB/tree/main/tools/drivers/ivshmem-driver) for fast communication.
 
 We recommend you to use two confidential VMs (CVMs), as evaluated in the paper. For those who do not have CVMs computers (e.g., ARM CCA, AMD SEV, Intel TDX), you can use 2 QEMU-KVM VMs to simulate CVMs. Depending on your computer architecture, either choose [vm-setup-aarch64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-aarch64.md) or [vm-setup-x86_64.md](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/vm-setup-x86_64.md). These tutorials will guide you on how to create 2 VMs that host DBMS and operators, separately, and how to perform a mode switch using QEMU-based VM snapshotting.
 
-The mode switch forks a CVM, creates a snapshot and places it in the Management Zone that admins are able to access. A security guarantee is that DBAs cannot log into the CVMs, including Integrity Zone and Privacy Zone. HEDB records operator invocations in the Integrity Zone (*Execution Mode*) and replays it in the Management Zone (*Maintenance Mode*).
+The mode switch forks a CVM, creates a snapshot and places it in the Management Zone that DBAs are able to access. A security guarantee is that DBAs cannot log into the CVMs, including Integrity Zone and Privacy Zone. HEDB records operator invocations in the Integrity Zone (*Execution Mode*) and replays it in the Management Zone (*Maintenance Mode*).
 
 ### Record/Replay
 
 HEDB [record/replay](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/record_replay) is meant for reproducing bugs. It logs all ops invocations, including parameters and results, for later replays. We use TPC-H as the demonstrative benchmark.
 
-For privacy reasons, SQL constants should be encrypted in advance. Since the current implementations lack client-side encryption, we should transform the constants into encrypted values using operators in the client mode. A future work is to seek and implement a simple client-side encryption or proxy-side encryption.
+For privacy reasons, SQL constants should be encrypted in advance. Since the current implementations lack client-side encryption, we should transform the constants into encrypted values using operators in the client mode. Future work will be to seek a simple client-side encryption or proxy-side encryption.
 
 ```bash
 ## make dependencies installed
@@ -138,7 +138,7 @@ $ python3 run.py --skip-generate --record-replay record
 $ python3 run.py --skip-generate --record-replay replay
 ```
 
-If you shut down the operators VM, you can still replay the queries. This is exactly how HEDB prevents Smuggle but is still able to reproduce bugs for DBAs.
+If you shut down the operators VM, you can still replay the queries. This is exactly how HEDB prevents Smuggle Attacks but is able to reproduce bugs for DBAs.
 
 ### Hotfix
 
@@ -205,7 +205,7 @@ For other platforms such as AMD SEV, Intel TDX, IBM PEF, and ARM Realm, the task
 
 #### Q3: Supporting TPC-C?
 
-The released code of HEDB is built on PostgreSQL. Its current record/replay supports the TPC-H benchmark only. We encourage future research to overcome this challenge posed by non-determinism when running TPC-C atop HEDB. We believe your excellent work will also be published and known to the industry.
+The released code of HEDB is built on PostgreSQL. Its current record/replay supports the TPC-H benchmark only. We encourage future research to overcome this challenge posed by non-determinism when running TPC-C atop HEDB. We believe your excellent work will also be published and known to the industry!
 
 ### Anecdote
 
@@ -217,7 +217,9 @@ HEDB is pronounced [haɪdiːbiː] or 嗨嘀哔.
 
 ### Note
 
-This repository is a research prototype, not for production use. It is intended for experimentation, research, and education to enhance understanding of EDB internals.
+This repository is a research prototype, not for production use.
+
+It is intended for experimentation, research, and education to enhance understanding of EDB internals.
 
 ## Maintainers
 

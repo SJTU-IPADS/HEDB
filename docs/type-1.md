@@ -1,10 +1,12 @@
-# How about building a secure Type-I EDB?
+# Building a secure Type-I EDB
 
-The core idea is to place a DBMS directly into a confidential VM or CVM. To begin with, you need to have access to a CVM, such as AMD SEV or Intel TDX. Once obtained, you can proceed with installing popular DBMSes like PostgreSQL, MySQL, SQLite, or DuckDB within the CVM. It is crucial to ensure secure communication between the CVM and the DBMS engine by utilizing an SSH secure channel, and carefully protect your password.
+The core idea is to place a DBMS directly into a confidential VM or CVM.
+
+To begin with, you need to have access to a CVM, such as AMD SEV or Intel TDX. Once obtained, you can proceed with installing popular DBMSes like PostgreSQL, MySQL, SQLite, or DuckDB within the CVM. It is essential to ensure secure communication between the CVM and the DBMS engine by utilizing an SSH secure channel, and carefully protect your password.
 
 To prevent data breaches from untrusted storage, consider using Linux `dm-crypt` for convenience.
 
-## How to use Linux dm-crypt
+## How to use dm-crypt
 
 ```bash
 sudo apt install cryptsetup
