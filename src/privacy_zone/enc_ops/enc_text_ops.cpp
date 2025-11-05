@@ -1,21 +1,13 @@
 // SPDX-License-Identifier: Mulan PSL v2
 /*
- * Copyright (c) 2021 - 2023 The HEDB Project.
+ * Copyright (c) 2021 - 2025 The HEDB Project.
  */
 
 #include "enc_text_ops.h"
 #include "plain_text_ops.h"
 #include <like_match.h>
-#include "base64.h"
-#include <string>
-using namespace std;
 
-static string b64_text(EncStr* in)
-{
-    char b64_text[ENC_STRING_B64_LENGTH + 1] = { 0 };
-    toBase64((const unsigned char*)in, sizeof(EncStr), b64_text);
-    return b64_text;
-}
+using namespace std;
 
 int enc_text_cmp(EncStrCmpRequestData* req)
 {
@@ -37,7 +29,6 @@ int enc_text_cmp(EncStrCmpRequestData* req)
     right.data[right.len] = '\0';
 
     req->cmp = plain_text_cmp((char*)left.data, left.len, (char*)right.data, right.len);
-    // printf("[LOG Client] <%d> %s %s => %d\n", req->common.reqType, left.data, right.data, req->cmp);
 
     return resp;
 }
