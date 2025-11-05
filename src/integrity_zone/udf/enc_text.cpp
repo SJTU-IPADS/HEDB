@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Mulan PSL v2
 /*
- * Copyright (c) 2021 - 2023 The HEDB Project.
+ * Copyright (c) 2021 - 2025 The HEDB Project.
  */
 
 #include "base64.h"
@@ -123,9 +123,8 @@ Datum enc_text_out(PG_FUNCTION_ARGS)
         res[str.len] = '\0';
         PG_RETURN_CSTRING(res);
     } else {
-        char base64_text[ENC_STRING_B64_LENGTH + 1] = { 0 };
+        char *base64_text = (char *)palloc(ENC_STRING_B64_LENGTH);
         toBase64((const unsigned char*)&VARDATA(s), VARSIZE(s), base64_text);
-        // ereport(INFO, (errmsg("base64('%p') = %s", &estr->enc_cstr, base64_text)));
         PG_RETURN_CSTRING(base64_text);
     }
 }
@@ -395,7 +394,7 @@ Datum substring(PG_FUNCTION_ARGS)
     int error = enc_text_substring(str, start, length, estr);
     if (error) print_error("%s %d", __func__, error);
 
-    PG_RETURN_CSTRING(res);
+    PG_RETURN_POINTER(res);
 }
 
 Datum enc_text_set_order(PG_FUNCTION_ARGS)

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Mulan PSL v2
 /*
- * Copyright (c) 2021 - 2023 The HEDB Project.
+ * Copyright (c) 2021 - 2025 The HEDB Project.
  */
 
 #include "base64.h"
@@ -43,14 +43,17 @@ static Timestamp pg_timestamp_in(char* str)
     int tz;
     int dtype;
     fsec_t fsec;
+    DateTimeErrorExtra extra;
     struct pg_tm tt, *tm = &tt;
 
     dterr = ParseDateTime(str, workbuf, sizeof(workbuf), field, ftype, MAXDATEFIELDS, &nf);
 
     if (dterr == 0)
-        dterr = DecodeDateTime(field, ftype, nf, &dtype, tm, &fsec, &tz);
-    if (dterr != 0)
-        DateTimeParseError(dterr, str, "timestamp");
+        dterr = DecodeDateTime(field, ftype, nf, &dtype, tm, &fsec, &tz, &extra);
+    if (dterr != 0) {
+        DateTimeParseError(dterr, &extra, str, "timestamp", nullptr);
+        return 0;
+    }
 
     switch (dtype) {
     case DTK_DATE:
@@ -160,7 +163,7 @@ Datum enc_timestamp_out(PG_FUNCTION_ARGS)
 
     if (clientMode == true) {
         TIMESTAMP timestamp;
-        char* result = (char*)palloc0(TIMESTAMP_LENGTH * sizeof(char));
+        char* result = (char*)palloc0(TIMESTAMP_LENGTH);
         struct pg_tm tt, *tm = &tt;
         fsec_t fsec;
         char buf[MAXDATELEN + 1];
@@ -178,9 +181,8 @@ Datum enc_timestamp_out(PG_FUNCTION_ARGS)
         result = pstrdup(buf);
         PG_RETURN_CSTRING(result);
     } else {
-        char base64_timestamp[ENC_TIMESTAMP_B64_LENGTH + 1] = { 0 };
+        char *base64_timestamp = (char *)palloc0(ENC_TIMESTAMP_B64_LENGTH);
         toBase64((const unsigned char*)t, ENC_TIMESTAMP_LENGTH, base64_timestamp);
-        // ereport(INFO, (errmsg("base64('%p') = %s", t, base64_timestamp)));
         PG_RETURN_CSTRING(base64_timestamp);
     }
 }
@@ -201,7 +203,7 @@ Datum enc_timestamp_eq(PG_FUNCTION_ARGS)
     int error = enc_timestamp_cmp(t1, t2, &ans);
     if (error) print_error("%s %d", __func__, error);
 
-    PG_RETURN_BOOL((ans == 0) ? true : false);
+    PG_RETURN_BOOL(ans == 0);
 }
 
 /*
@@ -220,7 +222,7 @@ Datum enc_timestamp_ne(PG_FUNCTION_ARGS)
     int error = enc_timestamp_cmp(t1, t2, &ans);
     if (error) print_error("%s %d", __func__, error);
 
-    PG_RETURN_BOOL((ans != 0) ? true : false);
+    PG_RETURN_BOOL(ans != 0);
 }
 
 /*
@@ -239,7 +241,7 @@ Datum enc_timestamp_lt(PG_FUNCTION_ARGS)
     int error = enc_timestamp_cmp(t1, t2, &ans);
     if (error) print_error("%s %d", __func__, error);
 
-    PG_RETURN_BOOL((ans == -1) ? true : false);
+    PG_RETURN_BOOL(ans == -1);
 }
 
 /*
@@ -258,7 +260,7 @@ Datum enc_timestamp_le(PG_FUNCTION_ARGS)
     int error = enc_timestamp_cmp(t1, t2, &ans);
     if (error) print_error("%s %d", __func__, error);
 
-    PG_RETURN_BOOL((ans <= 0) ? true : false);
+    PG_RETURN_BOOL(ans <= 0);
 }
 
 /*
@@ -277,7 +279,7 @@ Datum enc_timestamp_gt(PG_FUNCTION_ARGS)
     int error = enc_timestamp_cmp(t1, t2, &ans);
     if (error) print_error("%s %d", __func__, error);
 
-    PG_RETURN_BOOL((ans > 0) ? true : false);
+    PG_RETURN_BOOL(ans > 0);
 }
 
 /*
@@ -296,7 +298,7 @@ Datum enc_timestamp_ge(PG_FUNCTION_ARGS)
     int error = enc_timestamp_cmp(t1, t2, &ans);
     if (error) print_error("%s %d", __func__, error);
 
-    PG_RETURN_BOOL((ans >= 0) ? true : false);
+    PG_RETURN_BOOL(ans >= 0);
 }
 
 /*
@@ -324,7 +326,7 @@ Datum date_part(PG_FUNCTION_ARGS)
         ereport(ERROR, (errmsg("Only date_part('year', enc_timestamp) is currently implemented.")));
     }
     EncTimestamp* timestamp = PG_GETARG_ENCTimestamp(1);
-    EncInt* result = (EncInt*)palloc(sizeof(EncInt));
+    EncInt* result = (EncInt*)palloc0(sizeof(EncInt));
 
     int error = enc_timestamp_extract_year(timestamp, result);
     if (error) print_error("%s %d", __func__, error);

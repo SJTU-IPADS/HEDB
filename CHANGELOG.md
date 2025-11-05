@@ -1,5 +1,9 @@
 # Change Log
 
+## 2025.11
+
+- Fix: base64 conversion bug in server mode.
+
 ## 2023.9
 
 - Fix: base64 decode bug.

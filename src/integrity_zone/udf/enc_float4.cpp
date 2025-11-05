@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Mulan PSL v2
 /*
- * Copyright (c) 2021 - 2023 The HEDB Project.
+ * Copyright (c) 2021 - 2025 The HEDB Project.
  */
 
 #include "base64.h"
@@ -27,6 +27,7 @@ static string b64_float(EncFloat* in)
     toBase64((const unsigned char*)in, sizeof(EncFloat), b64_float4);
     return b64_float4;
 }
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -70,7 +71,7 @@ Datum enc_float4_encrypt(PG_FUNCTION_ARGS)
     EncFloat* f = (EncFloat*)palloc0(sizeof(EncFloat));
     int error = enc_float_encrypt(src, f);
     if (error) print_error("%s %d", __func__, error);
-    PG_RETURN_CSTRING(f);
+    PG_RETURN_CSTRING((const char *)f);
 }
 
 Datum enc_float4_decrypt(PG_FUNCTION_ARGS)
@@ -157,9 +158,8 @@ Datum enc_float4_out(PG_FUNCTION_ARGS)
         sprintf(str, "%f", out);
         PG_RETURN_POINTER(str);
     } else {
-        char base64_float4[ENC_FLOAT_B64_LENGTH + 1] = { 0 };
+        char *base64_float4 = (char *)palloc(ENC_FLOAT_B64_LENGTH);
         toBase64((const unsigned char*)in, sizeof(EncFloat), base64_float4);
-        // ereport(INFO, (errmsg("base64('%p') = %s", in, base64_float4)));
         PG_RETURN_CSTRING(base64_float4);
     }
 }

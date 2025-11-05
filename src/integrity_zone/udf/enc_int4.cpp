@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: Mulan PSL v2
 /*
- * Copyright (c) 2021 - 2023 The HEDB Project.
+ * Copyright (c) 2021 - 2025 The HEDB Project.
  */
 
 #include "base64.h"
-#include <enc_float_ops.hpp>
 #include <enc_int_ops.hpp>
 #include <extension.hpp>
 #include <string>
@@ -32,9 +31,6 @@ static string b64_int(EncInt* in)
 #ifdef __cplusplus
 extern "C" {
 #endif
-PG_FUNCTION_INFO_V1(enc_int4_encrypt);
-PG_FUNCTION_INFO_V1(enc_int4_decrypt);
-
 PG_FUNCTION_INFO_V1(enc_int4_in);
 PG_FUNCTION_INFO_V1(enc_int4_out);
 
@@ -61,38 +57,23 @@ PG_FUNCTION_INFO_V1(enc_int4_avg_bulk);
 
 PG_FUNCTION_INFO_V1(int4_to_enc_int4);
 PG_FUNCTION_INFO_V1(int8_to_enc_int4);
+
+PG_FUNCTION_INFO_V1(enc_int4_encrypt);
+PG_FUNCTION_INFO_V1(enc_int4_decrypt);
 #ifdef __cplusplus
 }
 #endif
-
-Datum enc_int4_encrypt(PG_FUNCTION_ARGS)
-{
-    EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
-    int in = PG_GETARG_INT32(0);
-    int error = enc_int_encrypt(in, out);
-    if (error) print_error("%s %d", __func__, error);
-    PG_RETURN_CSTRING(out);
-}
-
-Datum enc_int4_decrypt(PG_FUNCTION_ARGS)
-{
-    int ans = 0;
-    EncInt* in = PG_GETARG_ENCINT(0);
-    int error = enc_int_decrypt(in, &ans);
-    if (error) print_error("%s %d", __func__, error);
-    PG_RETURN_INT32(ans);
-}
 
 Datum enc_int4_in(PG_FUNCTION_ARGS)
 {
     char* pIn = PG_GETARG_CSTRING(0);
     EncInt* result = (EncInt*)palloc0(sizeof(EncInt));
 
-    if (clientMode == true) { // from plain int4 to cipher int4
+    if (clientMode == true) {
         int in = atoi(pIn);
         int error = enc_int_encrypt(in, result);
         if (error) print_error("%s %d", __func__, error);
-    } else { // base64 decode to cipher int4
+    } else {
         fromBase64(pIn, strlen(pIn), (unsigned char*)result);
     }
     PG_RETURN_POINTER(result);
@@ -102,19 +83,16 @@ Datum enc_int4_out(PG_FUNCTION_ARGS)
 {
     EncInt* in = PG_GETARG_ENCINT(0);
 
-    if (clientMode == true) { // from cipher int4 to plain int4
+    if (clientMode == true) {
         int out;
-        char* str = (char*)palloc0(sizeof(EncInt)); // this length is not really meaningful
-
+        char* str = (char*)palloc0(sizeof(EncInt));
         int error = enc_int_decrypt(in, &out);
         if (error) print_error("%s %d", __func__, error);
         sprintf(str, "%d", out);
-        // ereport(INFO, (errmsg("auto decryption('%p') = %d", in, out)));
         PG_RETURN_CSTRING(str);
-    } else { // base64 encode of cipher int4
-        char base64_int4[ENC_INT_B64_LENGTH + 1] = { 0 };
+    } else {
+        char *base64_int4 = (char *)palloc0(ENC_INT_B64_LENGTH);
         toBase64((const unsigned char*)in, sizeof(EncInt), base64_int4);
-        // ereport(INFO, (errmsg("base64('%p') = %s", in, base64_int4)));
         PG_RETURN_CSTRING(base64_int4);
     }
 }
@@ -128,11 +106,10 @@ Datum enc_int4_add(PG_FUNCTION_ARGS)
     int error = enc_int_add(left, right, result);
     if (error) print_error("%s %d", __func__, error);
 
-
 #ifdef LOG_MODE
     outfile << "i + " << b64_int(left) << " " << b64_int(right) << " " << b64_int(result) << endl;
 #endif 
-    PG_RETURN_CSTRING(result);
+    PG_RETURN_POINTER(result);
 }
 
 Datum enc_int4_sub(PG_FUNCTION_ARGS)
@@ -143,10 +120,11 @@ Datum enc_int4_sub(PG_FUNCTION_ARGS)
 
     int error = enc_int_sub(left, right, result);
     if (error) print_error("%s %d", __func__, error);
+
 #ifdef LOG_MODE
     outfile << "i - " << b64_int(left) << " " << b64_int(right) << " " << b64_int(result) << endl;
 #endif
-    PG_RETURN_CSTRING(result);
+    PG_RETURN_POINTER(result);
 }
 
 Datum enc_int4_mult(PG_FUNCTION_ARGS)
@@ -157,10 +135,11 @@ Datum enc_int4_mult(PG_FUNCTION_ARGS)
 
     int error = enc_int_mult(left, right, result);
     if (error) print_error("%s %d", __func__, error);
+
 #ifdef LOG_MODE
     outfile << "i * " << b64_int(left) << " " << b64_int(right) << " " << b64_int(result) << endl;
 #endif
-    PG_RETURN_CSTRING(result);
+    PG_RETURN_POINTER(result);
 }
 
 Datum enc_int4_div(PG_FUNCTION_ARGS)
@@ -171,10 +150,11 @@ Datum enc_int4_div(PG_FUNCTION_ARGS)
 
     int error = enc_int_div(left, right, result);
     if (error) print_error("%s %d", __func__, error);
+
 #ifdef LOG_MODE
     outfile << "i / " << b64_int(left) << " " << b64_int(right) << " " << b64_int(result) << endl;
 #endif
-    PG_RETURN_CSTRING(result);
+    PG_RETURN_POINTER(result);
 }
 
 Datum enc_int4_pow(PG_FUNCTION_ARGS)
@@ -185,10 +165,11 @@ Datum enc_int4_pow(PG_FUNCTION_ARGS)
 
     int error = enc_int_pow(left, right, result);
     if (error) print_error("%s %d", __func__, error);
+
 #ifdef LOG_MODE
     outfile << "i ^ " << b64_int(left) << " " << b64_int(right) << " " << b64_int(result) << endl;
 #endif
-    PG_RETURN_CSTRING(result);
+    PG_RETURN_POINTER(result);
 }
 
 Datum enc_int4_mod(PG_FUNCTION_ARGS)
@@ -199,10 +180,11 @@ Datum enc_int4_mod(PG_FUNCTION_ARGS)
 
     int error = enc_int_mod(left, right, result);
     if (error) print_error("%s %d", __func__, error);
+
 #ifdef LOG_MODE
     outfile << "i % " << b64_int(left) << " " << b64_int(right) << " " << b64_int(result) << endl;
 #endif
-    PG_RETURN_CSTRING(result);
+    PG_RETURN_POINTER(result);
 }
 
 Datum enc_int4_cmp(PG_FUNCTION_ARGS)
@@ -213,6 +195,7 @@ Datum enc_int4_cmp(PG_FUNCTION_ARGS)
 
     int error = enc_int_cmp(left, right, &res);
     if (error) print_error("%s %d", __func__, error);
+
 #ifdef LOG_MODE
     {
         if (0 == res) outfile << "i == ";
@@ -228,120 +211,102 @@ Datum enc_int4_eq(PG_FUNCTION_ARGS)
 {
     EncInt* left = PG_GETARG_ENCINT(0);
     EncInt* right = PG_GETARG_ENCINT(1);
-    int res;
-    bool cmp = false;
+    int cmp, ret;
 
-    int error = enc_int_cmp(left, right, &res);
+    int error = enc_int_cmp(left, right, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    if (res == 0)
-        cmp = true;
-    else
-        cmp = false;
+    ret = cmp == 0;
+
 #ifdef LOG_MODE
-    outfile << "i == " << b64_int(left) << " " << b64_int(right) << " " << (cmp == true ? "True" : "False") << endl;
+    outfile << "i == " << b64_int(left) << " " << b64_int(right) << " " << (ret == true ? "True" : "False") << endl;
 #endif
-    PG_RETURN_BOOL(cmp);
+    PG_RETURN_BOOL(ret);
 }
 
 Datum enc_int4_ne(PG_FUNCTION_ARGS)
 {
     EncInt* left = PG_GETARG_ENCINT(0);
     EncInt* right = PG_GETARG_ENCINT(1);
-    int res;
-    bool cmp = false;
+    int cmp, ret;
 
-    int error = enc_int_cmp(left, right, &res);
+    int error = enc_int_cmp(left, right, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    if (res == 0)
-        cmp = false;
-    else
-        cmp = true;
+    ret = cmp != 0;
+
 #ifdef LOG_MODE
-    outfile << "i != " << b64_int(left) << " " << b64_int(right) << " " << (cmp == true ? "True" : "False") << endl;
+    outfile << "i != " << b64_int(left) << " " << b64_int(right) << " " << (ret == true ? "True" : "False") << endl;
 #endif
-    PG_RETURN_BOOL(cmp);
+    PG_RETURN_BOOL(ret);
 }
 
 Datum enc_int4_lt(PG_FUNCTION_ARGS)
 {
     EncInt* left = PG_GETARG_ENCINT(0);
     EncInt* right = PG_GETARG_ENCINT(1);
-    int res;
-    bool cmp = false;
+    int cmp, ret;
 
-    int error = enc_int_cmp(left, right, &res);
+    int error = enc_int_cmp(left, right, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    if (res == -1)
-        cmp = true;
-    else
-        cmp = false;
+    ret = cmp == -1;
+
 #ifdef LOG_MODE
-    outfile << "i < " << b64_int(left) << " " << b64_int(right) << " " << (cmp == true ? "True" : "False") << endl;
+    outfile << "i < " << b64_int(left) << " " << b64_int(right) << " " << (ret == true ? "True" : "False") << endl;
 #endif
-    PG_RETURN_BOOL(cmp);
+    PG_RETURN_BOOL(ret);
 }
 
 Datum enc_int4_le(PG_FUNCTION_ARGS)
 {
     EncInt* left = PG_GETARG_ENCINT(0);
     EncInt* right = PG_GETARG_ENCINT(1);
-    int res;
-    bool cmp = false;
+    int cmp, ret;
 
-    int error = enc_int_cmp(left, right, &res);
+    int error = enc_int_cmp(left, right, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    if ((res == -1) || (res == 0))
-        cmp = true;
-    else
-        cmp = false;
+    ret = cmp <= 0;
+
 #ifdef LOG_MODE
-    outfile << "i <= " << b64_int(left) << " " << b64_int(right) << " " << (cmp == true ? "True" : "False") << endl;
+    outfile << "i <= " << b64_int(left) << " " << b64_int(right) << " " << (ret == true ? "True" : "False") << endl;
 #endif
-    PG_RETURN_BOOL(cmp);
+    PG_RETURN_BOOL(ret);
 }
 
 Datum enc_int4_gt(PG_FUNCTION_ARGS)
 {
     EncInt* left = PG_GETARG_ENCINT(0);
     EncInt* right = PG_GETARG_ENCINT(1);
-    int res;
-    bool cmp = false;
+    int cmp, ret;
 
-    int error = enc_int_cmp(left, right, &res);
+    int error = enc_int_cmp(left, right, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    if (res == 1)
-        cmp = true;
-    else
-        cmp = false;
+    ret = cmp == 1;
+
 #ifdef LOG_MODE
-    outfile << "i > " << b64_int(left) << " " << b64_int(right) << " " << (cmp == true ? "True" : "False") << endl;
+    outfile << "i > " << b64_int(left) << " " << b64_int(right) << " " << (ret == true ? "True" : "False") << endl;
 #endif
-    PG_RETURN_BOOL(cmp);
+    PG_RETURN_BOOL(ret);
 }
 
 Datum enc_int4_ge(PG_FUNCTION_ARGS)
 {
     EncInt* left = PG_GETARG_ENCINT(0);
     EncInt* right = PG_GETARG_ENCINT(1);
-    int res;
-    bool cmp = false;
+    int cmp, ret;
 
-    int error = enc_int_cmp(left, right, &res);
+    int error = enc_int_cmp(left, right, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    if (res == 0 || res == 1)
-        cmp = true;
-    else
-        cmp = false;
+    ret = cmp >= 0;
+
 #ifdef LOG_MODE
-    outfile << "i >= " << b64_int(left) << " " << b64_int(right) << " " << (cmp == true ? "True" : "False") << endl;
+    outfile << "i >= " << b64_int(left) << " " << b64_int(right) << " " << (ret == true ? "True" : "False") << endl;
 #endif
-    PG_RETURN_BOOL(cmp);
+    PG_RETURN_BOOL(ret);
 }
 
 Datum enc_int4_sum(PG_FUNCTION_ARGS)
@@ -352,10 +317,11 @@ Datum enc_int4_sum(PG_FUNCTION_ARGS)
 
     int error = enc_int_add(left, right, sum);
     if (error) print_error("%s %d", __func__, error);
+
 #ifdef LOG_MODE
     outfile << "i SUM " << b64_int(left) << " " << b64_int(right) << " " << b64_int(sum) << endl;
 #endif
-    PG_RETURN_CSTRING(sum);
+    PG_RETURN_POINTER(sum);
 }
 
 Datum enc_int4_sum_bulk(PG_FUNCTION_ARGS)
@@ -368,6 +334,7 @@ Datum enc_int4_sum_bulk(PG_FUNCTION_ARGS)
     EncInt sum_array[BULK_SIZE];
     int counter = 1;
     int error;
+
 #ifdef LOG_MODE
     outfile << "i SUM "; /// logging
 #endif
@@ -402,7 +369,7 @@ Datum enc_int4_sum_bulk(PG_FUNCTION_ARGS)
 #ifdef LOG_MODE
     outfile << b64_int(sum) << endl; /// logging
 #endif
-    PG_RETURN_CSTRING(sum);
+    PG_RETURN_POINTER(sum);
 }
 
 Datum enc_int4_avg_bulk(PG_FUNCTION_ARGS)
@@ -418,6 +385,7 @@ Datum enc_int4_avg_bulk(PG_FUNCTION_ARGS)
     EncInt unit; // cipher of '1'
     EncInt num_array[BULK_SIZE]; // nitems of '1'
     int counter; // sum will be at array[0]
+
 #ifdef LOG_MODE
     outfile << "i AVG "; /// logging
 #endif
@@ -468,7 +436,7 @@ Datum enc_int4_avg_bulk(PG_FUNCTION_ARGS)
 #ifdef LOG_MODE
     outfile << b64_int(res) << endl; /// logging
 #endif
-    PG_RETURN_CSTRING(res);
+    PG_RETURN_POINTER(res);
 }
 
 Datum enc_int4_max(PG_FUNCTION_ARGS)
@@ -479,6 +447,7 @@ Datum enc_int4_max(PG_FUNCTION_ARGS)
 
     int error = enc_int_cmp(left, right, &res);
     if (error) print_error("%s %d", __func__, error);
+
 #ifdef LOG_MODE
     outfile << "i MAX " << b64_int(left) << " " << b64_int(right) << " " << b64_int(res == 1 ? left : right) << endl;
 #endif
@@ -493,6 +462,7 @@ Datum enc_int4_min(PG_FUNCTION_ARGS)
 
     int error = enc_int_cmp(left, right, &res);
     if (error) print_error("%s %d", __func__, error);
+
 #ifdef LOG_MODE
     outfile << "i MIN " << b64_int(left) << " " << b64_int(right) << " " << b64_int(res == 1 ? right : left) << endl;
 #endif
@@ -529,7 +499,7 @@ Datum enc_int4_max_bulk(PG_FUNCTION_ARGS)
 
     // pfree(pTemp);
 
-    PG_RETURN_CSTRING(pMax);
+    PG_RETURN_POINTER(pMax);
 }
 
 Datum enc_int4_min_bulk(PG_FUNCTION_ARGS)
@@ -560,7 +530,7 @@ Datum enc_int4_min_bulk(PG_FUNCTION_ARGS)
 
     // pfree(pTemp);
 
-    PG_RETURN_CSTRING(pMin);
+    PG_RETURN_POINTER(pMin);
 }
 #endif
 
@@ -569,14 +539,31 @@ Datum int4_to_enc_int4(PG_FUNCTION_ARGS)
     int in = PG_GETARG_INT32(0);
     EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
     enc_int_encrypt(in, out);
-    PG_RETURN_CSTRING(out);
+    PG_RETURN_POINTER(out);
 }
 
 Datum int8_to_enc_int4(PG_FUNCTION_ARGS)
 {
-
     int in = PG_GETARG_INT64(0);
     EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
     enc_int_encrypt(in, out);
-    PG_RETURN_CSTRING(out);
+    PG_RETURN_POINTER(out);
+}
+
+Datum enc_int4_encrypt(PG_FUNCTION_ARGS)
+{
+    EncInt* out = (EncInt*)palloc0(sizeof(EncInt));
+    int in = PG_GETARG_INT32(0);
+    int error = enc_int_encrypt(in, out);
+    if (error) print_error("%s %d", __func__, error);
+    PG_RETURN_POINTER(out);
+}
+
+Datum enc_int4_decrypt(PG_FUNCTION_ARGS)
+{
+    int ans = 0;
+    EncInt* in = PG_GETARG_ENCINT(0);
+    int error = enc_int_decrypt(in, &ans);
+    if (error) print_error("%s %d", __func__, error);
+    PG_RETURN_INT32(ans);
 }
