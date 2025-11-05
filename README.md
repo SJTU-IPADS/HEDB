@@ -6,14 +6,13 @@
 
 HEDB is a PostgreSQL extension to compute queries over ciphertexts, with a suite of maintenance tools.
 
-As a long-term open project, HEDB highly values your feedback.
-
 ## Prerequisite
 
-- OS version: Ubuntu >= 20.04
-- Linux kernel version: >= 5.4
-- Postgres version: 14.12
-- Python version: >= 3.6
+- CMake version: >= 3.10
+- Postgres version: >= 17.6
+- OS version: Ubuntu >= 24.04
+- Linux kernel version: >= 6.17
+- Python version: >= 3.13
 
 ## Quick Start
 
@@ -52,7 +51,7 @@ SELECT enable_server_mode();            --- use server mode for database admins 
 SELECT * FROM test;
 ```
 
-There are currently four encrypted datatypes to protect your data selectively in PostgreSQL. To learn more about their usage, see [tests/unit-test](https://github.com/SJTU-IPADS/HEDB/blob/main/tests/unit-test/unit-test.sql).
+There are 4 encrypted datatypes to protect the data you select in PostgreSQL. To learn more about their usage, see [tests/unit-test](https://github.com/SJTU-IPADS/HEDB/blob/main/tests/unit-test/unit-test.sql).
 
 | data type | encrypted data type |
 |-----------|---------------------|
@@ -61,20 +60,22 @@ There are currently four encrypted datatypes to protect your data selectively in
 | text      | enc_text            |
 | timestamp | enc_timestamp       |
 
-Note that the above setting is ***NOT secure*** at all!
+In fact, the above setting is ***NOT secure*** at all.
 
-Here is a quick overview for newcomers to understand the purpose of HEDB (**10-minute reading**).
+Here is a quick overview for newcomers to understand the purpose of HEDB (*10-minute reading*).
 
 ## Encrypted Databases
 
-Databases may contain sensitive data, and can be outsourced to third parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary, resulting in an encrypted databases (EDB). EDB systems help enterprises obey data protection laws such as EU GDPR, US HIPAA, US PCI/DSS, PRC DSL, PRC PIPL, etc. Two types of EDBs are established so far.
+Databases may contain sensitive data, and can be outsourced to third parties to manage, optimize, and diagnose, called database-as-a-service (DBaaS). To protect sensitive data in use, secrets should be kept encrypted as necessary, resulting in an encrypted databases (EDB). EDB systems help enterprises obey data protection laws such as EU GDPR, US HIPAA, US PCI/DSS, PRC DSL, PRC PIPL, etc.
+
+Two types of EDBs are established so far.
 
 <p align="center">
   <img src="scripts/figures/types.jpg" width = "760" height = "180" align=center />
 </p>
-**Type-I EDB**: To build an EDB, one can [place an entire database inside an isolated domain](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/type-1.md), or confidential computing unit (as in Intel SGX, AMD SEV, Intel TDX, ARM Realm, IBM PEF, AWS Nitro, Ant HyperEnclave, or whatever you name it). However, Type-I EDB should prevent database admins (or DBAs in short) from managing the database. If DBAs were able to log into the DBMS, they would inspect user data.
 
-**Type-II EDB**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into the source code to navigate how to build such an EDB using PostgreSQL's [user-defined types (UDTs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/hedb--1.0.sql) and [user-defined functions (UDFs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/udf). Type-II EDB allows DBAs to log into the database, but keeps data always in ciphertext (at rest on disk, in transit over network, and in use in memory) to avoid potential leakage.
++ **Type-I EDB**: To build an EDB, one can [place an entire database inside an isolated domain](https://github.com/SJTU-IPADS/HEDB/blob/main/docs/type-1.md), or confidential computing unit (as in Intel SGX, AMD SEV, Intel TDX, ARM Realm, IBM PEF, AWS Nitro, Ant HyperEnclave, or whatever you name it). However, Type-I EDB should prevent database admins (or DBAs in short) from managing the database. If DBAs were able to log into the DBMS, they would inspect user data.
++ **Type-II EDB**: Cloud DBaaS vendors such as Azure, Alibaba, Huawei and others provision operator-based EDBs. You can dive into the source code to navigate how to build such an EDB using PostgreSQL's [user-defined types (UDTs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/hedb--1.0.sql) and [user-defined functions (UDFs)](https://github.com/SJTU-IPADS/HEDB/tree/main/src/integrity_zone/udf). Type-II EDB allows DBAs to log into the database, but keeps data always in ciphertext (at rest on disk, in transit over network, and in use in memory) to avoid potential leakage.
 
 However, for Type-II, we have discovered a type of attack named "Smuggle". You can learn how it works in [tools/smuggle.py](https://github.com/SJTU-IPADS/HEDB/blob/main/tools/smuggle.py), which recovers an integer column in TPC-H. The reason why Smuggle exists is that the Type-II EDB exposes sufficient expression operators for admins to construct oracles.
 
