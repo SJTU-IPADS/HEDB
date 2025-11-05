@@ -19,9 +19,3 @@ typedef struct varlena EncText;
 // #define DatumGetEncStr(X)  ((EncStr *) DatumGetPointer(X))
 #define PG_GETARG_ENCTEXT_P(n) ((EncText*)PG_DETOAST_DATUM(PG_GETARG_DATUM(n)))
 #define ORDER_NONE 0x0
-
-#ifndef PG_FUNCTION_ARGS
-#define PG_FUNCTION_ARGS FunctionCallInfo fcinfo
-#endif
-
-// #define LOG_MODE

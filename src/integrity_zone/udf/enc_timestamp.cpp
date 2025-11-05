@@ -14,8 +14,10 @@ extern "C" {
 #endif
 PG_FUNCTION_INFO_V1(enc_timestamp_encrypt);
 PG_FUNCTION_INFO_V1(enc_timestamp_decrypt);
+
 PG_FUNCTION_INFO_V1(enc_timestamp_in);
 PG_FUNCTION_INFO_V1(enc_timestamp_out);
+
 PG_FUNCTION_INFO_V1(enc_timestamp_eq);
 PG_FUNCTION_INFO_V1(enc_timestamp_ne);
 PG_FUNCTION_INFO_V1(enc_timestamp_lt);

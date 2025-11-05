@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Mulan PSL v2
 /*
- * Copyright (c) 2021 - 2023 The HEDB Project.
+ * Copyright (c) 2021 - 2025 The HEDB Project.
  */
 
 #include <defs.h>
@@ -60,17 +60,12 @@ int plain_int32_cmp(int left, int right)
     return (left == right) ? 0 : (left < right) ? -1 : 1;
 }
 
-int plain_int32_bulk(int reqType, int size, int* array)
+int plain_int32_sum_bulk(int size, int* array)
 {
     int res = 0;
-    switch (reqType) {
-    case CMD_INT_SUM_BULK:
-        for (int i = 0; i < size; i++) {
-            res += array[i];
-        }
-        break;
-    default:
-        break;
+
+    for (int i = 0; i < size; i++) {
+        res += array[i];
     }
     return res;
 }

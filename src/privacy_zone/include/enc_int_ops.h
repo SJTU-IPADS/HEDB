@@ -9,4 +9,4 @@
 
 int enc_int32_calc(EncIntCalcRequestData* req);
 int enc_int32_cmp(EncIntCmpRequestData* req);
-int enc_int32_bulk(EncIntBulkRequestData* req);
+int enc_int32_sum_bulk(EncIntBulkRequestData* req);

@@ -15,9 +15,6 @@
 #include <sync.h>
 #include <tee_interface.hpp>
 #include <timer.hpp>
-#include <unistd.h>
-#include <fstream>
-#include <iostream>
 using namespace std;
 
 TEEInvoker* TEEInvoker::invoker = nullptr;
@@ -33,17 +30,11 @@ char record_name_prefix[MAX_NAME_LENGTH];
 char record_names[MAX_RECORDS_NUM][MAX_NAME_LENGTH];
 
 uint64_t current_log_size = 0;
-#ifdef LOG_MODE
-    ofstream outfile("/dev/shm/ivshmem", ios::app); // leakage logging for I-Zone
-#endif 
 
 void exit_handler()
 {
     TEEInvoker* invoker = TEEInvoker::getInstance();
     delete invoker;
-#ifdef LOG_MODE
-    outfile.close();
-#endif 
 }
 
 #define SHM_SIZE (16 * 1024 * 1024) // TODO: merge this into one header

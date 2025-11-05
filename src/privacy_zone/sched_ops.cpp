@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Mulan PSL v2
 /*
- * Copyright (c) 2021 - 2023 The HEDB Project.
+ * Copyright (c) 2021 - 2025 The HEDB Project.
  */
 
 #include <enc_ops.h>
@@ -24,7 +24,7 @@ int handle_ops(BaseRequest* base_req)
         base_req->resp = enc_int32_cmp((EncIntCmpRequestData*)base_req);
         break;
     case CMD_INT_SUM_BULK:
-        base_req->resp = enc_int32_bulk((EncIntBulkRequestData*)base_req);
+        base_req->resp = enc_int32_sum_bulk((EncIntBulkRequestData*)base_req);
         break;
 
     case CMD_INT_ENC: {
@@ -56,7 +56,7 @@ int handle_ops(BaseRequest* base_req)
         break;
 
     case CMD_FLOAT_SUM_BULK:
-        base_req->resp = enc_float32_bulk((EncFloatBulkRequestData*)base_req);
+        base_req->resp = enc_float32_sum_bulk((EncFloatBulkRequestData*)base_req);
         break;
 
     case CMD_FLOAT_EVAL_EXPR:

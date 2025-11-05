@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Mulan PSL v2
 /*
- * Copyright (c) 2021 - 2023 The HEDB Project.
+ * Copyright (c) 2021 - 2025 The HEDB Project.
  */
 
 #include <cctype>
 #include <cstdio>
 #include <cstring>
 
-void _print_hex(const char* what, const void* v, const unsigned long l)
+void print_hex(const char* what, const void* v, const unsigned long l)
 {
     char tmp[512];
     const unsigned char* p = (const unsigned char*)v;

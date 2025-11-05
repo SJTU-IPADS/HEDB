@@ -4,7 +4,6 @@
  */
 
 #include "base64.h"
-#include <enc_int_ops.hpp>
 #include <enc_text_ops.hpp>
 #include <extension.hpp>
 
@@ -26,6 +25,7 @@ PG_FUNCTION_INFO_V1(enc_text_lt);
 PG_FUNCTION_INFO_V1(enc_text_ge);
 PG_FUNCTION_INFO_V1(enc_text_gt);
 PG_FUNCTION_INFO_V1(enc_text_cmp);
+
 PG_FUNCTION_INFO_V1(enc_text_concatenate);
 PG_FUNCTION_INFO_V1(enc_text_like);
 PG_FUNCTION_INFO_V1(enc_text_notlike);

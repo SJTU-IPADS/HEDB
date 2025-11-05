@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Mulan PSL v2
 /*
- * Copyright (c) 2021 - 2023 The HEDB Project.
+ * Copyright (c) 2021 - 2025 The HEDB Project.
  */
 
 #include <defs.h>
@@ -50,17 +50,12 @@ float plain_float_cmp(float left, float right)
     return (left == right) ? 0 : (left < right) ? -1 : 1;
 }
 
-double plain_float_bulk(int reqType, int size, float* array)
+double plain_float_sum_bulk(int size, float* array)
 {
     double res = 0;
-    switch (reqType) {
-    case CMD_FLOAT_SUM_BULK:
-        for (int i = 0; i < size; i++) {
-            res += array[i];
-        }
-        break;
-    default:
-        break;
+
+    for (int i = 0; i < size; i++) {
+        res += array[i];
     }
     return res;
 }

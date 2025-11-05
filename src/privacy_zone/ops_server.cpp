@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Mulan PSL v2
 /*
- * Copyright (c) 2021 - 2023 The HEDB Project.
+ * Copyright (c) 2021 - 2025 The HEDB Project.
  */
 
 #include <fcntl.h>
@@ -23,7 +23,6 @@
 #include "ops_server.h"
 #include "request_types.h"
 #include "sync.h"
-#include <fcntl.h>
 #include <mutex>
 #include <sched.h>
 #include <sys/mman.h>
@@ -32,14 +31,7 @@
 #include "ops_server.hpp"
 
 #include <map> // for profile
-#include <fstream>
-#include <iostream>
 using namespace std;
-
-// #define LOG_MODE
-#ifdef LOG_MODE
-    ofstream outfile("/dev/shm/ivshmem", ios::app);
-#endif
 
 struct alignas(128) Decrypt_args {
     bool inited;
@@ -157,8 +149,8 @@ int decrypt_bytes(uint8_t* pSrc, size_t src_len, uint8_t* pDst, size_t exp_dst_l
     }
     resp = gcm_decrypt(pSrc, src_len, pDst, &dst_len);
     if (resp != 0) {
-        _print_hex("dec from ", pSrc, src_len);
-        _print_hex("dec to ", pDst, dst_len);
+        print_hex("dec from ", pSrc, src_len);
+        print_hex("dec to ", pDst, dst_len);
     }
 
     decrypt_counter++;
@@ -178,9 +170,6 @@ int ivshm_fd;
 void ivshm_exit_handler()
 {
     close(ivshm_fd);
-#ifdef LOG_MODE
-    outfile.close();
-#endif
 }
 void* get_shmem_ivshm(size_t size)
 {

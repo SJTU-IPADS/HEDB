@@ -106,11 +106,11 @@ DEFINE_ENCTYPE_1ARG_ReqData(EncTimestamp, EncInt, EncTimestampExtractYearRequest
 
 #define DEFINE_ENCTYPE_3ARG_ReqData(arg1_type, arg1_name, arg2_type, arg2_name, arg3_type, arg3_name, res_type, typename) \
     typedef struct {                                                                                                      \
-        BaseRequest common;                                                                                               \
-        arg1_type arg1_name;                                                                                              \
-        arg2_type arg2_name;                                                                                              \
-        arg3_type arg3_name;                                                                                              \
-        res_type res;                                                                                                     \
+        BaseRequest common; \
+        arg1_type arg1_name; \
+        arg2_type arg2_name; \
+        arg3_type arg3_name; \
+        res_type res; \
     } typename;
 
 DEFINE_ENCTYPE_3ARG_ReqData(EncStr, str, EncInt, start, EncInt, length, EncStr, SubstringRequestData);

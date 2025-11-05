@@ -11,9 +11,7 @@
 #include <iostream>
 using namespace std;
 
-// #define LOG_MODE
-
-extern ofstream outfile;
+// #define DEBUG_MODE
 
 static string b64_int(EncInt* in)
 {
@@ -38,12 +36,12 @@ int enc_int32_cmp(EncIntCmpRequestData* req)
 
     req->cmp = plain_int32_cmp(left, right);
 
-#ifdef LOG_MODE
+#ifdef DEBUG_MODE
     {
-        if (0 == req->cmp) outfile << "== ";
-        else if (-1 == req->cmp) outfile << "< ";
-        else if (1 == req->cmp) outfile << "> ";
-        outfile << b64_int(&req->left) << " " << b64_int(&req->right) << " True" << endl;
+        if (0 == req->cmp) cout << "== ";
+        else if (-1 == req->cmp) cout << "< ";
+        else if (1 == req->cmp) cout << "> ";
+        cout << b64_int(&req->left) << " " << b64_int(&req->right) << " True" << endl;
     }
 #endif
     return resp;
@@ -68,25 +66,25 @@ int enc_int32_calc(EncIntCalcRequestData* req)
 
     resp = encrypt_bytes((uint8_t*)&res, sizeof(res), (uint8_t*)&req->res, sizeof(req->res));
 
-#ifdef LOG_MODE
+#ifdef DEBUG_MODE
     {
         switch (req->common.reqType)
         {
-        case CMD_INT_PLUS:  outfile << "+ "; break;
-        case CMD_INT_MINUS: outfile << "- "; break;
-        case CMD_INT_MULT:  outfile << "* "; break;
-        case CMD_INT_DIV:   outfile << "/ "; break;
-        case CMD_INT_MOD:   outfile << "% "; break;
-        case CMD_INT_EXP:   outfile << "^ "; break;
+        case CMD_INT_PLUS:  cout << "+ "; break;
+        case CMD_INT_MINUS: cout << "- "; break;
+        case CMD_INT_MULT:  cout << "* "; break;
+        case CMD_INT_DIV:   cout << "/ "; break;
+        case CMD_INT_MOD:   cout << "% "; break;
+        case CMD_INT_EXP:   cout << "^ "; break;
         default: break;
         }
-        outfile << b64_int(&req->left) << " " << b64_int(&req->right) << " " << b64_int(&req->res) << endl;
+        cout << b64_int(&req->left) << " " << b64_int(&req->right) << " " << b64_int(&req->res) << endl;
     }
 #endif
     return resp;
 }
 
-int enc_int32_bulk(EncIntBulkRequestData* req)
+int enc_int32_sum_bulk(EncIntBulkRequestData* req)
 {
     int bulk_size = req->bulk_size;
     EncInt* array = req->items;
@@ -100,16 +98,16 @@ int enc_int32_bulk(EncIntBulkRequestData* req)
         count++;
     }
 
-    int res = plain_int32_bulk(req->common.reqType, req->bulk_size, plain_array);
+    int res = plain_int32_sum_bulk(req->bulk_size, plain_array);
 
     resp = encrypt_bytes((uint8_t*)&res, sizeof(res), (uint8_t*)&req->res, sizeof(req->res));
-#ifdef LOG_MODE
 
+#ifdef DEBUG_MODE
     {
-        outfile << "SUM ";
+        cout << "SUM ";
         for (int id = 0; id < req->bulk_size; id++)
-            outfile << b64_int(&array[id]) << " ";
-        outfile << b64_int(&req->res) << endl;
+            cout << b64_int(&array[id]) << " ";
+        cout << b64_int(&req->res) << endl;
     }
 #endif
     return resp;

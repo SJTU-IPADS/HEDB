@@ -6,27 +6,10 @@
 #include "base64.h"
 #include <enc_float_ops.hpp>
 #include <extension.hpp>
-#include <string>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/mman.h>
+
 using namespace std;
 
 extern bool clientMode;
-#ifdef LOG_MODE
-    extern ofstream outfile;
-#endif
-
-static string b64_float(EncFloat* in)
-{
-    char b64_float4[ENC_FLOAT_B64_LENGTH + 1] = { 0 };
-    toBase64((const unsigned char*)in, sizeof(EncFloat), b64_float4);
-    return b64_float4;
-}
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,16 +20,13 @@ PG_FUNCTION_INFO_V1(enc_float4_decrypt);
 PG_FUNCTION_INFO_V1(enc_float4_in);
 PG_FUNCTION_INFO_V1(enc_float4_out);
 
-PG_FUNCTION_INFO_V1(enc_float4_sum_bulk);
-PG_FUNCTION_INFO_V1(enc_float4_avg_bulk);
-PG_FUNCTION_INFO_V1(enc_float4_eval_expr);
-PG_FUNCTION_INFO_V1(enc_float4_min);
-PG_FUNCTION_INFO_V1(enc_float4_max);
 PG_FUNCTION_INFO_V1(enc_float4_add);
 PG_FUNCTION_INFO_V1(enc_float4_subs);
 PG_FUNCTION_INFO_V1(enc_float4_mult);
 PG_FUNCTION_INFO_V1(enc_float4_div);
 PG_FUNCTION_INFO_V1(enc_float4_exp);
+PG_FUNCTION_INFO_V1(enc_float4_mod);
+
 PG_FUNCTION_INFO_V1(enc_float4_eq);
 PG_FUNCTION_INFO_V1(enc_float4_ne);
 PG_FUNCTION_INFO_V1(enc_float4_lt);
@@ -54,7 +34,12 @@ PG_FUNCTION_INFO_V1(enc_float4_le);
 PG_FUNCTION_INFO_V1(enc_float4_gt);
 PG_FUNCTION_INFO_V1(enc_float4_ge);
 PG_FUNCTION_INFO_V1(enc_float4_cmp);
-PG_FUNCTION_INFO_V1(enc_float4_mod);
+
+PG_FUNCTION_INFO_V1(enc_float4_sum_bulk);
+PG_FUNCTION_INFO_V1(enc_float4_avg_bulk);
+PG_FUNCTION_INFO_V1(enc_float4_eval_expr);
+PG_FUNCTION_INFO_V1(enc_float4_min);
+PG_FUNCTION_INFO_V1(enc_float4_max);
 
 PG_FUNCTION_INFO_V1(float4_to_enc_float4);
 PG_FUNCTION_INFO_V1(numeric_to_enc_float4);
@@ -174,25 +159,15 @@ Datum enc_float4_sum_bulk(PG_FUNCTION_ARGS)
     int counter = 1; // sum will be at array[0]
     int error;
 
-#ifdef LOG_MODE
-    outfile << "f SUM "; /// logging
-#endif 
-
     ArrayMetaState* my_extra = (ArrayMetaState*)fcinfo->flinfo->fn_extra;
     ArrayIterator array_iterator = array_create_iterator(v, 0, my_extra);
 
     array_iterate(array_iterator, &value, &isnull);
     *sum = *DatumGetEncFloat(value);
 
-#ifdef LOG_MODE
-    outfile << b64_float(sum) << " "; /// logging
-#endif 
     sum_array[0] = *sum;
     while (array_iterate(array_iterator, &value, &isnull)) {
         sum_array[counter] = *DatumGetEncFloat(value);
-#ifdef LOG_MODE
-        outfile << b64_float(&sum_array[counter]) << " "; /// logging
-#endif 
         counter++;
         if (counter == BULK_SIZE) {
             error = enc_float_sum_bulk(BULK_SIZE, sum_array, sum);
@@ -205,9 +180,6 @@ Datum enc_float4_sum_bulk(PG_FUNCTION_ARGS)
         error = enc_float_sum_bulk(counter, sum_array, sum);
         if (error) print_error("%s %d", __func__, error);
     }
-#ifdef LOG_MODE
-    outfile << b64_float(sum) << endl; /// logging
-#endif 
     PG_RETURN_POINTER(sum);
 }
 
@@ -224,17 +196,12 @@ Datum enc_float4_avg_bulk(PG_FUNCTION_ARGS)
     EncFloat unit; // cipher of '1'
     EncFloat num_array[BULK_SIZE]; // nitems of '1'
     int counter; // sum will be at array[0]
-#ifdef LOG_MODE
-    outfile << "f AVG "; /// logging
-#endif 
+
     ArrayMetaState* my_extra = (ArrayMetaState*)fcinfo->flinfo->fn_extra;
     ArrayIterator array_iterator = array_create_iterator(v, 0, my_extra);
 
     array_iterate(array_iterator, &value, &isnull);
     sum = *DatumGetEncFloat(value);
-#ifdef LOG_MODE
-    outfile << b64_float(&sum) << " "; /// logging
-#endif 
     sum_array[0] = sum;
     counter = 1;
 
@@ -246,9 +213,6 @@ Datum enc_float4_avg_bulk(PG_FUNCTION_ARGS)
     }
     while (array_iterate(array_iterator, &value, &isnull)) {
         sum_array[counter] = *DatumGetEncFloat(value);
-#ifdef LOG_MODE
-        outfile << b64_float(&sum_array[counter]) << " "; /// logging
-#endif 
         num_array[counter] = unit;
         counter++;
         if (counter == BULK_SIZE) {
@@ -269,9 +233,6 @@ Datum enc_float4_avg_bulk(PG_FUNCTION_ARGS)
     }
     error = enc_float_div(&sum, &num, res);
     if (error) print_error("%s %d", __func__, error);
-#ifdef LOG_MODE
-    outfile << b64_float(res) << endl; /// logging
-#endif 
     PG_RETURN_POINTER(res);
 }
 
@@ -429,14 +390,8 @@ Datum enc_float4_max(PG_FUNCTION_ARGS)
 
     int error = enc_float_cmp(f1, f2, &cmp);
     if (error) print_error("%s %d", __func__, error);
-#ifdef LOG_MODE
-    outfile << "f MAX " << b64_float(f1) << " " << b64_float(f2) << " " << b64_float(cmp == 1 ? f1 : f2) << endl;
-#endif 
 
-    if (cmp == 1)
-        PG_RETURN_POINTER(f1);
-    else
-        PG_RETURN_POINTER(f2);
+    PG_RETURN_POINTER(cmp == 1 ? f1 : f2);
 }
 /*
  * return the less between the two.
@@ -449,13 +404,8 @@ Datum enc_float4_min(PG_FUNCTION_ARGS)
 
     int error = enc_float_cmp(f1, f2, &cmp);
     if (error) print_error("%s %d", __func__, error);
-#ifdef LOG_MODE
-    outfile << "f MIN " << b64_float(f1) << " " << b64_float(f2) << " " << b64_float(cmp == 1 ? f1 : f2) << endl;
-#endif 
-    if (cmp == 1)
-        PG_RETURN_POINTER(f2);
-    else
-        PG_RETURN_POINTER(f1);
+ 
+    PG_RETURN_POINTER(cmp == 1 ? f2 : f1);
 }
 
 Datum enc_float4_add(PG_FUNCTION_ARGS)
@@ -466,10 +416,6 @@ Datum enc_float4_add(PG_FUNCTION_ARGS)
 
     int error = enc_float_add(f1, f2, f);
     if (error) print_error("%s %d", __func__, error);
-#ifdef LOG_MODE
-    outfile << "f + " << b64_float(f1) << " " << b64_float(f2) << " " << b64_float(f) << endl;
-#endif 
-
     PG_RETURN_POINTER(f);
 }
 
@@ -486,9 +432,6 @@ Datum enc_float4_subs(PG_FUNCTION_ARGS)
 
     int error = enc_float_sub(f1, f2, f);
     if (error) print_error("%s %d", __func__, error);
-#ifdef LOG_MODE
-    outfile << "f - " << b64_float(f1) << " " << b64_float(f2) << " " << b64_float(f) << endl;
-#endif 
     PG_RETURN_POINTER(f);
 }
 
@@ -505,10 +448,6 @@ Datum enc_float4_mult(PG_FUNCTION_ARGS)
 
     int error = enc_float_mult(f1, f2, f);
     if (error) print_error("%s %d", __func__, error);
-
-#ifdef LOG_MODE
-    outfile << "f * " << b64_float(f1) << " " << b64_float(f2) << " " << b64_float(f) << endl;
-#endif 
     PG_RETURN_POINTER(f);
 }
 
@@ -526,9 +465,6 @@ Datum enc_float4_div(PG_FUNCTION_ARGS)
 
     int error = enc_float_div(f1, f2, f);
     if (error) print_error("%s %d", __func__, error);
-#ifdef LOG_MODE
-    outfile << "f / " << b64_float(f1) << " " << b64_float(f2) << " " << b64_float(f) << endl;
-#endif 
     PG_RETURN_POINTER(f);
 }
 
@@ -546,9 +482,6 @@ Datum enc_float4_exp(PG_FUNCTION_ARGS)
 
     int error = enc_float_pow(f1, f2, f);
     if (error) print_error("%s %d", __func__, error);
-#ifdef LOG_MODE
-    outfile << "f ^ " << b64_float(f1) << " " << b64_float(f2) << " " << b64_float(f) << endl;
-#endif 
     PG_RETURN_POINTER(f);
 }
 
@@ -566,9 +499,6 @@ Datum enc_float4_mod(PG_FUNCTION_ARGS)
 
     int error = enc_float_mod(f1, f2, f);
     if (error) print_error("%s %d", __func__, error);
-#ifdef LOG_MODE
-    outfile << "f % " << b64_float(f1) << " " << b64_float(f2) << " " << b64_float(f) << endl;
-#endif 
     PG_RETURN_POINTER(f);
 }
 /*
@@ -588,9 +518,6 @@ Datum enc_float4_eq(PG_FUNCTION_ARGS)
     if (error) print_error("%s %d", __func__, error);
 
     ret = cmp == 0;
-#ifdef LOG_MODE
-    outfile << "f == " << b64_float(f1) << " " << b64_float(f2) << " " << (ret == true ? "True" : "False") << endl;
-#endif 
     PG_RETURN_BOOL(ret);
 }
 
@@ -611,9 +538,6 @@ Datum enc_float4_ne(PG_FUNCTION_ARGS)
     if (error) print_error("%s %d", __func__, error);
 
     ret = cmp != 0;
-#ifdef LOG_MODE
-    outfile << "f != " << b64_float(f1) << " " << b64_float(f2) << " " << (ret == true ? "True" : "False") << endl;
-#endif 
     PG_RETURN_BOOL(ret);
 }
 
@@ -634,9 +558,6 @@ Datum enc_float4_lt(PG_FUNCTION_ARGS)
     if (error) print_error("%s %d", __func__, error);
 
     ret = cmp == -1;
-#ifdef LOG_MODE
-    outfile << "f < " << b64_float(f1) << " " << b64_float(f2) << " " << (ret == true ? "True" : "False") << endl;
-#endif 
     PG_RETURN_BOOL(ret);
 }
 
@@ -657,9 +578,6 @@ Datum enc_float4_le(PG_FUNCTION_ARGS)
     if (error) print_error("%s %d", __func__, error);
 
     ret = cmp <= 0;
-#ifdef LOG_MODE
-    outfile << "f <= " << b64_float(f1) << " " << b64_float(f2) << " " << (ret == true ? "True" : "False") << endl;
-#endif 
     PG_RETURN_BOOL(ret);
 }
 
@@ -680,9 +598,6 @@ Datum enc_float4_gt(PG_FUNCTION_ARGS)
     if (error) print_error("%s %d", __func__, error);
 
     ret = cmp == 1;
-#ifdef LOG_MODE
-    outfile << "f > " << b64_float(f1) << " " << b64_float(f2) << " " << (ret == true ? "True" : "False") << endl;
-#endif 
     PG_RETURN_BOOL(ret);
 }
 
@@ -703,9 +618,6 @@ Datum enc_float4_ge(PG_FUNCTION_ARGS)
     if (error) print_error("%s %d", __func__, error);
 
     ret = cmp >= 0;
-#ifdef LOG_MODE
-    outfile << "f >= " << b64_float(f1) << " " << b64_float(f2) << " " << (ret == true ? "True" : "False") << endl;
-#endif 
     PG_RETURN_BOOL(ret);
 }
 
@@ -722,15 +634,6 @@ Datum enc_float4_cmp(PG_FUNCTION_ARGS)
 
     int error = enc_float_cmp(f1, f2, &cmp);
     if (error) print_error("%s %d", __func__, error);
-
-#ifdef LOG_MODE
-    {
-        if (0 == cmp) outfile << "f == ";
-        else if (-1 == cmp) outfile << "f < ";
-        else if (1 == cmp) outfile << "f > ";
-        outfile << b64_float(f1) << " " << b64_float(f2) << " True" << endl;
-    }
-#endif 
     PG_RETURN_INT32(cmp);
 }
 
