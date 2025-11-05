@@ -177,8 +177,8 @@ typedef struct
    char     *name;
    char     *comment;
    DSS_HUGE      base;
-   int       (*loader) ();
-   long      (*gen_seed)();
+   int       (*loader) (void *, long); // XXX
+   long      (*gen_seed)(long, long); // XXX
    int       child;
    DSS_HUGE vtotal;
 }         tdef;
@@ -474,6 +474,7 @@ int dbg_print(int dt, FILE *tgt, void *data, int len, int eol);
 #define PR_VSTR_LAST(f, str, len) 	dbg_print(DT_VSTR, f, (void *)str, len, 0)
 #define PR_INT(f, str) 			dbg_print(DT_INT, f, (void *)str, 0, 1)
 #define PR_HUGE(f, str) 		dbg_print(DT_HUGE, f, (void *)str, 0, 1)
+#define PR_HUGE_LAST(f, str)        dbg_print(DT_HUGE, f, (void *)str, 0, 0)
 #define PR_KEY(f, str) 			dbg_print(DT_KEY, f, (void *)str, 0, -1)
 #define PR_MONEY(f, str) 		dbg_print(DT_MONEY, f, (void *)str, 0, 1)
 #define PR_CHR(f, str)	 		dbg_print(DT_CHR, f, (void *)str, 0, 1)
@@ -484,7 +485,7 @@ int dbg_print(int dt, FILE *tgt, void *data, int len, int eol);
    sprintf(tgt, "%02d-%02d-19%02d", mn, dy, yr)
 #else
 #define  PR_DATE(tgt, yr, mn, dy)	\
-sprintf(tgt, "19%02ld-%02ld-%02ld", yr, mn, dy)
+sprintf(tgt, "19%02d-%02d-%02d", yr, mn, dy)
 #endif /* DATE_FORMAT */
 
 /*

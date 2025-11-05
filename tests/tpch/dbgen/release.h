@@ -1,7 +1,7 @@
 /*
  * release.h
  */
-#define VERSION 2
-#define RELEASE 14
+#define VERSION 3
+#define RELEASE 0
 #define PATCH 0
 #define BUILD 0

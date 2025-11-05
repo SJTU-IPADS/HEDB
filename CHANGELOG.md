@@ -3,6 +3,7 @@
 ## 2025.11
 
 - Fix: base64 conversion bug in server mode.
+- Test: TPC-H 3.0.
 
 ## 2023.9
 

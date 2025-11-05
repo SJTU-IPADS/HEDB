@@ -135,7 +135,7 @@ dbg_print(int format, FILE *target, void *data, int len, int sep)
 			}
 		dollars = cents / 100;
 		cents %= 100;
-		fprintf(target, "%d.%02d", dollars, cents);
+		fprintf(target, "%ld.%02ld", dollars, cents);
 		break;
 	case DT_CHR:
 		fprintf(target, "%c", *(char *)data);
@@ -431,7 +431,7 @@ pr_drange(int tbl, DSS_HUGE min, DSS_HUGE cnt, long num)
 			}
 		}
 		PR_STRT(dfp);
-		PR_HUGE(dfp, &new);
+		PR_HUGE_LAST(dfp, &new);
 		PR_END(dfp);
 		start = new;
 		last = new;

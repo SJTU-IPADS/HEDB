@@ -49,6 +49,15 @@
 /*
  * database portability defines
  */
+#ifdef VECTORWISE
+#define GEN_QUERY_PLAN  "EXPLAIN"
+#define START_TRAN      ""
+#define END_TRAN        "COMMIT;"
+#define SET_OUTPUT      ""
+#define SET_ROWCOUNT    "first %d\n"
+#define SET_DBASE       ""
+#endif /* VECTORWISE */
+
 #ifdef DB2
 #define GEN_QUERY_PLAN  "SET CURRENT EXPLAIN SNAPSHOT ON;"
 #define START_TRAN      ""
@@ -102,6 +111,15 @@
 #define SET_ROWCOUNT    ".SET RETCANCEL ON\n.SET RETLIMIT %d\n"
 #define SET_DBASE       ".LOGON %s\n"
 #endif
+
+#ifdef POSTGRESQL
+#define GEN_QUERY_PLAN  "EXPLAIN"
+#define START_TRAN      "BEGIN TRANSACTION"
+#define END_TRAN        "COMMIT;"
+#define SET_OUTPUT      ""
+#define SET_ROWCOUNT    "LIMIT %d\n"
+#define SET_DBASE       ""
+#endif /* POSTGRESQL */
 
 #define MAX_VARS      8 /* max number of host vars in any query */
 #define QLEN_MAX   2048 /* max length of any query */

@@ -394,26 +394,28 @@ tbl_open(int tbl, char *mode)
             env_config(PATH_TAG, PATH_DFLT), PATH_SEP, tdefs[tbl].name);
 
     retcode = stat(fullpath, &fstats);
-    if (retcode && (errno != ENOENT))
-        {
-        fprintf(stderr, "stat(%s) failed.\n", fullpath);
-        exit(-1);
-        }
-    if (S_ISREG(fstats.st_mode) && !force && *mode != 'r' )
-        {
-        sprintf(prompt, "Do you want to overwrite %s ?", fullpath);
-        if (!yes_no(prompt))
-            exit(0);
-        }
-
-    if (S_ISFIFO(fstats.st_mode))
-        {
-        retcode =
-            open(fullpath, ((*mode == 'r')?O_RDONLY:O_WRONLY)|O_CREAT);
-        f = fdopen(retcode, mode);
-        }
-    else
-        f = fopen(fullpath, mode);
+    if (retcode) {
+		if (errno != ENOENT) {
+			fprintf(stderr, "stat(%s) failed.\n", fullpath);
+			exit(-1);
+		} else
+			f = fopen(fullpath, mode);  // create and open the file
+	} else {
+		/* note this code asumes we are writing but tests if mode == r -jrg */
+		if (S_ISREG(fstats.st_mode) && !force && *mode != 'r' ) {
+			sprintf(prompt, "Do you want to overwrite %s ?", fullpath);
+			if (!yes_no(prompt))
+				exit(0);
+			f = fopen(fullpath, mode);
+		} else if (S_ISFIFO(fstats.st_mode))
+			{
+			retcode =
+				open(fullpath, ((*mode == 'r')?O_RDONLY:O_WRONLY)|O_CREAT, 0664);
+			f = fdopen(retcode, mode);
+			}
+		else
+			f = fopen(fullpath, mode);
+	}
     OPEN_CHECK(f, fullpath);
 
     return (f);

@@ -72,7 +72,7 @@
 #include "config.h"
 #include <stdio.h>
 #include <math.h>
-#if (defined(LINUX)||defined(_POSIX_SOURCE))
+#ifdef LINUX
 #include <stdint.h>
 #endif
 #ifdef IBM
@@ -128,7 +128,7 @@ row_stop(int t)	\
 			{ 
 			if (set_seeds && (Seed[i].usage > Seed[i].boundary))
 				{
-				fprintf(stderr, "\nSEED CHANGE: seed[%d].usage = %ld\n", 
+				fprintf(stderr, "\nSEED CHANGE: seed[%d].usage = %d\n", 
 					i, Seed[i].usage); 
 				Seed[i].boundary = Seed[i].usage;
 				} 
