@@ -45,17 +45,28 @@ static Timestamp pg_timestamp_in(char* str)
     int tz;
     int dtype;
     fsec_t fsec;
+#if PG_VERSION_NUM >= 160000
     DateTimeErrorExtra extra;
+#endif
     struct pg_tm tt, *tm = &tt;
 
     dterr = ParseDateTime(str, workbuf, sizeof(workbuf), field, ftype, MAXDATEFIELDS, &nf);
 
+#if PG_VERSION_NUM >= 160000
     if (dterr == 0)
         dterr = DecodeDateTime(field, ftype, nf, &dtype, tm, &fsec, &tz, &extra);
     if (dterr != 0) {
         DateTimeParseError(dterr, &extra, str, "timestamp", nullptr);
         return 0;
     }
+#elif
+    if (dterr == 0)
+        dterr = DecodeDateTime(field, ftype, nf, &dtype, tm, &fsec, &tz);
+    if (dterr != 0) {
+        DateTimeParseError(dterr, str, "timestamp");
+        return 0;
+    }
+#endif
 
     switch (dtype) {
     case DTK_DATE:
