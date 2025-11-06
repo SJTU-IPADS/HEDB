@@ -35,7 +35,7 @@ if ( ${TEE_TYPE} STREQUAL "CVM" )
     file(GLOB SRCS
         privacy_zone/crypto.cpp
         privacy_zone/ops_server.cpp
-        privacy_zone/sched_ops.cpp
+        privacy_zone/handler.cpp
         privacy_zone/enc_ops/*.cpp
         privacy_zone/plain_ops/*.c
         utils/*.cpp

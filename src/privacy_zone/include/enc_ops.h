@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-int handle_ops(BaseRequest* req);
+int handler(BaseRequest* req);
 
 #ifdef __cplusplus
 }

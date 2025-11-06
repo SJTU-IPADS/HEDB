@@ -169,78 +169,72 @@ Datum enc_int4_eq(PG_FUNCTION_ARGS)
 {
     EncInt* left = PG_GETARG_ENCINT(0);
     EncInt* right = PG_GETARG_ENCINT(1);
-    int cmp, ret;
+    int cmp;
 
     int error = enc_int_cmp(left, right, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    ret = cmp == 0;
-    PG_RETURN_BOOL(ret);
+    PG_RETURN_BOOL(cmp == 0);
 }
 
 Datum enc_int4_ne(PG_FUNCTION_ARGS)
 {
     EncInt* left = PG_GETARG_ENCINT(0);
     EncInt* right = PG_GETARG_ENCINT(1);
-    int cmp, ret;
+    int cmp;
 
     int error = enc_int_cmp(left, right, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    ret = cmp != 0;
-    PG_RETURN_BOOL(ret);
+    PG_RETURN_BOOL(cmp != 0);
 }
 
 Datum enc_int4_lt(PG_FUNCTION_ARGS)
 {
     EncInt* left = PG_GETARG_ENCINT(0);
     EncInt* right = PG_GETARG_ENCINT(1);
-    int cmp, ret;
+    int cmp;
 
     int error = enc_int_cmp(left, right, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    ret = cmp == -1;
-    PG_RETURN_BOOL(ret);
+    PG_RETURN_BOOL(cmp == -1);
 }
 
 Datum enc_int4_le(PG_FUNCTION_ARGS)
 {
     EncInt* left = PG_GETARG_ENCINT(0);
     EncInt* right = PG_GETARG_ENCINT(1);
-    int cmp, ret;
+    int cmp;
 
     int error = enc_int_cmp(left, right, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    ret = cmp <= 0;
-    PG_RETURN_BOOL(ret);
+    PG_RETURN_BOOL(cmp <= 0);
 }
 
 Datum enc_int4_gt(PG_FUNCTION_ARGS)
 {
     EncInt* left = PG_GETARG_ENCINT(0);
     EncInt* right = PG_GETARG_ENCINT(1);
-    int cmp, ret;
+    int cmp;
 
     int error = enc_int_cmp(left, right, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    ret = cmp == 1;
-    PG_RETURN_BOOL(ret);
+    PG_RETURN_BOOL(cmp == 1);
 }
 
 Datum enc_int4_ge(PG_FUNCTION_ARGS)
 {
     EncInt* left = PG_GETARG_ENCINT(0);
     EncInt* right = PG_GETARG_ENCINT(1);
-    int cmp, ret;
+    int cmp;
 
     int error = enc_int_cmp(left, right, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    ret = cmp >= 0;
-    PG_RETURN_BOOL(ret);
+    PG_RETURN_BOOL(cmp >= 0);
 }
 
 Datum enc_int4_sum(PG_FUNCTION_ARGS)
@@ -354,7 +348,7 @@ Datum enc_int4_max(PG_FUNCTION_ARGS)
     int error = enc_int_cmp(left, right, &res);
     if (error) print_error("%s %d", __func__, error);
 
-    PG_RETURN_POINTER(res == 1 ? left : right);
+    PG_RETURN_POINTER(res > 0 ? left : right);
 }
 
 Datum enc_int4_min(PG_FUNCTION_ARGS)
@@ -366,7 +360,7 @@ Datum enc_int4_min(PG_FUNCTION_ARGS)
     int error = enc_int_cmp(left, right, &res);
     if (error) print_error("%s %d", __func__, error);
 
-    PG_RETURN_POINTER(res == 1 ? right : left);
+    PG_RETURN_POINTER(res < 0 ? left : right);
 }
 
 #if 0

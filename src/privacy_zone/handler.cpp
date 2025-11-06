@@ -6,7 +6,7 @@
 #include <enc_ops.h>
 #include <request_types.h>
 
-int handle_ops(BaseRequest* base_req)
+int handler(BaseRequest* base_req)
 {
     // printf("\nops: %d", base_req->reqType);
     switch (base_req->reqType) {

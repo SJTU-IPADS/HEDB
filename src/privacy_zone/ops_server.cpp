@@ -230,7 +230,7 @@ pid_t fork_ops_process(void* shm_addr)
             if (req->reqType != CMD_INT_ENC && req->reqType != CMD_INT_DEC && req->reqType != CMD_FLOAT_ENC && req->reqType != CMD_FLOAT_DEC && req->reqType != CMD_STRING_ENC && req->reqType != CMD_STRING_DEC && req->reqType != CMD_TIMESTAMP_ENC && req->reqType != CMD_TIMESTAMP_DEC)
                 non_enc_counter++;
             if (req->reqType > 0)
-                handle_ops(req);
+                handler(req);
             else
                 ;
             // desenitize_ops(req);

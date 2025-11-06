@@ -512,13 +512,12 @@ Datum enc_float4_eq(PG_FUNCTION_ARGS)
 {
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
-    int cmp, ret;
+    int cmp;
 
     int error = enc_float_cmp(f1, f2, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    ret = cmp == 0;
-    PG_RETURN_BOOL(ret);
+    PG_RETURN_BOOL(cmp == 0);
 }
 
 /*
@@ -532,13 +531,12 @@ Datum enc_float4_ne(PG_FUNCTION_ARGS)
 {
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
-    int cmp, ret;
+    int cmp;
 
     int error = enc_float_cmp(f1, f2, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    ret = cmp != 0;
-    PG_RETURN_BOOL(ret);
+    PG_RETURN_BOOL(cmp != 0);
 }
 
 /*
@@ -552,13 +550,12 @@ Datum enc_float4_lt(PG_FUNCTION_ARGS)
 {
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
-    int cmp, ret;
+    int cmp;
 
     int error = enc_float_cmp(f1, f2, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    ret = cmp == -1;
-    PG_RETURN_BOOL(ret);
+    PG_RETURN_BOOL(cmp == -1);
 }
 
 /*
@@ -572,13 +569,12 @@ Datum enc_float4_le(PG_FUNCTION_ARGS)
 {
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
-    int cmp, ret;
+    int cmp;
 
     int error = enc_float_cmp(f1, f2, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    ret = cmp <= 0;
-    PG_RETURN_BOOL(ret);
+    PG_RETURN_BOOL(cmp <= 0);
 }
 
 /*
@@ -592,13 +588,12 @@ Datum enc_float4_gt(PG_FUNCTION_ARGS)
 {
     EncFloat* f1 = PG_GETARG_ENCFlOAT(0);
     EncFloat* f2 = PG_GETARG_ENCFlOAT(1);
-    int cmp, ret;
+    int cmp;
 
     int error = enc_float_cmp(f1, f2, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    ret = cmp == 1;
-    PG_RETURN_BOOL(ret);
+    PG_RETURN_BOOL(cmp == 1);
 }
 
 /*
@@ -617,8 +612,7 @@ Datum enc_float4_ge(PG_FUNCTION_ARGS)
     int error = enc_float_cmp(f1, f2, &cmp);
     if (error) print_error("%s %d", __func__, error);
 
-    ret = cmp >= 0;
-    PG_RETURN_BOOL(ret);
+    PG_RETURN_BOOL(cmp >= 0);
 }
 
 /*
@@ -634,6 +628,7 @@ Datum enc_float4_cmp(PG_FUNCTION_ARGS)
 
     int error = enc_float_cmp(f1, f2, &cmp);
     if (error) print_error("%s %d", __func__, error);
+
     PG_RETURN_INT32(cmp);
 }
 
