@@ -193,7 +193,7 @@ int gen_ktest_file(BaseRequest* base_req, const char* name)
     case CMD_INT_MINUS:
     case CMD_INT_MULT:
     case CMD_INT_DIV:
-    case CMD_INT_EXP:
+    case CMD_INT_POW:
     case CMD_INT_MOD: {
         int left, right;
         EncIntCalcRequestData* req = (EncIntCalcRequestData*)base_req;
@@ -231,7 +231,7 @@ int gen_ktest_file(BaseRequest* base_req, const char* name)
     case CMD_FLOAT_MINUS:
     case CMD_FLOAT_MULT:
     case CMD_FLOAT_DIV:
-    case CMD_FLOAT_EXP:
+    case CMD_FLOAT_POW:
     case CMD_FLOAT_MOD: {
         EncFloatCalcRequestData* req = (EncFloatCalcRequestData*)base_req;
         float left, right;
@@ -408,7 +408,7 @@ static int retrieve_request_from_file(FILE* f, char* req_buffer)
     case CMD_INT_MINUS:
     case CMD_INT_MULT:
     case CMD_INT_DIV:
-    case CMD_INT_EXP:
+    case CMD_INT_POW:
     case CMD_INT_MOD: {
         EncIntCalcRequestData* req = (EncIntCalcRequestData*)req_buffer;
         char* src = read_buffer;
@@ -424,7 +424,7 @@ static int retrieve_request_from_file(FILE* f, char* req_buffer)
     case CMD_FLOAT_MINUS:
     case CMD_FLOAT_MULT:
     case CMD_FLOAT_DIV:
-    case CMD_FLOAT_EXP:
+    case CMD_FLOAT_POW:
     case CMD_FLOAT_MOD: {
         EncFloatCalcRequestData* req = (EncFloatCalcRequestData*)req_buffer;
         char* src = read_buffer;

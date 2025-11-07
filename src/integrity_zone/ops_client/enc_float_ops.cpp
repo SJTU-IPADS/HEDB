@@ -55,7 +55,7 @@ int enc_float_div(EncFloat* left, EncFloat* right, EncFloat* res)
 
 int enc_float_pow(EncFloat* left, EncFloat* right, EncFloat* res)
 {
-    return enc_float_calc(CMD_FLOAT_EXP, left, right, res);
+    return enc_float_calc(CMD_FLOAT_POW, left, right, res);
 }
 
 int enc_float_mod(EncFloat* left, EncFloat* right, EncFloat* res)

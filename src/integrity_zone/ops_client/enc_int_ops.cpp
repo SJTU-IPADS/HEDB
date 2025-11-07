@@ -58,7 +58,7 @@ int enc_int_div(EncInt* left, EncInt* right, EncInt* res)
 
 int enc_int_pow(EncInt* left, EncInt* right, EncInt* res)
 {
-    int resp = enc_int_calc(CMD_INT_EXP, left, right, res);
+    int resp = enc_int_calc(CMD_INT_POW, left, right, res);
     return resp;
 }
 

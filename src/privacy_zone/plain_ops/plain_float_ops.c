@@ -33,7 +33,7 @@ float plain_float_calc(int reqType, float left, float right)
     case CMD_FLOAT_DIV:
         res = left / right;
         break;
-    case CMD_FLOAT_EXP:
+    case CMD_FLOAT_POW:
         res = pow(left, right);
         break;
     case CMD_FLOAT_MOD:

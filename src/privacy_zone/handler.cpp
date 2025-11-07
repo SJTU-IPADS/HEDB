@@ -16,7 +16,7 @@ int handler(BaseRequest* base_req)
     case CMD_INT_MINUS:
     case CMD_INT_MULT:
     case CMD_INT_DIV:
-    case CMD_INT_EXP:
+    case CMD_INT_POW:
     case CMD_INT_MOD:
         base_req->resp = enc_int32_calc((EncIntCalcRequestData*)base_req);
         break;
@@ -46,7 +46,7 @@ int handler(BaseRequest* base_req)
     case CMD_FLOAT_MINUS:
     case CMD_FLOAT_MULT:
     case CMD_FLOAT_DIV:
-    case CMD_FLOAT_EXP:
+    case CMD_FLOAT_POW:
     case CMD_FLOAT_MOD:
         base_req->resp = enc_float32_calc((EncFloatCalcRequestData*)base_req);
         break;

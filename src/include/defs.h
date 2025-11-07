@@ -43,7 +43,7 @@ typedef unsigned long DWORD; // 4 byte(s)
 #define CMD_INT_CMP 5
 #define CMD_INT_ENC 6
 #define CMD_INT_DEC 7
-#define CMD_INT_EXP 8
+#define CMD_INT_POW 8
 #define CMD_INT_MOD 9
 #define CMD_INT_SUM_BULK 10
 
@@ -54,7 +54,7 @@ typedef unsigned long DWORD; // 4 byte(s)
 #define CMD_FLOAT_CMP 25
 #define CMD_FLOAT_ENC 26
 #define CMD_FLOAT_DEC 27
-#define CMD_FLOAT_EXP 28
+#define CMD_FLOAT_POW 28
 #define CMD_FLOAT_MOD 29
 #define CMD_FLOAT_SUM_BULK 30
 #define CMD_FLOAT_EVAL_EXPR 31

@@ -43,7 +43,7 @@ int plain_int32_calc(int reqType, int left, int right)
     case CMD_INT_DIV:
         res = left / right;
         break;
-    case CMD_INT_EXP:
+    case CMD_INT_POW:
         res = pow(left, right);
         break;
     case CMD_INT_MOD:
