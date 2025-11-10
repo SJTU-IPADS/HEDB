@@ -59,7 +59,7 @@ static Timestamp pg_timestamp_in(char* str)
         DateTimeParseError(dterr, &extra, str, "timestamp", nullptr);
         return 0;
     }
-#elif
+#else
     if (dterr == 0)
         dterr = DecodeDateTime(field, ftype, nf, &dtype, tm, &fsec, &tz);
     if (dterr != 0) {
