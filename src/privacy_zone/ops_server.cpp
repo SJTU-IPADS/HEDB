@@ -199,7 +199,7 @@ pid_t fork_ops_process(void* shm_addr)
     // child
     // after fork, child inherit all attached shared memory (man shmat)
     pid = getpid();
-    // printf("[%d] waiting on shm_addr %p\n", pid, shm_addr);
+    printf("[%d] waiting on shm_addr %p\n", pid, shm_addr);
 
     for (int i = 0; i < MAX_DECRYPT_THREAD; i++) {
         args_array[i].index = i;
@@ -252,10 +252,13 @@ pid_t fork_ops_process(void* shm_addr)
 int main(int argc, char* argv[])
 {
     int data_size = SHM_SIZE;
-    pid_t child_pids[20] = {};
     OpsServer* req = (OpsServer*)get_shmem_ivshm(data_size);
-    printf("HEDB ops_server running on shared memory addr: %p.\n", req);
     memset(req, 0, sizeof(OpsServer));
+    printf("HEDB ops_server running on shared memory addr: %p.\n", req);
+
+    pid_t child_pids[16] = { 0 };
+    gcm_init();
+
     while (1) {
         if (req->status == SHM_GET) {
             for (int i = 0; i < MAX_REGION_NUM; i++) {
