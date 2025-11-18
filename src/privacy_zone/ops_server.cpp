@@ -124,7 +124,7 @@ void decrypt_wait(uint8_t* pDst, size_t exp_dst_len)
     // memcpy(pDst, plain_buffer, exp_dst_len);
 }
 
-static unsigned long encrypt_counter = 0;
+static uint64_t encrypt_counter = 0;
 int encrypt_bytes(uint8_t* pSrc, size_t src_len, uint8_t* pDst, size_t exp_dst_len)
 {
     size_t dst_len = exp_dst_len;
@@ -137,7 +137,7 @@ int encrypt_bytes(uint8_t* pSrc, size_t src_len, uint8_t* pDst, size_t exp_dst_l
     return resp;
 }
 
-static unsigned long decrypt_counter = 0;
+static uint64_t decrypt_counter = 0;
 int decrypt_bytes(uint8_t* pSrc, size_t src_len, uint8_t* pDst, size_t exp_dst_len)
 {
     size_t dst_len = 0;
@@ -199,7 +199,7 @@ pid_t fork_ops_process(void* shm_addr)
     // child
     // after fork, child inherit all attached shared memory (man shmat)
     pid = getpid();
-    printf("[%d] waiting on shm_addr %p\n", pid, shm_addr);
+    // printf("[%d] waiting on shm_addr %p\n", pid, shm_addr);
 
     // per-process entropy and crypto context
     gcm_init();
@@ -210,7 +210,7 @@ pid_t fork_ops_process(void* shm_addr)
         args_array[i].decrypt_status = NONE;
     }
 
-    int counter = 0, non_enc_counter = 0;
+    uint64_t non_enc_counter = 0;
 
     BaseRequest* req = (BaseRequest*)shm_addr;
     while (1) {
@@ -221,16 +221,19 @@ pid_t fork_ops_process(void* shm_addr)
                     args_array[i].decrypt_status = EXIT;
                 }
             }
-            printf("[%d] total ops: %d, enc: %ld, dec: %ld, others: %d\n", pid,
-                counter, encrypt_counter, decrypt_counter, non_enc_counter);
+            printf("[%d] total ops: %ld, enc: %ld, dec: %ld, others: %ld\n", pid,
+                encrypt_counter + decrypt_counter + non_enc_counter,
+                encrypt_counter, decrypt_counter, non_enc_counter);
             req->status = NONE;
             exit(0);
         } else if (req->status == SENT) {
             LOAD_BARRIER;
             // auto start = std::chrono::system_clock::now();
             // printf("request received %d\n", req->reqType);
-            counter++;
-            if (req->reqType != CMD_INT_ENC && req->reqType != CMD_INT_DEC && req->reqType != CMD_FLOAT_ENC && req->reqType != CMD_FLOAT_DEC && req->reqType != CMD_STRING_ENC && req->reqType != CMD_STRING_DEC && req->reqType != CMD_TIMESTAMP_ENC && req->reqType != CMD_TIMESTAMP_DEC)
+            if (req->reqType != CMD_INT_ENC && req->reqType != CMD_INT_DEC &&
+                req->reqType != CMD_FLOAT_ENC && req->reqType != CMD_FLOAT_DEC &&
+                req->reqType != CMD_STRING_ENC && req->reqType != CMD_STRING_DEC &&
+                req->reqType != CMD_TIMESTAMP_ENC && req->reqType != CMD_TIMESTAMP_DEC)
                 non_enc_counter++;
             if (req->reqType > 0)
                 handler(req);
@@ -239,7 +242,7 @@ pid_t fork_ops_process(void* shm_addr)
             // desenitize_ops(req);
 
             if (req->resp != 0) {
-                printf("TA error %d, %d\n", req->resp, counter);
+                printf("TA error %d\n", req->resp);
             }
             STORE_BARRIER;
             req->status = DONE;
