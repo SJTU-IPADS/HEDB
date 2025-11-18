@@ -57,8 +57,8 @@ void gcm_init(void)
     // init the context...
     mbedtls_gcm_init(&aes);
 
-    // add salt for leading 4 bytes
-    randombytes(iv, 4);
+    // an alternative is to use salt + counter per session
+    randombytes(iv, IV_SIZE);
 
     // Set the key. This next line could have CAMELLIA or ARIA as our GCM mode cipher...
     res = mbedtls_gcm_setkey(&aes, MBEDTLS_CIPHER_ID_AES, (const unsigned char*)enc_key, sizeof(enc_key)*8);
