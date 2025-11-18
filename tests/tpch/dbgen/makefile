@@ -110,7 +110,7 @@ DATABASE= POSTGRESQL
 MACHINE = LINUX
 WORKLOAD = TPCH
 #
-CFLAGS	= -w -Wno-incompatible-pointer-types -g -DDBNAME=\"dss\" -D$(MACHINE) -D$(DATABASE) -D$(WORKLOAD) -DRNG_TEST -D_FILE_OFFSET_BITS=64
+CFLAGS	= -w -g -DDBNAME=\"dss\" -D$(MACHINE) -D$(DATABASE) -D$(WORKLOAD) -DRNG_TEST -D_FILE_OFFSET_BITS=64
 LDFLAGS = -O
 # The OBJ,EXE and LIB macros will need to be changed for compilation under
 #  Windows NT
