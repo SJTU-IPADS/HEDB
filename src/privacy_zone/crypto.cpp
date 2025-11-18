@@ -15,21 +15,28 @@ const uint8_t enc_key[KEY_SIZE] = {
     0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12
 }; // TA_DERIVED_KEY_MAX_SIZE
 
-#if 0
-#include <ctime>
-#include <cstdlib>
-static inline void randombytes_buf(uint8_t *iv, size_t sz)
+static __thread mbedtls_gcm_context aes;
+static __thread uint8_t iv[IV_SIZE] = { 0 };
+
+static inline void randombytes(uint8_t *buf, size_t sz)
 {
-    static bool _init = false;
-    if (!_init) {
-        srand(time(NULL));
-        _init = true;
-    }
-    for (int i = 0; i < sz; i++) {
-        iv[i] = rand() % 256;
-    }
+    int res = 0;
+
+    mbedtls_entropy_context entropy;
+    mbedtls_ctr_drbg_context ctr_drbg;
+
+    mbedtls_entropy_init(&entropy);
+    mbedtls_ctr_drbg_init(&ctr_drbg);
+
+    res = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, nullptr, 0);
+    if (res != 0) fprintf(stderr, "%s: %d\n", __func__, res);
+
+    res = mbedtls_ctr_drbg_random(&ctr_drbg, buf, sz);
+    if (res != 0) fprintf(stderr, "%s: %d\n", __func__, res);
+
+    mbedtls_ctr_drbg_free(&ctr_drbg);
+    mbedtls_entropy_free(&entropy);
 }
-#endif
 
 static inline void increment(unsigned char *iv, int size)
 {
@@ -43,15 +50,15 @@ static inline void increment(unsigned char *iv, int size)
     }
 }
 
-static __thread mbedtls_gcm_context aes;
-static __thread uint8_t iv[IV_SIZE] = { 0 };
-
 void gcm_init(void)
 {
     int res = 0;
 
     // init the context...
     mbedtls_gcm_init(&aes);
+
+    // add salt for leading 4 bytes
+    randombytes(iv, 4);
 
     // Set the key. This next line could have CAMELLIA or ARIA as our GCM mode cipher...
     res = mbedtls_gcm_setkey(&aes, MBEDTLS_CIPHER_ID_AES, (const unsigned char*)enc_key, sizeof(enc_key)*8);
@@ -69,11 +76,8 @@ int gcm_encrypt(uint8_t* in, uint64_t in_sz, uint8_t* out, uint64_t* out_sz)
     uint8_t* tag_pos = out + IV_SIZE;
     uint8_t* data_pos = out + IV_SIZE + TAG_SIZE;
 
-#if 0
-    randombytes_buf(iv, IV_SIZE); // add entropy
-    memcpy(iv_pos, iv, IV_SIZE);
-#endif
     increment(iv, IV_SIZE);
+    memcpy(iv_pos, iv, IV_SIZE);
 
     // Initialise the GCM cipher...
     res = mbedtls_gcm_crypt_and_tag(&aes, MBEDTLS_GCM_ENCRYPT, in_sz, iv_pos, IV_SIZE, NULL, 0, in, data_pos, TAG_SIZE, tag_pos);

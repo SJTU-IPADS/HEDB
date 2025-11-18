@@ -201,6 +201,9 @@ pid_t fork_ops_process(void* shm_addr)
     pid = getpid();
     printf("[%d] waiting on shm_addr %p\n", pid, shm_addr);
 
+    // per-process entropy and crypto context
+    gcm_init();
+
     for (int i = 0; i < MAX_DECRYPT_THREAD; i++) {
         args_array[i].index = i;
         args_array[i].inited = false;
@@ -257,7 +260,6 @@ int main(int argc, char* argv[])
     printf("HEDB ops_server running on shared memory addr: %p.\n", req);
 
     pid_t child_pids[16] = { 0 };
-    gcm_init();
 
     while (1) {
         if (req->status == SHM_GET) {

@@ -2,6 +2,8 @@
 #define TA_CRYPTO_H
 
 #include <assert.h> // for debugging
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
 #include <mbedtls/gcm.h>
 #include <stdbool.h>
 #include <string.h>
