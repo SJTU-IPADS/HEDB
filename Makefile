@@ -40,7 +40,7 @@ stop:
 	pkill ops_server
 
 test:
-	echo "test not implemented"
+	sudo -u postgres pg_prove tests/unit-test/unit-test.sql
 
 clean:
 	rm -rf build
