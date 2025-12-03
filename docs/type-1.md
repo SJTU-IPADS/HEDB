@@ -10,7 +10,7 @@ To prevent data breaches from untrusted storage, consider using Linux `dm-crypt`
 
 ```bash
 sudo apt install cryptsetup
-sudo modprobe brd rd_nr=1 rd_size=$((4*1024*1024*1024))
+sudo modprobe brd rd_nr=1 rd_size=$((4*1024*1024))
 ls /dev/ram0
 fallocate -l 2M crypthdr.img
 sudo cryptsetup luksFormat /dev/ram0 --header crypthdr.img

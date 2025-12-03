@@ -4,7 +4,7 @@ We recommend using Ubuntu cloud images, as they provide ready-to-use images.
 
 Download an amd64 image to use:
 ```sh
-$ wget https://cloud-images.ubuntu.com/releases/23.04/release/ubuntu-23.04-server-cloudimg-amd64.img
+$ wget https://cloud-images.ubuntu.com/releases/noble/release/ubuntu-24.04-server-cloudimg-amd64.img
 ```
 
 Install the tool:
@@ -35,9 +35,10 @@ $ chmod a+rwx /dev/shm/ivshmem
 
 Set up the privacy-zone VM for Operators:
 ```sh
-$ cp ubuntu-23.04-server-cloudimg-amd64.img ops.img
+$ cp ubuntu-24.04-server-cloudimg-amd64.img ops.img
+$ qemu-img resize ops.img 16G
 $ qemu-system-x86_64 \
-    -cpu host -enable-kvm -m 1G -nographic \
+    -enable-kvm -nographic -cpu host -smp 8 -m 4G \
     -drive if=virtio,format=qcow2,file=ops.img \
     -drive if=virtio,format=qcow2,file=cloud.img \
     -device ivshmem-plain,memdev=hostmem \
@@ -79,11 +80,11 @@ $ ./build/ops_server
 
 Make up the integrity-zone VM for DBMS:
 ```sh
-$ cp ubuntu-23.04-server-cloudimg-amd64.img dbms.img
-$ qemu-img resize dbms.img 10G
+$ cp ubuntu-24.04-server-cloudimg-amd64.img dbms.img
+$ qemu-img resize dbms.img 32G
 $ cloud-localds --disk-format qcow2 cloud2.img cloud.yaml
 $ qemu-system-x86_64 \
-    -cpu host -smp 2 -enable-kvm -m 4G -nographic \
+    -enable-kvm -nographic -cpu host -smp 16 -m 16G \
     -drive if=virtio,format=qcow2,file=dbms.img \
     -drive if=virtio,format=qcow2,file=cloud2.img \
     -device ivshmem-plain,memdev=hostmem,master=on \
